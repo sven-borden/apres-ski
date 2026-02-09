@@ -9,6 +9,7 @@ const navLinks = [
   { label: "Hub", href: "/" },
   { label: "Rostrum", href: "/rostrum" },
   { label: "Feasts", href: "/feasts" },
+  { label: "Crew", href: "/crew" },
   { label: "Basecamp", href: "/basecamp" },
 ];
 
