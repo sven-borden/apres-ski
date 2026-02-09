@@ -14,8 +14,12 @@ export default function CrewPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-midnight">Crew</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-midnight">Crew</h1>
+          <Button onClick={() => setShowAdd(true)}>+ Add</Button>
+        </div>
         <Card className="animate-pulse h-48"><span /></Card>
+        <AddCrewModal isOpen={showAdd} onClose={() => setShowAdd(false)} />
       </div>
     );
   }
