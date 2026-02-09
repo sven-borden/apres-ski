@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+:root {
+  --powder-white: #F8FAFC;
+  --glacier-white: #FFFFFF;
+  --midnight-slate: #0F172A;
+  --alpine-blue: #2563EB;
+  --spritz-orange: #F97316;
+  --pine-green: #10B981;
+  --mist-grey: #94A3B8;
+}
+
+@theme inline {
+  --color-powder: var(--powder-white);
+  --color-glacier: var(--glacier-white);
+  --color-midnight: var(--midnight-slate);
+  --color-alpine: var(--alpine-blue);
+  --color-spritz: var(--spritz-orange);
+  --color-pine: var(--pine-green);
+  --color-mist: var(--mist-grey);
+}
+
+body {
+  background: var(--powder-white);
+  color: var(--midnight-slate);
+}
