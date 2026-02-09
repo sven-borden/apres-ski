@@ -13,11 +13,13 @@ export function TimelineMatrix({
   participants,
   attendance,
   capacity,
+  onEditParticipant,
 }: {
   trip: Trip;
   participants: Participant[];
   attendance: Attendance[];
   capacity: number | null;
+  onEditParticipant?: (participant: Participant) => void;
 }) {
   const { dates, todayStr, attendanceMap, dailyCounts } = useMemo(() => {
     const dates = getDateRange(trip.startDate, trip.endDate);
@@ -53,7 +55,7 @@ export function TimelineMatrix({
 
   return (
     <div className="overflow-x-auto -mx-5 px-5">
-      <div className="inline-flex flex-col min-w-max gap-2">
+      <div className="flex flex-col min-w-max w-fit mx-auto gap-2">
         {/* Date header row */}
         <div className="flex items-end gap-2">
           <div className="w-32 shrink-0" />
@@ -76,21 +78,9 @@ export function TimelineMatrix({
           })}
         </div>
 
-        {/* Participant rows */}
-        {sortParticipants(participants).map((p) => (
-          <TimelineRow
-            key={p.id}
-            participant={p}
-            dates={dates}
-            attendanceSet={attendanceMap.get(p.id) ?? new Set()}
-            todayStr={todayStr}
-            onToggle={handleToggle}
-          />
-        ))}
-
         {/* Capacity row */}
         {capacity != null && capacity > 0 && (
-          <div className="flex items-center gap-2 border-t border-midnight/10 pt-2 mt-1">
+          <div className="flex items-center gap-2 border-b border-midnight/10 pb-2 mb-1">
             <div className="w-32 shrink-0 text-xs font-semibold text-mist truncate">
               Capacity ({capacity})
             </div>
@@ -114,6 +104,19 @@ export function TimelineMatrix({
             })}
           </div>
         )}
+
+        {/* Participant rows */}
+        {sortParticipants(participants).map((p) => (
+          <TimelineRow
+            key={p.id}
+            participant={p}
+            dates={dates}
+            attendanceSet={attendanceMap.get(p.id) ?? new Set()}
+            todayStr={todayStr}
+            onToggle={handleToggle}
+            onEdit={onEditParticipant}
+          />
+        ))}
       </div>
     </div>
   );
