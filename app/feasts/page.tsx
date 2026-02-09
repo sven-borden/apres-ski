@@ -1,12 +1,12 @@
 import { Card } from "@/components/ui/Card";
 
-export default function HubPage() {
+export default function FeastsPage() {
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-midnight">Hub</h1>
+      <h1 className="text-2xl font-bold text-midnight">Feasts</h1>
       <Card>
         <p className="text-mist">
-          Welcome to Apres-Ski. Your trip dashboard will appear here.
+          Meal planning and assignments will appear here.
         </p>
       </Card>
     </div>

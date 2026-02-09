@@ -1,0 +1,47 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils/cn";
+
+const navLinks = [
+  { label: "Hub", href: "/" },
+  { label: "Rostrum", href: "/rostrum" },
+  { label: "Feasts", href: "/feasts" },
+  { label: "Basecamp", href: "/basecamp" },
+];
+
+export function DesktopHeader() {
+  const pathname = usePathname();
+
+  function isActive(href: string) {
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
+  }
+
+  return (
+    <header className="hidden md:block sticky top-0 z-40 bg-glacier/80 backdrop-blur-sm border-b border-mist/20">
+      <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+        <Link href="/" className="text-lg font-bold text-midnight">
+          Apres-Ski
+        </Link>
+        <nav className="flex items-center gap-1">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-sm font-medium transition-colors",
+                isActive(link.href)
+                  ? "bg-alpine/10 text-alpine"
+                  : "text-mist hover:text-midnight",
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+    </header>
+  );
+}
