@@ -7,6 +7,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { AddCrewModal } from "@/components/crew/AddCrewModal";
 import { EditCrewModal } from "@/components/crew/EditCrewModal";
 import { useParticipants } from "@/lib/hooks/useParticipants";
+import { sortParticipants } from "@/lib/utils/colors";
 import type { Participant } from "@/lib/types";
 
 export default function CrewPage() {
@@ -27,11 +28,7 @@ export default function CrewPage() {
     );
   }
 
-  const sorted = [...participants].sort((a, b) => {
-    const aTime = a.joinedAt?.toMillis?.() ?? 0;
-    const bTime = b.joinedAt?.toMillis?.() ?? 0;
-    return aTime - bTime;
-  });
+  const sorted = sortParticipants(participants);
 
   return (
     <div className="space-y-4">

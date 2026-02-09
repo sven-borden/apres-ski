@@ -199,7 +199,7 @@ export function EditBasecampModal({
         {/* Maps URL */}
         <Field label="Maps URL">
           <input
-            type="url"
+            type="text"
             value={form.mapsUrl}
             onChange={(e) => update("mapsUrl", e.target.value)}
             placeholder="https://maps.app.goo.gl/..."

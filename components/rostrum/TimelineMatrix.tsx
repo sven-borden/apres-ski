@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils/cn";
 import { getDateRange, formatDateShort, isToday } from "@/lib/utils/dates";
 import { TimelineRow } from "@/components/rostrum/TimelineRow";
 import { toggleAttendance } from "@/lib/actions/attendance";
+import { sortParticipants } from "@/lib/utils/colors";
 import type { Trip, Participant, Attendance } from "@/lib/types";
 
 export function TimelineMatrix({
@@ -65,7 +66,7 @@ export function TimelineMatrix({
         </div>
 
         {/* Participant rows */}
-        {participants.map((p) => (
+        {sortParticipants(participants).map((p) => (
           <TimelineRow
             key={p.id}
             participant={p}
