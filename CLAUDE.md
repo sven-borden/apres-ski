@@ -75,4 +75,4 @@ All interfaces defined in `lib/types.ts`. Uses Firestore `Timestamp` type.
 
 ## Project Status
 
-Phases 1-5 complete (scaffolding, app shell, basecamp CRUD, rostrum attendance, feasts meal planning). Phases 6-7 remain (hub dashboard, polish). See `PLAN.md` for full roadmap.
+Phases 1-6 complete (scaffolding, app shell, basecamp CRUD, rostrum attendance, feasts meal planning, hub dashboard). Phase 7 remains (polish). See `PLAN.md` for full roadmap.
