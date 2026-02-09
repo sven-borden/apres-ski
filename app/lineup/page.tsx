@@ -5,14 +5,16 @@ import { Card } from "@/components/ui/Card";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useParticipants } from "@/lib/hooks/useParticipants";
 import { useAttendance } from "@/lib/hooks/useAttendance";
+import { useBasecamp } from "@/lib/hooks/useBasecamp";
 import { TimelineMatrix } from "@/components/lineup/TimelineMatrix";
 
 export default function LineupPage() {
   const { trip, loading: tripLoading } = useTrip();
   const { participants, loading: participantsLoading } = useParticipants();
   const { attendance, loading: attendanceLoading } = useAttendance();
+  const { basecamp, loading: basecampLoading } = useBasecamp();
 
-  const loading = tripLoading || participantsLoading || attendanceLoading;
+  const loading = tripLoading || participantsLoading || attendanceLoading || basecampLoading;
 
   if (loading) {
     return (
@@ -61,6 +63,7 @@ export default function LineupPage() {
           trip={trip}
           participants={participants}
           attendance={attendance}
+          capacity={basecamp?.capacity ?? null}
         />
       </Card>
     </div>

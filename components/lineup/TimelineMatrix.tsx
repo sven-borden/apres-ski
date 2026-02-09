@@ -12,12 +12,14 @@ export function TimelineMatrix({
   trip,
   participants,
   attendance,
+  capacity,
 }: {
   trip: Trip;
   participants: Participant[];
   attendance: Attendance[];
+  capacity: number | null;
 }) {
-  const { dates, todayStr, attendanceMap } = useMemo(() => {
+  const { dates, todayStr, attendanceMap, dailyCounts } = useMemo(() => {
     const dates = getDateRange(trip.startDate, trip.endDate);
     const todayStr = dates.find(isToday) ?? "";
 
@@ -31,7 +33,16 @@ export function TimelineMatrix({
       set.add(a.date);
     }
 
-    return { dates, todayStr, attendanceMap };
+    const dailyCounts = new Map<string, number>();
+    for (const date of dates) {
+      let count = 0;
+      for (const set of attendanceMap.values()) {
+        if (set.has(date)) count++;
+      }
+      dailyCounts.set(date, count);
+    }
+
+    return { dates, todayStr, attendanceMap, dailyCounts };
   }, [trip.startDate, trip.endDate, attendance]);
 
   function handleToggle(participantId: string, date: string, currentlyPresent: boolean) {
@@ -76,6 +87,33 @@ export function TimelineMatrix({
             onToggle={handleToggle}
           />
         ))}
+
+        {/* Capacity row */}
+        {capacity != null && capacity > 0 && (
+          <div className="flex items-center gap-2 border-t border-midnight/10 pt-2 mt-1">
+            <div className="w-32 shrink-0 text-xs font-semibold text-mist truncate">
+              Capacity ({capacity})
+            </div>
+            {dates.map((date) => {
+              const count = dailyCounts.get(date) ?? 0;
+              const ratio = count / capacity;
+              let colorClass = "text-pine";
+              if (ratio > 1.2) colorClass = "text-red-500";
+              else if (ratio > 1.1) colorClass = "text-amber-500";
+              return (
+                <div
+                  key={date}
+                  className={cn(
+                    "w-12 shrink-0 text-center text-sm font-bold",
+                    colorClass,
+                  )}
+                >
+                  {count}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
