@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { cn } from "@/lib/utils/cn";
 import { getDateRange, formatDateShort, isToday } from "@/lib/utils/dates";
-import { TimelineRow } from "@/components/rostrum/TimelineRow";
+import { TimelineRow } from "@/components/lineup/TimelineRow";
 import { toggleAttendance } from "@/lib/actions/attendance";
 import { sortParticipants } from "@/lib/utils/colors";
 import type { Trip, Participant, Attendance } from "@/lib/types";

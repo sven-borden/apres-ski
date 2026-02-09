@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/Button";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useParticipants } from "@/lib/hooks/useParticipants";
 import { useAttendance } from "@/lib/hooks/useAttendance";
-import { TimelineMatrix } from "@/components/rostrum/TimelineMatrix";
-import { EditTripModal } from "@/components/rostrum/EditTripModal";
+import { TimelineMatrix } from "@/components/lineup/TimelineMatrix";
+import { EditTripModal } from "@/components/lineup/EditTripModal";
 
-export default function RostrumPage() {
+export default function LineupPage() {
   const { trip, loading: tripLoading } = useTrip();
   const { participants, loading: participantsLoading } = useParticipants();
   const { attendance, loading: attendanceLoading } = useAttendance();
@@ -20,7 +20,7 @@ export default function RostrumPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-midnight">Rostrum</h1>
+        <h1 className="text-2xl font-bold text-midnight">Lineup</h1>
         <Card className="animate-pulse h-48"><span /></Card>
       </div>
     );
@@ -29,7 +29,7 @@ export default function RostrumPage() {
   if (!trip) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-midnight">Rostrum</h1>
+        <h1 className="text-2xl font-bold text-midnight">Lineup</h1>
         <Card>
           <div className="text-center py-8 space-y-3">
             <p className="text-mist">No trip set up yet</p>
@@ -49,7 +49,7 @@ export default function RostrumPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-midnight">Rostrum</h1>
+          <h1 className="text-2xl font-bold text-midnight">Lineup</h1>
           <Button variant="secondary" onClick={() => setEditOpen(true)}>
             Edit Trip
           </Button>
@@ -71,7 +71,7 @@ export default function RostrumPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-midnight">Rostrum</h1>
+        <h1 className="text-2xl font-bold text-midnight">Lineup</h1>
         <Button variant="secondary" onClick={() => setEditOpen(true)}>
           Edit Trip
         </Button>
