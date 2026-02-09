@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { updateTrip } from "@/lib/actions/trip";
+import { seedMeals } from "@/lib/actions/meals";
 import type { Trip } from "@/lib/types";
 
 const inputClass =
@@ -33,6 +34,7 @@ export function EditTripModal({
     setSaving(true);
     try {
       await updateTrip({ name: name.trim(), startDate, endDate });
+      await seedMeals(startDate, endDate);
       onClose();
     } finally {
       setSaving(false);
