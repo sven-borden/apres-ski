@@ -49,7 +49,7 @@ Four main routes: `/` (hub dashboard), `/rostrum` (attendance timeline), `/feast
 
 ### Layout
 
-`AppShell` provides responsive navigation: `DesktopHeader` (top nav, md+) and `MobileTabBar` (fixed bottom tabs, <md). Content area uses `pb-20 md:pb-0` for mobile tab clearance.
+`AppShell` provides responsive navigation: `DesktopHeader` (top nav, md+), `OfflineBanner` (orange bar when offline), and `MobileTabBar` (fixed bottom tabs, <md). Content area uses `pb-20 md:pb-0` for mobile tab clearance.
 
 ## Conventions
 
@@ -73,6 +73,16 @@ All interfaces defined in `lib/types.ts`. Uses Firestore `Timestamp` type.
 - Use `initializeFirestore()` with settings object, not `getFirestore()` with 3 args.
 - PostCSS config: `{ plugins: { "@tailwindcss/postcss": {} } }`.
 
+### Offline & PWA
+
+- `useOnline` hook (`lib/hooks/useOnline.ts`) uses `useSyncExternalStore` to track connectivity.
+- `OfflineBanner` shows when offline; Firestore `persistentLocalCache()` handles data sync.
+- PWA manifest at `app/manifest.ts` (served as `/manifest.webmanifest`), SVG favicon at `app/icon.svg`, PNG icons in `public/icons/`.
+
+### Meal Seeding
+
+`seedMeals(startDate, endDate)` in `lib/actions/meals.ts` auto-creates unassigned meal docs for each trip date (skips existing). Called from `EditTripModal` after saving a trip.
+
 ## Project Status
 
-Phases 1-6 complete (scaffolding, app shell, basecamp CRUD, rostrum attendance, feasts meal planning, hub dashboard). Phase 7 remains (polish). See `PLAN.md` for full roadmap.
+All phases complete (1-7). See `PLAN.md` for full roadmap.

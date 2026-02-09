@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { HeroHeader } from "@/components/hub/HeroHeader";
 import { TodaySnapshot } from "@/components/hub/TodaySnapshot";
 import { QuickActions } from "@/components/hub/QuickActions";
+import { EditTripModal } from "@/components/rostrum/EditTripModal";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useParticipants } from "@/lib/hooks/useParticipants";
 import { useAttendance } from "@/lib/hooks/useAttendance";
@@ -14,6 +16,7 @@ import { getCountdownText, getTodayString } from "@/lib/utils/countdown";
 import type { Participant } from "@/lib/types";
 
 export default function HubPage() {
+  const [tripModalOpen, setTripModalOpen] = useState(false);
   const { trip, loading: tripLoading } = useTrip();
   const { participants, loading: participantsLoading } = useParticipants();
   const { attendance, loading: attendanceLoading } = useAttendance();
@@ -89,13 +92,31 @@ export default function HubPage() {
         tripName={trip?.name ?? null}
         countdownText={countdownText}
       />
-      <TodaySnapshot
-        arrivals={arrivals}
-        departures={departures}
-        todayMeal={todayMeal}
-        participants={participants}
-      />
-      <QuickActions basecamp={basecamp} />
+      {!trip ? (
+        <>
+          <Card>
+            <div className="text-center py-4">
+              <p className="text-mist mb-4">No trip set up yet. Create one to get started!</p>
+              <Button onClick={() => setTripModalOpen(true)}>Set Up Trip</Button>
+            </div>
+          </Card>
+          <EditTripModal
+            isOpen={tripModalOpen}
+            onClose={() => setTripModalOpen(false)}
+            trip={null}
+          />
+        </>
+      ) : (
+        <>
+          <TodaySnapshot
+            arrivals={arrivals}
+            departures={departures}
+            todayMeal={todayMeal}
+            participants={participants}
+          />
+          <QuickActions basecamp={basecamp} />
+        </>
+      )}
     </div>
   );
 }

@@ -1,5 +1,39 @@
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
+import { getDateRange } from "@/lib/utils/dates";
+
+export async function seedMeals(startDate: string, endDate: string) {
+  const db = getDb();
+  const dates = getDateRange(startDate, endDate);
+
+  await Promise.all(
+    dates.map(async (date) => {
+      const ref = doc(db, "meals", date);
+      const snap = await getDoc(ref);
+      if (snap.exists()) return;
+
+      await setDoc(ref, {
+        date,
+        tripId: "current",
+        apero: {
+          assignedTo: "",
+          assignedParticipantId: "",
+          notes: "",
+          status: "unassigned",
+        },
+        dinner: {
+          chefName: "",
+          chefParticipantId: "",
+          menu: "",
+          dietaryTags: [],
+          status: "unassigned",
+        },
+        updatedAt: serverTimestamp(),
+        updatedBy: "system",
+      });
+    }),
+  );
+}
 
 export async function claimApero(
   date: string,

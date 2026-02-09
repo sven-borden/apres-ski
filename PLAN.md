@@ -398,16 +398,16 @@ apres-ski/
 
 **Dependencies:** Phases 3-5 (all data sources must exist).
 
-- [ ] **6.1** Data derivation (no new hooks -- reuses existing)
+- [x] **6.1** Data derivation (no new hooks -- reuses existing)
   - Today's arrivals: participants whose first present date is today
   - Today's departures: participants whose last present date is today
   - Tonight's chef: dinner assignment for today
   - Apero duty: apero assignment for today
   - Countdown: days until `trip.startDate` or "Day X" during trip
-- [ ] **6.2** Utility: `lib/utils/countdown.ts`
+- [x] **6.2** Utility: `lib/utils/countdown.ts`
   - `getCountdownText(startDate, endDate)` -> `"3 days until the trip!"` / `"Day 2 of 7"` / `"Hope you had fun!"`
-- [ ] **6.3** Page: `app/page.tsx`
-- [ ] **6.4** Components
+- [x] **6.3** Page: `app/page.tsx`
+- [x] **6.4** Components
   - `components/hub/HeroHeader.tsx` -- background mountain image (`public/images/hero-mountain.webp`) + countdown overlay text
   - `components/hub/TodaySnapshot.tsx` -- card with arrivals, departures, chef, apero
   - `components/hub/QuickActions.tsx` -- "Navigate to Chalet" (maps deep link), "View WiFi" (copy popup)
@@ -422,24 +422,24 @@ apres-ski/
 
 **Dependencies:** Phases 1-6 complete.
 
-- [ ] **7.1** Empty states for all views
+- [x] **7.1** Empty states for all views
   - No participants yet
   - No meals assigned
   - No basecamp info configured
   - No trip configured
-- [ ] **7.2** Loading skeletons while Firestore loads
-- [ ] **7.3** Trip setup flow
+- [x] **7.2** Loading skeletons while Firestore loads
+- [x] **7.3** Trip setup flow
   - Simple form to configure trip name, start/end dates
   - Accessible from Hub when no trip exists
-- [ ] **7.4** Meal seed/init flow
+- [x] **7.4** Meal seed/init flow
   - Auto-create meal docs for each date in the trip range
-- [ ] **7.5** Offline indicator
+- [x] **7.5** Offline indicator
   - Firestore persistence handles data automatically
   - Show subtle banner when offline
-- [ ] **7.6** PWA support
+- [x] **7.6** PWA support
   - `manifest.json` for add-to-homescreen
-- [ ] **7.7** OG meta tags for link sharing
-- [ ] **7.8** `lib/utils/colors.ts` -- 10 predefined participant colors
+- [x] **7.7** OG meta tags for link sharing
+- [x] **7.8** `lib/utils/colors.ts` -- 10 predefined participant colors
 
 **Verify:** All empty states render correctly, loading skeletons appear briefly, app works offline, installable via PWA prompt.
 
