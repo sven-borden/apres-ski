@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/Card";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useMeals } from "@/lib/hooks/useMeals";
 import { useParticipants } from "@/lib/hooks/useParticipants";
-import { useUser } from "@/components/providers/UserProvider";
 import { getDateRange, isToday } from "@/lib/utils/dates";
 import { DateScroller } from "@/components/feasts/DateScroller";
 import { DayMealCard } from "@/components/feasts/DayMealCard";
@@ -19,8 +18,6 @@ export default function FeastsPage() {
   const { trip, loading: tripLoading } = useTrip();
   const { meals, loading: mealsLoading } = useMeals();
   const { participants, loading: participantsLoading } = useParticipants();
-  const { user } = useUser();
-
   const dates = useMemo(
     () => (trip ? getDateRange(trip.startDate, trip.endDate) : []),
     [trip],
@@ -72,7 +69,7 @@ export default function FeastsPage() {
           date={resolvedDate}
           meal={currentMeal}
           participants={participants}
-          currentUserId={user?.id ?? ""}
+          currentUserId=""
         />
       )}
     </div>

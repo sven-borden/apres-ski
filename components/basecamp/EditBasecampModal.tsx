@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { useUser } from "@/components/providers/UserProvider";
 import { updateBasecamp } from "@/lib/actions/basecamp";
 import type { Basecamp } from "@/lib/types";
 
@@ -77,7 +76,6 @@ export function EditBasecampModal({
   onClose: () => void;
   basecamp: Basecamp | null;
 }) {
-  const { user } = useUser();
   const [form, setForm] = useState<FormState>(() => basecampToForm(basecamp));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,8 +143,6 @@ export function EditBasecampModal({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!user) return;
-
     setSaving(true);
     setError(null);
     try {
@@ -165,7 +161,7 @@ export function EditBasecampModal({
           ),
           notes: form.notes,
         },
-        user.name,
+        "anonymous",
       );
       onClose();
     } catch (err) {

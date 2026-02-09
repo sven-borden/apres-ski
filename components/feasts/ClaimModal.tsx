@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { DietaryTag } from "@/components/ui/DietaryTag";
-import { useUser } from "@/components/providers/UserProvider";
 import { claimApero, claimDinner } from "@/lib/actions/meals";
 
 const DIETARY_PRESETS = [
@@ -30,7 +29,6 @@ export function ClaimModal({
   section: "apero" | "dinner";
   date: string;
 }) {
-  const { user } = useUser();
   const [notes, setNotes] = useState("");
   const [menu, setMenu] = useState("");
   const [dietaryTags, setDietaryTags] = useState<string[]>([]);
@@ -50,16 +48,14 @@ export function ClaimModal({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!user) return;
-
     setSaving(true);
     try {
       if (section === "apero") {
-        await claimApero(date, { id: user.id, name: user.name }, notes.trim());
+        await claimApero(date, { id: "", name: "anonymous" }, notes.trim());
       } else {
         await claimDinner(
           date,
-          { id: user.id, name: user.name },
+          { id: "", name: "anonymous" },
           menu.trim(),
           dietaryTags,
         );
