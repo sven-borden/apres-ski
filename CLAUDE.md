@@ -45,7 +45,7 @@ Firestore ←→ lib/hooks/use*.ts (onSnapshot listeners) → Components
 
 ### Routing
 
-Four main routes: `/` (hub dashboard), `/rostrum` (attendance timeline), `/feasts` (meals), `/basecamp` (chalet info). All page components are client components with loading skeleton → empty state → data view pattern.
+Four main routes: `/` (hub dashboard), `/lineup` (attendance timeline), `/feasts` (meals), `/basecamp` (chalet info). All page components are client components with loading skeleton → empty state → data view pattern.
 
 ### Layout
 

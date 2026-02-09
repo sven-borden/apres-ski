@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar } from "@/components/ui/Avatar";
-import { TimelineCell } from "@/components/rostrum/TimelineCell";
+import { TimelineCell } from "@/components/lineup/TimelineCell";
 import type { Participant } from "@/lib/types";
 
 export function TimelineRow({

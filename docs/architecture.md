@@ -104,7 +104,7 @@ Four routes, all client components:
 | Route | View | Description |
 |-------|------|-------------|
 | `/` | Hub | Dashboard with countdown, today's snapshot, quick actions |
-| `/rostrum` | Rostrum | Attendance timeline matrix |
+| `/lineup` | Lineup | Attendance timeline matrix |
 | `/feasts` | Feasts | Meal planning with date scroller |
 | `/basecamp` | Basecamp | Chalet info, address, WiFi, contacts |
 
@@ -132,7 +132,7 @@ app/                    Pages and global styles
   globals.css           Tailwind v4 + design tokens
   icon.svg              SVG favicon
   manifest.ts           PWA manifest
-  rostrum/page.tsx      Attendance timeline
+  lineup/page.tsx       Attendance timeline
   feasts/page.tsx       Meal planning
   basecamp/page.tsx     Chalet info
 lib/                    Shared logic
@@ -146,7 +146,7 @@ components/
   layout/               AppShell, DesktopHeader, MobileTabBar, OfflineBanner
   ui/                   Card, Button, Modal, Avatar, CopyButton, StatusBadge, RevealField, DietaryTag
   hub/                  HeroHeader, TodaySnapshot, QuickActions
-  rostrum/              TimelineMatrix, TimelineRow, TimelineCell, EditTripModal
+  lineup/               TimelineMatrix, TimelineRow, TimelineCell, EditTripModal
   feasts/               DateScroller, DayMealCard, AperoSection, DinnerSection, ClaimModal
   basecamp/             MapEmbed, AddressBlock, EssentialsGrid, EditBasecampModal
   UserSetupModal.tsx    First-visit user setup
