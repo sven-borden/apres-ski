@@ -9,7 +9,7 @@ import {
 } from "react";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
-import { UserSetupModal } from "@/components/UserSetupModal";
+
 import type { LocalUser } from "@/lib/types";
 
 const STORAGE_KEY = "apres-ski-user";
@@ -114,7 +114,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   return (
     <UserContext.Provider value={{ user, isReady, needsSetup, saveUser }}>
       {children}
-      {needsSetup && <UserSetupModal onSave={saveUser} />}
     </UserContext.Provider>
   );
 }
