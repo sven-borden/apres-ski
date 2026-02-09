@@ -43,6 +43,7 @@ export interface DinnerAssignment {
 }
 
 export interface Meal {
+  id: string;
   date: string;
   tripId: string;
   apero: AperoAssignment;
