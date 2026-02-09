@@ -348,16 +348,16 @@ apres-ski/
 
 **Dependencies:** Phase 3 (Firebase patterns established).
 
-- [ ] **4.1** Data hooks
+- [x] **4.1** Data hooks
   - `lib/hooks/useParticipants.ts` -- `onSnapshot` on `participants` collection
   - `lib/hooks/useAttendance.ts` -- `onSnapshot` on `attendance` collection
   - `lib/hooks/useTrip.ts` -- `onSnapshot` on `doc(db, 'trips', 'current')`
-- [ ] **4.2** Write actions: `lib/actions/attendance.ts`
+- [x] **4.2** Write actions: `lib/actions/attendance.ts`
   - `toggleAttendance(participantId, date, currentlyPresent)` -- sets/deletes attendance doc using composite ID `{participantId}_{date}`
-- [ ] **4.3** Utilities
+- [x] **4.3** Utilities
   - `lib/utils/dates.ts` -- `getDateRange(start, end)` -> `YYYY-MM-DD[]`, `formatDateShort(date)` -> `"Fri 12"`, `isToday(date)` -> boolean
-- [ ] **4.4** Page: `app/rostrum/page.tsx`
-- [ ] **4.5** Components
+- [x] **4.4** Page: `app/rostrum/page.tsx`
+- [x] **4.5** Components
   - `components/rostrum/TimelineMatrix.tsx` -- horizontally scrollable container, sticky left column (names + avatars), date header row
   - `components/rostrum/TimelineRow.tsx` -- one participant's row with colored presence bars
   - `components/rostrum/TimelineCell.tsx` -- tap to toggle, colored (participant color) when present, grey when absent
