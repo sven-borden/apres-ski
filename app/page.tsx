@@ -1,11 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { HeroHeader } from "@/components/hub/HeroHeader";
-import { TodaySnapshot } from "@/components/hub/TodaySnapshot";
-import { QuickActions } from "@/components/hub/QuickActions";
+import { LiteHero } from "@/components/hub/LiteHero";
+import { DayCard } from "@/components/hub/DayCard";
 import { EditTripModal } from "@/components/basecamp/EditTripModal";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useParticipants } from "@/lib/hooks/useParticipants";
@@ -13,7 +12,8 @@ import { useAttendance } from "@/lib/hooks/useAttendance";
 import { useMeals } from "@/lib/hooks/useMeals";
 import { useBasecamp } from "@/lib/hooks/useBasecamp";
 import { getCountdownText, getTodayString } from "@/lib/utils/countdown";
-import type { Participant } from "@/lib/types";
+import { getDateRange } from "@/lib/utils/dates";
+import type { Meal } from "@/lib/types";
 
 export default function HubPage() {
   const [tripModalOpen, setTripModalOpen] = useState(false);
@@ -37,49 +37,48 @@ export default function HubPage() {
 
   const today = useMemo(() => getTodayString(), []);
 
-  const todayMeal = useMemo(
-    () => meals.find((m) => m.date === today),
-    [meals, today],
-  );
+  const dates = useMemo(() => {
+    if (!trip) return [];
+    return getDateRange(trip.startDate, trip.endDate);
+  }, [trip]);
 
-  const { arrivals, departures } = useMemo(() => {
-    if (!attendance.length || !participants.length) {
-      return { arrivals: [] as Participant[], departures: [] as Participant[] };
-    }
-
-    const presentByParticipant = new Map<string, string[]>();
+  const attendanceByDate = useMemo(() => {
+    const map = new Map<string, Set<string>>();
     for (const a of attendance) {
       if (!a.present) continue;
-      const dates = presentByParticipant.get(a.participantId) || [];
-      dates.push(a.date);
-      presentByParticipant.set(a.participantId, dates);
+      const set = map.get(a.date) ?? new Set<string>();
+      set.add(a.participantId);
+      map.set(a.date, set);
     }
+    return map;
+  }, [attendance]);
 
-    const arrivingIds: string[] = [];
-    const departingIds: string[] = [];
-
-    for (const [pid, dates] of presentByParticipant) {
-      dates.sort();
-      if (dates[0] === today) arrivingIds.push(pid);
-      if (dates[dates.length - 1] === today) departingIds.push(pid);
+  const mealByDate = useMemo(() => {
+    const map = new Map<string, Meal>();
+    for (const m of meals) {
+      map.set(m.date, m);
     }
+    return map;
+  }, [meals]);
 
-    const participantMap = new Map(participants.map((p) => [p.id, p]));
-    return {
-      arrivals: arrivingIds
-        .map((id) => participantMap.get(id))
-        .filter((p): p is Participant => !!p),
-      departures: departingIds
-        .map((id) => participantMap.get(id))
-        .filter((p): p is Participant => !!p),
-    };
-  }, [attendance, participants, today]);
+  const todayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!loading && todayRef.current) {
+      todayRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [loading]);
+
+  const capacity = basecamp?.capacity ?? null;
 
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-28 rounded-2xl bg-gradient-to-br from-alpine to-midnight animate-pulse" />
-        <Card className="animate-pulse h-32">
+        <div className="h-8 w-48 rounded-lg bg-mist/20 animate-pulse" />
+        <Card className="animate-pulse h-48">
+          <span />
+        </Card>
+        <Card className="animate-pulse h-48">
           <span />
         </Card>
       </div>
@@ -88,7 +87,7 @@ export default function HubPage() {
 
   return (
     <div className="space-y-4">
-      <HeroHeader
+      <LiteHero
         tripName={trip?.name ?? null}
         countdownText={countdownText}
       />
@@ -96,8 +95,12 @@ export default function HubPage() {
         <>
           <Card>
             <div className="text-center py-4">
-              <p className="text-mist mb-4">No trip set up yet. Create one to get started!</p>
-              <Button onClick={() => setTripModalOpen(true)}>Set Up Trip</Button>
+              <p className="text-mist mb-4">
+                No trip set up yet. Create one to get started!
+              </p>
+              <Button onClick={() => setTripModalOpen(true)}>
+                Set Up Trip
+              </Button>
             </div>
           </Card>
           <EditTripModal
@@ -107,15 +110,21 @@ export default function HubPage() {
           />
         </>
       ) : (
-        <>
-          <TodaySnapshot
-            arrivals={arrivals}
-            departures={departures}
-            todayMeal={todayMeal}
-            participants={participants}
-          />
-          <QuickActions basecamp={basecamp} />
-        </>
+        dates.map((date) => {
+          const isTodayDate = date === today;
+          return (
+            <div key={date} ref={isTodayDate ? todayRef : undefined}>
+              <DayCard
+                date={date}
+                presentIds={attendanceByDate.get(date) ?? new Set()}
+                allParticipants={participants}
+                meal={mealByDate.get(date)}
+                capacity={capacity}
+                isToday={isTodayDate}
+              />
+            </div>
+          );
+        })
       )}
     </div>
   );
