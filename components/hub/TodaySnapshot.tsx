@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
-import { getInitials } from "@/lib/utils/colors";
+import { getInitials, sortParticipants } from "@/lib/utils/colors";
 import type { Participant, Meal } from "@/lib/types";
 
 export function TodaySnapshot({
@@ -134,7 +134,7 @@ function Row({
       {icon}
       <div className="flex items-center gap-2 min-w-0">
         <div className="flex -space-x-2">
-          {participants.slice(0, 5).map((p) => (
+          {sortParticipants(participants).slice(0, 5).map((p) => (
             <Avatar
               key={p.id}
               initials={getInitials(p.name)}

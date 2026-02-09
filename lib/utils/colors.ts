@@ -11,6 +11,21 @@ export const PARTICIPANT_COLORS = [
   { name: "Powder Pink", hex: "#EC4899" },
 ] as const;
 
+const COLOR_ORDER: Map<string, number> = new Map(
+  PARTICIPANT_COLORS.map((c, i) => [c.hex, i]),
+);
+
+export function sortParticipants<T extends { color: string; name: string }>(
+  list: T[],
+): T[] {
+  return [...list].sort((a, b) => {
+    const ca = COLOR_ORDER.get(a.color) ?? PARTICIPANT_COLORS.length;
+    const cb = COLOR_ORDER.get(b.color) ?? PARTICIPANT_COLORS.length;
+    if (ca !== cb) return ca - cb;
+    return a.name.localeCompare(b.name);
+  });
+}
+
 export function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/);
   if (parts.length === 0 || parts[0] === "") return "";
