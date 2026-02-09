@@ -28,10 +28,11 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 ## Project Structure
 
 ```
-app/          → Pages and global styles
+app/          → Pages, global styles, PWA manifest
 lib/          → Firebase config, TypeScript types, hooks, actions, utils
-components/   → React components (planned)
-public/       → Static assets
+components/   → React components (ui, layout, providers, feature modules)
+docs/         → Project documentation
+public/       → Static assets (icons, images)
 ```
 
 ## Scripts
@@ -42,6 +43,8 @@ public/       → Static assets
 | `npm run build` | Production build |
 | `npm run lint` | Run ESLint |
 
-## Roadmap
+## Documentation
 
-See [PLAN.md](./PLAN.md) for the full implementation roadmap.
+- [Branding Guidelines](./docs/branding.md) — color palette, typography, shape tokens, logo, PWA theming
+- [Architecture & Developer Guide](./docs/architecture.md) — tech stack, data flow, hooks/actions patterns, project structure
+- [Firestore Data Model](./docs/data-model.md) — collections, document schemas, indexes, security rules
