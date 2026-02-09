@@ -283,11 +283,11 @@ apres-ski/
 
 **Dependencies:** Phase 1 (project scaffolding must exist).
 
-- [ ] **2.1** Root layout (`app/layout.tsx`)
+- [x] **2.1** Root layout (`app/layout.tsx`)
   - Inter font via `next/font/google`
   - Metadata: title "Apres-Ski", description, OG tags
   - Wrap children in `<UserProvider>`
-- [ ] **2.2** User identity system
+- [x] **2.2** User identity system
   - `components/providers/UserProvider.tsx` (client component)
     - Reads `localStorage('apres-ski-user')` on mount
     - Exposes `{ user, isReady, needsSetup, saveUser }` via React context
@@ -295,14 +295,14 @@ apres-ski/
     - When `needsSetup` is true, renders `<UserSetupModal>`
   - `components/UserSetupModal.tsx`
     - Name input, color picker grid (10 predefined alpine colors), auto-generated avatar (initials), "Join Trip" button
-- [ ] **2.3** Responsive navigation shell
+- [x] **2.3** Responsive navigation shell
   - `components/layout/AppShell.tsx` -- desktop: `<DesktopHeader>`, mobile: `<MobileTabBar>`
   - `components/layout/DesktopHeader.tsx` -- top bar with logo + 4 nav links (md+)
   - `components/layout/MobileTabBar.tsx` -- fixed bottom bar with 4 icon+label tabs (<md)
   - Tabs: Hub `/`, Rostrum `/rostrum`, Feasts `/feasts`, Basecamp `/basecamp`
   - Content area: `pb-20 md:pb-0` for mobile tab clearance
   - Icons: inline SVGs (Home/Mountain, Bed/Calendar, Utensils, MapPin)
-- [ ] **2.4** Base UI components (`components/ui/`)
+- [x] **2.4** Base UI components (`components/ui/`)
   - `Card.tsx` -- `bg-glacier rounded-2xl shadow-sm p-5`
   - `Button.tsx` -- primary (`bg-alpine`), secondary (outline), pill-shaped
   - `Modal.tsx` -- bottom sheet on mobile, centered on desktop
@@ -320,14 +320,14 @@ apres-ski/
 
 **Dependencies:** Phase 2 (shell and user identity).
 
-- [ ] **3.1** Data hook: `lib/hooks/useBasecamp.ts`
+- [x] **3.1** Data hook: `lib/hooks/useBasecamp.ts`
   - `onSnapshot` listener on `doc(db, 'basecamp', 'current')`
   - Returns `{ basecamp, loading, error }`
-- [ ] **3.2** Write actions: `lib/actions/basecamp.ts`
+- [x] **3.2** Write actions: `lib/actions/basecamp.ts`
   - `updateBasecamp(fields)` -> `setDoc` with merge
-- [ ] **3.3** Page: `app/basecamp/page.tsx`
+- [x] **3.3** Page: `app/basecamp/page.tsx`
   - Wraps components, passes data from `useBasecamp`
-- [ ] **3.4** Components
+- [x] **3.4** Components
   - `components/basecamp/MapEmbed.tsx` -- Google Maps static iframe with coordinates
   - `components/basecamp/AddressBlock.tsx` -- address text + `CopyButton`
   - `components/basecamp/EssentialsGrid.tsx` -- 2-column grid:
