@@ -80,6 +80,7 @@ export function EditBasecampModal({
   const { user } = useUser();
   const [form, setForm] = useState<FormState>(() => basecampToForm(basecamp));
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -147,6 +148,7 @@ export function EditBasecampModal({
     if (!user) return;
 
     setSaving(true);
+    setError(null);
     try {
       const coords = parseCoordinates(form.coordinatesText);
       await updateBasecamp(
@@ -166,6 +168,9 @@ export function EditBasecampModal({
         user.name,
       );
       onClose();
+    } catch (err) {
+      console.error("Failed to save basecamp:", err);
+      setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setSaving(false);
     }
@@ -348,6 +353,12 @@ export function EditBasecampModal({
             rows={3}
           />
         </Field>
+
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+            {error}
+          </p>
+        )}
 
         {/* Actions */}
         <div className="flex gap-3 pt-2">
