@@ -45,7 +45,7 @@ Firestore ←→ lib/hooks/use*.ts (onSnapshot listeners) → Components
 
 ### Routing
 
-Four main routes: `/` (hub dashboard), `/lineup` (attendance timeline), `/feasts` (meals), `/basecamp` (chalet info). All page components are client components with loading skeleton → empty state → data view pattern.
+Five main routes: `/` (hub dashboard), `/lineup` (attendance timeline), `/feasts` (meals), `/crew` (participant management), `/basecamp` (chalet info). All page components are client components with loading skeleton → empty state → data view pattern.
 
 ### Layout
 
@@ -77,7 +77,7 @@ All interfaces defined in `lib/types.ts`. Uses Firestore `Timestamp` type.
 
 - `useOnline` hook (`lib/hooks/useOnline.ts`) uses `useSyncExternalStore` to track connectivity.
 - `OfflineBanner` shows when offline; Firestore `persistentLocalCache()` handles data sync.
-- PWA manifest at `app/manifest.ts` (served as `/manifest.webmanifest`), SVG favicon at `app/icon.svg`, PNG icons in `public/icons/`.
+- PWA manifest at `app/manifest.ts` (served as `/manifest.webmanifest`), PNG favicon at `app/icon.png`, Apple touch icon at `app/apple-icon.png`, PNG icons in `public/icons/`.
 
 ### Meal Seeding
 
@@ -85,4 +85,4 @@ All interfaces defined in `lib/types.ts`. Uses Firestore `Timestamp` type.
 
 ## Project Status
 
-All phases complete (1-7). See `PLAN.md` for full roadmap.
+All phases complete (1-7).

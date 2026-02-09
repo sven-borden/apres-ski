@@ -45,7 +45,7 @@ export default function FeastsPage() {
         <h1 className="text-2xl font-bold text-midnight">Feasts</h1>
         <Card>
           <div className="text-center py-8">
-            <p className="text-mist">No trip set up yet — head to Rostrum to create one</p>
+            <p className="text-mist">No trip set up yet — head to Basecamp to create one</p>
           </div>
         </Card>
       </div>
@@ -69,7 +69,6 @@ export default function FeastsPage() {
           date={resolvedDate}
           meal={currentMeal}
           participants={participants}
-          currentUserId=""
         />
       )}
     </div>
