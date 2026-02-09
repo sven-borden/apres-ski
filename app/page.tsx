@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { HeroHeader } from "@/components/hub/HeroHeader";
 import { TodaySnapshot } from "@/components/hub/TodaySnapshot";
 import { QuickActions } from "@/components/hub/QuickActions";
-import { EditTripModal } from "@/components/lineup/EditTripModal";
+import { EditTripModal } from "@/components/basecamp/EditTripModal";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useParticipants } from "@/lib/hooks/useParticipants";
 import { useAttendance } from "@/lib/hooks/useAttendance";

@@ -14,6 +14,7 @@ interface FormState {
   wifiPassword: string;
   checkIn: string;
   checkOut: string;
+  capacity: string;
   accessCodes: { label: string; code: string }[];
   emergencyContacts: { name: string; phone: string; role: string }[];
   notes: string;
@@ -29,6 +30,7 @@ function basecampToForm(b: Basecamp | null): FormState {
       wifiPassword: "",
       checkIn: "",
       checkOut: "",
+      capacity: "",
       accessCodes: [],
       emergencyContacts: [],
       notes: "",
@@ -45,6 +47,7 @@ function basecampToForm(b: Basecamp | null): FormState {
     wifiPassword: b.wifi?.password || "",
     checkIn: b.checkIn || "",
     checkOut: b.checkOut || "",
+    capacity: b.capacity ? String(b.capacity) : "",
     accessCodes: b.accessCodes?.length ? [...b.accessCodes] : [],
     emergencyContacts: b.emergencyContacts?.length
       ? [...b.emergencyContacts]
@@ -155,6 +158,7 @@ export function EditBasecampModal({
           wifi: { network: form.wifiNetwork, password: form.wifiPassword },
           checkIn: form.checkIn,
           checkOut: form.checkOut,
+          capacity: form.capacity ? parseInt(form.capacity, 10) : 0,
           accessCodes: form.accessCodes.filter((c) => c.label || c.code),
           emergencyContacts: form.emergencyContacts.filter(
             (c) => c.name || c.phone,
@@ -249,6 +253,18 @@ export function EditBasecampModal({
             />
           </Field>
         </div>
+
+        {/* Capacity */}
+        <Field label="Capacity" hint="number of beds">
+          <input
+            type="number"
+            min="0"
+            value={form.capacity}
+            onChange={(e) => update("capacity", e.target.value)}
+            placeholder="8"
+            className={inputClass}
+          />
+        </Field>
 
         {/* Access Codes */}
         <fieldset>

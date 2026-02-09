@@ -1,19 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useParticipants } from "@/lib/hooks/useParticipants";
 import { useAttendance } from "@/lib/hooks/useAttendance";
 import { TimelineMatrix } from "@/components/lineup/TimelineMatrix";
-import { EditTripModal } from "@/components/lineup/EditTripModal";
 
 export default function LineupPage() {
   const { trip, loading: tripLoading } = useTrip();
   const { participants, loading: participantsLoading } = useParticipants();
   const { attendance, loading: attendanceLoading } = useAttendance();
-  const [editOpen, setEditOpen] = useState(false);
 
   const loading = tripLoading || participantsLoading || attendanceLoading;
 
@@ -33,14 +30,11 @@ export default function LineupPage() {
         <Card>
           <div className="text-center py-8 space-y-3">
             <p className="text-mist">No trip set up yet</p>
-            <Button onClick={() => setEditOpen(true)}>Set Up Trip</Button>
+            <Link href="/basecamp" className="text-alpine font-medium hover:underline">
+              Set up in Basecamp
+            </Link>
           </div>
         </Card>
-        <EditTripModal
-          isOpen={editOpen}
-          onClose={() => setEditOpen(false)}
-          trip={null}
-        />
       </div>
     );
   }
@@ -48,34 +42,19 @@ export default function LineupPage() {
   if (participants.length === 0) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-midnight">Lineup</h1>
-          <Button variant="secondary" onClick={() => setEditOpen(true)}>
-            Edit Trip
-          </Button>
-        </div>
+        <h1 className="text-2xl font-bold text-midnight">Lineup</h1>
         <Card>
           <div className="text-center py-8 space-y-3">
             <p className="text-mist">No participants yet — share the link to invite friends</p>
           </div>
         </Card>
-        <EditTripModal
-          isOpen={editOpen}
-          onClose={() => setEditOpen(false)}
-          trip={trip}
-        />
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-midnight">Lineup</h1>
-        <Button variant="secondary" onClick={() => setEditOpen(true)}>
-          Edit Trip
-        </Button>
-      </div>
+      <h1 className="text-2xl font-bold text-midnight">Lineup</h1>
 
       <Card>
         <TimelineMatrix
@@ -84,12 +63,6 @@ export default function LineupPage() {
           attendance={attendance}
         />
       </Card>
-
-      <EditTripModal
-        isOpen={editOpen}
-        onClose={() => setEditOpen(false)}
-        trip={trip}
-      />
     </div>
   );
 }
