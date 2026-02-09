@@ -16,22 +16,15 @@ export function TodaySnapshot({
   todayMeal: Meal | undefined;
   participants: Participant[];
 }) {
-  const dinnerClaimed = todayMeal?.dinner.status !== "unassigned";
-  const aperoClaimed = todayMeal?.apero.status !== "unassigned";
-
-  const chefParticipant = dinnerClaimed
-    ? participants.find((p) => p.id === todayMeal?.dinner.chefParticipantId)
-    : undefined;
-
-  const aperoParticipant = aperoClaimed
-    ? participants.find((p) => p.id === todayMeal?.apero.assignedParticipantId)
-    : undefined;
+  const hasDinner = todayMeal && todayMeal.responsibleIds.length > 0;
+  const responsibleParticipants = hasDinner
+    ? todayMeal.responsibleIds
+        .map((id) => participants.find((p) => p.id === id))
+        .filter(Boolean) as Participant[]
+    : [];
 
   const hasContent =
-    arrivals.length > 0 ||
-    departures.length > 0 ||
-    dinnerClaimed ||
-    aperoClaimed;
+    arrivals.length > 0 || departures.length > 0 || hasDinner;
 
   return (
     <Card>
@@ -62,52 +55,29 @@ export function TodaySnapshot({
               participants={departures}
             />
           )}
-          {dinnerClaimed && todayMeal && (
+          {hasDinner && todayMeal && (
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-alpine/10 flex items-center justify-center text-alpine">
                 <ChefIcon />
               </div>
               <div className="flex items-center gap-2 min-w-0">
-                {chefParticipant && (
-                  <Avatar
-                    initials={getInitials(chefParticipant.name)}
-                    color={chefParticipant.color}
-                    size="sm"
-                  />
-                )}
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-midnight">
-                    Dinner — {todayMeal.dinner.chefName}
-                  </p>
-                  {todayMeal.dinner.menu && (
-                    <p className="text-xs text-mist truncate">
-                      {todayMeal.dinner.menu}
-                    </p>
-                  )}
+                <div className="flex -space-x-2">
+                  {responsibleParticipants.map((p) => (
+                    <Avatar
+                      key={p.id}
+                      initials={getInitials(p.name)}
+                      color={p.color}
+                      size="sm"
+                    />
+                  ))}
                 </div>
-              </div>
-            </div>
-          )}
-          {aperoClaimed && todayMeal && (
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-spritz/10 flex items-center justify-center text-spritz">
-                <GlassIcon />
-              </div>
-              <div className="flex items-center gap-2 min-w-0">
-                {aperoParticipant && (
-                  <Avatar
-                    initials={getInitials(aperoParticipant.name)}
-                    color={aperoParticipant.color}
-                    size="sm"
-                  />
-                )}
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-midnight">
-                    Apero — {todayMeal.apero.assignedTo}
+                    Dinner — {responsibleParticipants.map((p) => p.name).join(", ")}
                   </p>
-                  {todayMeal.apero.notes && (
+                  {todayMeal.description && (
                     <p className="text-xs text-mist truncate">
-                      {todayMeal.apero.notes}
+                      {todayMeal.description}
                     </p>
                   )}
                 </div>
@@ -173,14 +143,6 @@ function ChefIcon() {
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M5 14h6M4 10h8M5 10V7M11 10V7" />
       <circle cx="8" cy="4" r="2.5" />
-    </svg>
-  );
-}
-
-function GlassIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 2l1.5 6H10.5L12 2H4zM7.5 8v5M5.5 13h4" />
     </svg>
   );
 }

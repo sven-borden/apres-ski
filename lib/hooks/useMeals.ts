@@ -5,6 +5,19 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
 import type { Meal } from "@/lib/types";
 
+function normalizeMeal(raw: Record<string, unknown>, id: string): Meal {
+  return {
+    id,
+    date: (raw.date as string) ?? "",
+    tripId: (raw.tripId as string) ?? "current",
+    responsibleIds: (raw.responsibleIds as string[]) ?? [],
+    description: (raw.description as string) ?? "",
+    shoppingList: Array.isArray(raw.shoppingList) ? raw.shoppingList : [],
+    updatedAt: raw.updatedAt as Meal["updatedAt"],
+    updatedBy: (raw.updatedBy as string) ?? "",
+  };
+}
+
 export function useMeals() {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +29,7 @@ export function useMeals() {
       collection(db, "meals"),
       (snap) => {
         setMeals(
-          snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Meal),
+          snap.docs.map((d) => normalizeMeal(d.data(), d.id)),
         );
         setLoading(false);
       },

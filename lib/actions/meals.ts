@@ -1,6 +1,7 @@
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
 import { getDateRange } from "@/lib/utils/dates";
+import type { ShoppingItem } from "@/lib/types";
 
 export async function seedMeals(startDate: string, endDate: string) {
   const db = getDb();
@@ -15,19 +16,9 @@ export async function seedMeals(startDate: string, endDate: string) {
       await setDoc(ref, {
         date,
         tripId: "current",
-        apero: {
-          assignedTo: "",
-          assignedParticipantId: "",
-          notes: "",
-          status: "unassigned",
-        },
-        dinner: {
-          chefName: "",
-          chefParticipantId: "",
-          menu: "",
-          dietaryTags: [],
-          status: "unassigned",
-        },
+        responsibleIds: [],
+        description: "",
+        shoppingList: [],
         updatedAt: serverTimestamp(),
         updatedBy: "system",
       });
@@ -35,10 +26,10 @@ export async function seedMeals(startDate: string, endDate: string) {
   );
 }
 
-export async function claimApero(
+export async function updateDinner(
   date: string,
-  user: { id: string; name: string },
-  notes: string,
+  data: { responsibleIds: string[]; description: string },
+  updatedBy: string,
 ) {
   const db = getDb();
   await setDoc(
@@ -46,92 +37,79 @@ export async function claimApero(
     {
       date,
       tripId: "current",
-      apero: {
-        assignedTo: user.name,
-        assignedParticipantId: user.id,
-        notes,
-        status: "claimed",
-      },
+      responsibleIds: data.responsibleIds,
+      description: data.description,
       updatedAt: serverTimestamp(),
-      updatedBy: user.name,
+      updatedBy,
     },
     { merge: true },
   );
 }
 
-export async function claimDinner(
+export async function addShoppingItem(
   date: string,
-  user: { id: string; name: string },
-  menu: string,
-  dietaryTags: string[],
+  item: ShoppingItem,
+  updatedBy: string,
 ) {
   const db = getDb();
+  const ref = doc(db, "meals", date);
+  const snap = await getDoc(ref);
+  const current = snap.exists() ? (snap.data().shoppingList ?? []) : [];
+
   await setDoc(
-    doc(db, "meals", date),
+    ref,
     {
-      date,
-      tripId: "current",
-      dinner: {
-        chefName: user.name,
-        chefParticipantId: user.id,
-        menu,
-        dietaryTags,
-        status: "claimed",
-      },
+      shoppingList: [...current, item],
       updatedAt: serverTimestamp(),
-      updatedBy: user.name,
+      updatedBy,
     },
     { merge: true },
   );
 }
 
-export async function updateMealDetails(
+export async function toggleShoppingItem(
   date: string,
-  section: "apero" | "dinner",
-  fields: Record<string, unknown>,
+  itemId: string,
   updatedBy: string,
 ) {
   const db = getDb();
-  const update: Record<string, unknown> = {
-    updatedAt: serverTimestamp(),
-    updatedBy,
-  };
-  for (const [key, value] of Object.entries(fields)) {
-    update[`${section}.${key}`] = value;
-  }
-  await setDoc(doc(db, "meals", date), update, { merge: true });
-}
+  const ref = doc(db, "meals", date);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
 
-export async function unclaimMeal(
-  date: string,
-  section: "apero" | "dinner",
-  updatedBy: string,
-) {
-  const db = getDb();
-  const defaults =
-    section === "apero"
-      ? {
-          apero: {
-            assignedTo: "",
-            assignedParticipantId: "",
-            notes: "",
-            status: "unassigned",
-          },
-        }
-      : {
-          dinner: {
-            chefName: "",
-            chefParticipantId: "",
-            menu: "",
-            dietaryTags: [],
-            status: "unassigned",
-          },
-        };
+  const list: ShoppingItem[] = snap.data().shoppingList ?? [];
+  const updated = list.map((item) =>
+    item.id === itemId ? { ...item, checked: !item.checked } : item,
+  );
 
   await setDoc(
-    doc(db, "meals", date),
+    ref,
     {
-      ...defaults,
+      shoppingList: updated,
+      updatedAt: serverTimestamp(),
+      updatedBy,
+    },
+    { merge: true },
+  );
+}
+
+export async function removeShoppingItem(
+  date: string,
+  itemId: string,
+  updatedBy: string,
+) {
+  const db = getDb();
+  const ref = doc(db, "meals", date);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+
+  const list: ShoppingItem[] = snap.data().shoppingList ?? [];
+  const updated = list.filter((item) => item.id !== itemId);
+
+  await setDoc(
+    ref,
+    {
+      shoppingList: updated,
       updatedAt: serverTimestamp(),
       updatedBy,
     },

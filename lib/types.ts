@@ -27,27 +27,19 @@ export interface Attendance {
   tripId: string;
 }
 
-export interface AperoAssignment {
-  assignedTo: string;
-  assignedParticipantId: string;
-  notes: string;
-  status: "unassigned" | "claimed" | "confirmed";
-}
-
-export interface DinnerAssignment {
-  chefName: string;
-  chefParticipantId: string;
-  menu: string;
-  dietaryTags: string[];
-  status: "unassigned" | "claimed" | "confirmed";
+export interface ShoppingItem {
+  id: string;
+  text: string;
+  checked: boolean;
 }
 
 export interface Meal {
   id: string;
   date: string;
   tripId: string;
-  apero: AperoAssignment;
-  dinner: DinnerAssignment;
+  responsibleIds: string[];
+  description: string;
+  shoppingList: ShoppingItem[];
   updatedAt: Timestamp;
   updatedBy: string;
 }
