@@ -19,18 +19,10 @@ function getFirebaseApp(): FirebaseApp {
     throw new Error("Firebase should only be initialized in the browser");
   }
 
-  const requiredVars = [
-    "NEXT_PUBLIC_FIREBASE_API_KEY",
-    "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
-    "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
-    "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
-    "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
-    "NEXT_PUBLIC_FIREBASE_APP_ID",
-  ] as const;
-
-  for (const varName of requiredVars) {
-    if (!process.env[varName]) {
-      throw new Error(`Missing environment variable: ${varName}`);
+  const requiredEntries = Object.entries(firebaseConfig) as [string, string | undefined][];
+  for (const [key, value] of requiredEntries) {
+    if (!value) {
+      throw new Error(`Missing Firebase config value: ${key}`);
     }
   }
 
