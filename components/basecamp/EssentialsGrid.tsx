@@ -9,7 +9,7 @@ export function EssentialsGrid({ basecamp }: { basecamp: Basecamp }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <WifiCard wifi={basecamp.wifi} />
-      <ScheduleCard checkIn={basecamp.checkIn} checkOut={basecamp.checkOut} />
+      <ScheduleCard checkIn={basecamp.checkIn} checkOut={basecamp.checkOut} capacity={basecamp.capacity} />
       <AccessCodesCard codes={basecamp.accessCodes} />
       <EmergencyCard contacts={basecamp.emergencyContacts} />
     </div>
@@ -40,14 +40,17 @@ function WifiCard({ wifi }: { wifi?: Basecamp["wifi"] }) {
 function ScheduleCard({
   checkIn,
   checkOut,
+  capacity,
 }: {
   checkIn?: string;
   checkOut?: string;
+  capacity?: number;
 }) {
+  const hasInfo = checkIn || checkOut || (capacity && capacity > 0);
   return (
     <Card>
       <h3 className="text-sm font-semibold text-midnight mb-2">Schedule</h3>
-      {checkIn || checkOut ? (
+      {hasInfo ? (
         <div className="space-y-1">
           {checkIn && (
             <p className="text-sm text-midnight/80">
@@ -57,6 +60,11 @@ function ScheduleCard({
           {checkOut && (
             <p className="text-sm text-midnight/80">
               <span className="font-medium">Check-out:</span> {checkOut}
+            </p>
+          )}
+          {capacity != null && capacity > 0 && (
+            <p className="text-sm text-midnight/80">
+              <span className="font-medium">Capacity:</span> {capacity} beds
             </p>
           )}
         </div>
