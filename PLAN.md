@@ -372,15 +372,15 @@ apres-ski/
 
 **Dependencies:** Phase 4 (participants and attendance data exist).
 
-- [ ] **5.1** Data hook: `lib/hooks/useMeals.ts`
+- [x] **5.1** Data hook: `lib/hooks/useMeals.ts`
   - `onSnapshot` on `meals` collection, filtered by `tripId`
-- [ ] **5.2** Write actions: `lib/actions/meals.ts`
+- [x] **5.2** Write actions: `lib/actions/meals.ts`
   - `claimApero(date, user)` -- set apero assignment
   - `claimDinner(date, user)` -- set dinner assignment
   - `updateMealDetails(date, section, fields)` -- edit notes/menu/tags
   - `unclaimMeal(date, section)` -- release assignment
-- [ ] **5.3** Page: `app/feasts/page.tsx`
-- [ ] **5.4** Components
+- [x] **5.3** Page: `app/feasts/page.tsx`
+- [x] **5.4** Components
   - `components/feasts/DateScroller.tsx` -- horizontal scrollable date pills, today highlighted in alpine-blue
   - `components/feasts/DayMealCard.tsx` -- card for selected date with two sections
   - `components/feasts/AperoSection.tsx` -- spritz-orange accent, avatar of assigned person, notes field, claim button
