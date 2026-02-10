@@ -39,6 +39,10 @@ Firestore ←→ lib/hooks/use*.ts (onSnapshot listeners) → Components
 - Composite doc IDs: attendance uses `{participantId}_{YYYY-MM-DD}`, meals use `YYYY-MM-DD`.
 - Firestore rules are open read/write (no auth).
 
+### Weather
+
+Weather data for La Tzoumaz is fetched from the [Open-Meteo API](https://open-meteo.com/) (free, no API key). Data is cached in Firestore at `weather/la-tzoumaz` with a 1-hour TTL. `useWeather` hook listens via `onSnapshot` and triggers `refreshWeather()` action when stale. Utility functions in `lib/utils/weather.ts` map WMO codes to emoji/labels and provide snow vibe text.
+
 ### User Identity
 
 `UserProvider` uses `useSyncExternalStore` to read from localStorage key `apres-ski-user`. On first visit, `UserSetupModal` prompts for name/color. `saveUser()` writes to both localStorage and Firestore participants collection.

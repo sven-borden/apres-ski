@@ -59,6 +59,16 @@ export interface Basecamp {
   updatedBy: string;
 }
 
+export interface WeatherData {
+  temperature: number;
+  temperatureMin: number;
+  temperatureMax: number;
+  weatherCode: number;
+  snowDepth: number;
+  freezingLevel: number;
+  fetchedAt: Timestamp;
+}
+
 export interface LocalUser {
   id: string;
   name: string;

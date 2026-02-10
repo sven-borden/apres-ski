@@ -32,3 +32,36 @@ export function getCountdownText(startDate: string, endDate: string): string {
     ) + 1;
   return `Day ${dayNum} of ${totalDays}`;
 }
+
+export type CountdownData =
+  | { state: "before"; days: number; hours: number }
+  | { state: "during"; dayNum: number; totalDays: number }
+  | { state: "after" };
+
+export function getCountdownData(startDate: string, endDate: string): CountdownData {
+  const now = new Date();
+  const start = new Date(`${startDate}T00:00:00`);
+  const end = new Date(`${endDate}T23:59:59`);
+
+  if (now < start) {
+    const diffMs = start.getTime() - now.getTime();
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    return { state: "before", days, hours };
+  }
+
+  if (now > end) {
+    return { state: "after" };
+  }
+
+  const todayStart = new Date(`${getTodayString()}T00:00:00`);
+  const dayNum =
+    Math.floor(
+      (todayStart.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+    ) + 1;
+  const totalDays =
+    Math.floor(
+      (new Date(`${endDate}T00:00:00`).getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+    ) + 1;
+  return { state: "during", dayNum, totalDays };
+}
