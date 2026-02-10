@@ -8,6 +8,8 @@
   --spritz-orange: #F97316;
   --pine-green: #10B981;
   --mist-grey: #94A3B8;
+  --glass-bg: rgba(255, 255, 255, 0.70);
+  --glass-border: rgba(255, 255, 255, 0.20);
 }
 
 @theme inline {
@@ -18,9 +20,13 @@
   --color-spritz: var(--spritz-orange);
   --color-pine: var(--pine-green);
   --color-mist: var(--mist-grey);
+  --color-glass: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
 }
 
 body {
-  background: var(--powder-white);
+  background: linear-gradient(135deg, #87CEEB 0%, #a8d8ea 30%, #E0E7EE 60%, #F8FAFC 100%);
   color: var(--midnight-slate);
+  min-height: 100vh;
+  background-attachment: fixed;
 }

@@ -69,7 +69,7 @@ export function DayCard({
         <button
           type="button"
           onClick={() => setEditOpen(true)}
-          className="w-full flex items-center justify-between gap-2 rounded-lg px-3 py-2 -mx-3 hover:bg-powder transition-colors text-left"
+          className="w-full flex items-center justify-between gap-2 rounded-lg px-3 py-2 -mx-3 hover:bg-white/40 transition-colors text-left"
         >
           <div className="min-w-0 flex-1">
             {responsibleNames.length > 0 ? (

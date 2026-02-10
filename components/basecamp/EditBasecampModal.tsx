@@ -68,7 +68,7 @@ function parseCoordinates(
 }
 
 const inputClass =
-  "w-full rounded-xl border border-mist/30 bg-powder px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50";
+  "w-full rounded-xl border border-mist/30 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50";
 
 export function EditBasecampModal({
   isOpen,
@@ -314,7 +314,7 @@ export function EditBasecampModal({
           </legend>
           <div className="space-y-3">
             {form.emergencyContacts.map((contact, i) => (
-              <div key={i} className="space-y-2 rounded-xl bg-powder/50 p-3">
+              <div key={i} className="space-y-2 rounded-xl bg-white/30 p-3">
                 <input
                   type="text"
                   value={contact.name}

@@ -21,7 +21,7 @@ export function TimelineRow({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="w-32 shrink-0 sticky left-0 bg-glacier z-10 flex items-center gap-2 pr-2">
+      <div className="w-32 shrink-0 sticky left-0 bg-white/85 z-10 flex items-center gap-2 pr-2">
         <Avatar initials={participant.avatar} color={participant.color} size="sm" />
         <span className="text-sm font-medium text-midnight truncate flex-1">
           {participant.name}

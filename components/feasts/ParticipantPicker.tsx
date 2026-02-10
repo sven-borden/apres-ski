@@ -29,7 +29,7 @@ export function ParticipantPicker({
               "flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors border",
               selected
                 ? "border-alpine bg-alpine/10 text-alpine"
-                : "border-mist/30 bg-powder text-midnight hover:border-alpine/50",
+                : "border-mist/30 bg-white/50 text-midnight hover:border-alpine/50",
             )}
           >
             <Avatar
