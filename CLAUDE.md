@@ -55,7 +55,7 @@ Five main routes: `/` (hub dashboard), `/lineup` (attendance timeline), `/feasts
 
 ### Tailwind v4
 
-Uses `@import "tailwindcss"` in `globals.css` with CSS custom properties mapped via `@theme inline`. Design tokens: `bg-powder` (page bg), `bg-glacier` (card surfaces), `text-midnight` (primary text), `bg-alpine`/`text-alpine` (primary actions), `bg-spritz`/`text-spritz` (accent), `text-mist` (secondary text), `bg-pine`/`text-pine` (success).
+Uses `@import "tailwindcss"` in `globals.css` with CSS custom properties mapped via `@theme inline`. Design tokens: `text-midnight` (primary text), `bg-alpine`/`text-alpine` (primary actions), `bg-spritz`/`text-spritz` (accent), `text-mist` (secondary text), `bg-pine`/`text-pine` (success). Glassmorphism surface tokens: `bg-glass` (semi-transparent white, 70% opacity) for cards/modals/nav, `border-glass-border` (subtle white border). Body uses a fixed mountain-sky gradient; `AppShell` adds a gradient overlay div. Use `backdrop-blur-md` on glass surfaces. Form inputs use `bg-white/50` instead of the old `bg-powder`.
 
 ### Path Alias
 

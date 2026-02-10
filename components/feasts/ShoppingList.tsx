@@ -109,7 +109,7 @@ export function ShoppingList({
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
           placeholder="Add item..."
-          className="flex-1 rounded-lg border border-mist/30 bg-powder px-3 py-2 text-sm text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50"
+          className="flex-1 rounded-lg border border-mist/30 bg-white/50 px-3 py-2 text-sm text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50"
         />
         <button
           type="submit"

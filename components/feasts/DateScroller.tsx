@@ -40,8 +40,8 @@ export function DateScroller({
               selected
                 ? "bg-alpine text-white"
                 : today
-                  ? "border border-alpine text-alpine bg-glacier"
-                  : "bg-glacier border border-mist/30 text-midnight",
+                  ? "border border-alpine text-alpine bg-glass backdrop-blur-sm"
+                  : "bg-glass backdrop-blur-sm border border-glass-border text-midnight",
             )}
           >
             {formatDateShort(date)}

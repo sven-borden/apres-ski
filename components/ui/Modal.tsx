@@ -30,7 +30,7 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
       <div
-        className="absolute inset-0 bg-midnight/50"
+        className="absolute inset-0 bg-midnight/60 backdrop-blur-sm"
         onClick={onClose}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") onClose?.();
@@ -41,7 +41,7 @@ export function Modal({
       />
       <div
         className={cn(
-          "relative z-10 w-full bg-glacier",
+          "relative z-10 w-full bg-glass backdrop-blur-md border border-glass-border shadow-xl",
           "rounded-t-2xl md:rounded-2xl",
           "max-h-[90vh] overflow-y-auto",
           "md:max-w-md md:mx-4",

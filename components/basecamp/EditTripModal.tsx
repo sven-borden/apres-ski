@@ -8,7 +8,7 @@ import { seedMeals } from "@/lib/actions/meals";
 import type { Trip } from "@/lib/types";
 
 const inputClass =
-  "w-full rounded-xl border border-mist/30 bg-powder px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50";
+  "w-full rounded-xl border border-mist/30 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50";
 
 export function EditTripModal({
   isOpen,
