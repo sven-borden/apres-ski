@@ -4,6 +4,7 @@ import { useMemo, useRef, useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { LiteHero } from "@/components/hub/LiteHero";
+import { WeatherWidget } from "@/components/hub/WeatherWidget";
 import { DayCard } from "@/components/hub/DayCard";
 import { EditTripModal } from "@/components/basecamp/EditTripModal";
 import { useTrip } from "@/lib/hooks/useTrip";
@@ -11,7 +12,7 @@ import { useParticipants } from "@/lib/hooks/useParticipants";
 import { useAttendance } from "@/lib/hooks/useAttendance";
 import { useMeals } from "@/lib/hooks/useMeals";
 import { useBasecamp } from "@/lib/hooks/useBasecamp";
-import { getCountdownText, getTodayString } from "@/lib/utils/countdown";
+import { getTodayString } from "@/lib/utils/countdown";
 import { getDateRange } from "@/lib/utils/dates";
 import type { Meal } from "@/lib/types";
 
@@ -29,11 +30,6 @@ export default function HubPage() {
     attendanceLoading ||
     mealsLoading ||
     basecampLoading;
-
-  const countdownText = useMemo(() => {
-    if (!trip) return null;
-    return getCountdownText(trip.startDate, trip.endDate);
-  }, [trip]);
 
   const today = useMemo(() => getTodayString(), []);
 
@@ -74,7 +70,16 @@ export default function HubPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-48 rounded-lg bg-mist/20 animate-pulse" />
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 items-start">
+          <div className="h-8 w-48 rounded-lg bg-mist/20 animate-pulse" />
+          <Card className="animate-pulse min-w-[220px]">
+            <div className="space-y-3">
+              <div className="h-4 w-24 rounded bg-mist/20" />
+              <div className="h-8 w-16 rounded bg-mist/20" />
+              <div className="h-3 w-32 rounded bg-mist/20" />
+            </div>
+          </Card>
+        </div>
         <Card className="animate-pulse h-48">
           <span />
         </Card>
@@ -87,10 +92,14 @@ export default function HubPage() {
 
   return (
     <div className="space-y-4">
-      <LiteHero
-        tripName={trip?.name ?? null}
-        countdownText={countdownText}
-      />
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 items-start">
+        <LiteHero
+          tripName={trip?.name ?? null}
+          startDate={trip?.startDate ?? null}
+          endDate={trip?.endDate ?? null}
+        />
+        <WeatherWidget />
+      </div>
       {!trip ? (
         <>
           <Card>
