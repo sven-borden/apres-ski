@@ -35,6 +35,7 @@ export function DayCard({
       : [];
 
   const itemCount = meal?.shoppingList?.length ?? 0;
+  const checkedCount = meal?.shoppingList?.filter((i) => i.checked).length ?? 0;
 
   return (
     <Card className={cn(isToday && "ring-2 ring-alpine")}>
@@ -106,7 +107,7 @@ export function DayCard({
             <button
               type="button"
               onClick={() => setShoppingOpen(!shoppingOpen)}
-              className="flex items-center gap-1.5 text-sm text-mist hover:text-midnight transition-colors"
+              className="flex items-center gap-2 text-sm text-mist hover:text-midnight transition-colors w-full"
             >
               <svg
                 width="14"
@@ -118,13 +119,49 @@ export function DayCard({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 className={cn(
-                  "transition-transform",
+                  "shrink-0 transition-transform",
                   shoppingOpen && "rotate-90",
                 )}
               >
                 <path d="M5 3l4 4-4 4" />
               </svg>
-              Shopping list ({itemCount} {itemCount === 1 ? "item" : "items"})
+              {/* Cart icon */}
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={cn(
+                  "shrink-0",
+                  checkedCount === 0 && itemCount > 0
+                    ? "text-red-500"
+                    : "text-mist",
+                )}
+              >
+                <circle cx="6" cy="14" r="1" />
+                <circle cx="13" cy="14" r="1" />
+                <path d="M1 1h2l1.68 8.39a1 1 0 001 .81h7.72a1 1 0 00.98-.78L15.5 5H4" />
+              </svg>
+              <span className="shrink-0">Shopping list</span>
+              {itemCount > 0 && (
+                <>
+                  <div className="flex-1 h-1.5 rounded-full bg-mist/20 min-w-[40px]">
+                    <div
+                      className="h-full rounded-full bg-pine transition-all"
+                      style={{
+                        width: `${Math.round((checkedCount / itemCount) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <span className="shrink-0 text-xs tabular-nums">
+                    {checkedCount}/{itemCount}
+                  </span>
+                </>
+              )}
             </button>
             {shoppingOpen && (
               <div className="mt-2">
