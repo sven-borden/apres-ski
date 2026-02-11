@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useCallback,
+  useEffect,
   useSyncExternalStore,
 } from "react";
 import { dictionaries, defaultLocale } from "./locales";
@@ -71,6 +72,10 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     getSnapshot,
     getServerSnapshot,
   );
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   const setLocale = useCallback((l: Locale) => {
     localStorage.setItem(STORAGE_KEY, l);
