@@ -11,6 +11,7 @@ import { useParticipants } from "@/lib/hooks/useParticipants";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useAttendance } from "@/lib/hooks/useAttendance";
 import { useBasecamp } from "@/lib/hooks/useBasecamp";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Participant } from "@/lib/types";
 
 export default function CrewPage() {
@@ -20,6 +21,7 @@ export default function CrewPage() {
   const { basecamp, loading: bLoading } = useBasecamp();
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Participant | null>(null);
+  const { t } = useLocale();
 
   const loading = pLoading || tLoading || aLoading || bLoading;
 
@@ -27,8 +29,8 @@ export default function CrewPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-midnight">Crew</h1>
-          <Button onClick={() => setShowAdd(true)}>+ Add</Button>
+          <h1 className="text-2xl font-bold text-midnight">{t.crew.title}</h1>
+          <Button onClick={() => setShowAdd(true)}>+ {t.common.add}</Button>
         </div>
         <Card className="animate-pulse h-48"><span /></Card>
         <AddCrewModal isOpen={showAdd} onClose={() => setShowAdd(false)} />
@@ -40,14 +42,14 @@ export default function CrewPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-midnight">Crew</h1>
-          <Button onClick={() => setShowAdd(true)}>+ Add</Button>
+          <h1 className="text-2xl font-bold text-midnight">{t.crew.title}</h1>
+          <Button onClick={() => setShowAdd(true)}>+ {t.common.add}</Button>
         </div>
         <Card>
           <div className="text-center py-8 space-y-3">
-            <p className="text-mist">No trip set up yet</p>
+            <p className="text-mist">{t.crew.no_trip}</p>
             <Link href="/basecamp" className="text-alpine font-medium hover:underline">
-              Set up in Basecamp
+              {t.crew.set_up_in_basecamp}
             </Link>
           </div>
         </Card>
@@ -60,12 +62,12 @@ export default function CrewPage() {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-midnight">Crew</h1>
-          <Button onClick={() => setShowAdd(true)}>+ Add</Button>
+          <h1 className="text-2xl font-bold text-midnight">{t.crew.title}</h1>
+          <Button onClick={() => setShowAdd(true)}>+ {t.common.add}</Button>
         </div>
         <Card>
           <p className="text-center py-8 text-mist">
-            No one has joined yet — share the link to invite friends
+            {t.crew.no_members}
           </p>
         </Card>
         <AddCrewModal isOpen={showAdd} onClose={() => setShowAdd(false)} />
@@ -76,8 +78,8 @@ export default function CrewPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-midnight">Crew</h1>
-        <Button onClick={() => setShowAdd(true)}>+ Add</Button>
+        <h1 className="text-2xl font-bold text-midnight">{t.crew.title}</h1>
+        <Button onClick={() => setShowAdd(true)}>+ {t.common.add}</Button>
       </div>
 
       <Card>

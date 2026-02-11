@@ -1,11 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils/cn";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
-const statusConfig = {
-  unassigned: { label: "Unassigned", classes: "bg-mist/20 text-mist" },
-  claimed: { label: "Claimed", classes: "bg-alpine/10 text-alpine" },
-  confirmed: { label: "Confirmed", classes: "bg-pine/10 text-pine" },
+const statusClasses = {
+  unassigned: "bg-mist/20 text-mist",
+  claimed: "bg-alpine/10 text-alpine",
+  confirmed: "bg-pine/10 text-pine",
 } as const;
 
 export function StatusBadge({
@@ -13,16 +14,16 @@ export function StatusBadge({
 }: {
   status: "unassigned" | "claimed" | "confirmed";
 }) {
-  const config = statusConfig[status];
+  const { t } = useLocale();
 
   return (
     <span
       className={cn(
         "inline-block rounded-full px-3 py-0.5 text-xs font-medium",
-        config.classes,
+        statusClasses[status],
       )}
     >
-      {config.label}
+      {t.status[status]}
     </span>
   );
 }

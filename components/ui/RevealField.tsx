@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { cn } from "@/lib/utils/cn";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function RevealField({
   label,
@@ -16,6 +17,7 @@ export function RevealField({
   className?: string;
 }) {
   const [revealed, setRevealed] = useState(false);
+  const { t } = useLocale();
 
   if (!value) return null;
 
@@ -33,7 +35,7 @@ export function RevealField({
           onClick={() => setRevealed(true)}
           className="text-sm text-alpine hover:text-alpine/80 font-medium transition-colors"
         >
-          Tap to reveal
+          {t.common.tap_to_reveal}
         </button>
       )}
     </div>

@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/Card";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { RevealField } from "@/components/ui/RevealField";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Basecamp } from "@/lib/types";
 
 export function EssentialsGrid({ basecamp }: { basecamp: Basecamp }) {
@@ -17,9 +18,10 @@ export function EssentialsGrid({ basecamp }: { basecamp: Basecamp }) {
 }
 
 function WifiCard({ wifi }: { wifi?: Basecamp["wifi"] }) {
+  const { t } = useLocale();
   return (
     <Card>
-      <h3 className="text-sm font-semibold text-midnight mb-2">WiFi</h3>
+      <h3 className="text-sm font-semibold text-midnight mb-2">{t.basecamp.wifi}</h3>
       {wifi?.network ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -27,11 +29,11 @@ function WifiCard({ wifi }: { wifi?: Basecamp["wifi"] }) {
             <CopyButton text={wifi.network} />
           </div>
           {wifi.password && (
-            <RevealField label="Password" value={wifi.password} copyable />
+            <RevealField label={t.basecamp.password} value={wifi.password} copyable />
           )}
         </div>
       ) : (
-        <p className="text-sm text-mist">Not configured</p>
+        <p className="text-sm text-mist">{t.basecamp.not_configured}</p>
       )}
     </Card>
   );
@@ -46,30 +48,31 @@ function ScheduleCard({
   checkOut?: string;
   capacity?: number;
 }) {
+  const { t } = useLocale();
   const hasInfo = checkIn || checkOut || (capacity && capacity > 0);
   return (
     <Card>
-      <h3 className="text-sm font-semibold text-midnight mb-2">Schedule</h3>
+      <h3 className="text-sm font-semibold text-midnight mb-2">{t.basecamp.schedule}</h3>
       {hasInfo ? (
         <div className="space-y-1">
           {checkIn && (
             <p className="text-sm text-midnight/80">
-              <span className="font-medium">Check-in:</span> {checkIn}
+              <span className="font-medium">{t.basecamp.check_in}:</span> {checkIn}
             </p>
           )}
           {checkOut && (
             <p className="text-sm text-midnight/80">
-              <span className="font-medium">Check-out:</span> {checkOut}
+              <span className="font-medium">{t.basecamp.check_out}:</span> {checkOut}
             </p>
           )}
           {capacity != null && capacity > 0 && (
             <p className="text-sm text-midnight/80">
-              <span className="font-medium">Capacity:</span> {capacity} beds
+              <span className="font-medium">{t.basecamp.capacity}:</span> {t.basecamp.capacity_beds(capacity)}
             </p>
           )}
         </div>
       ) : (
-        <p className="text-sm text-mist">Not configured</p>
+        <p className="text-sm text-mist">{t.basecamp.not_configured}</p>
       )}
     </Card>
   );
@@ -80,10 +83,11 @@ function AccessCodesCard({
 }: {
   codes?: Basecamp["accessCodes"];
 }) {
+  const { t } = useLocale();
   return (
     <Card>
       <h3 className="text-sm font-semibold text-midnight mb-2">
-        Access Codes
+        {t.basecamp.access_codes}
       </h3>
       {codes && codes.length > 0 ? (
         <div className="space-y-2">
@@ -92,7 +96,7 @@ function AccessCodesCard({
           ))}
         </div>
       ) : (
-        <p className="text-sm text-mist">No access codes</p>
+        <p className="text-sm text-mist">{t.basecamp.no_access_codes}</p>
       )}
     </Card>
   );
@@ -103,10 +107,11 @@ function EmergencyCard({
 }: {
   contacts?: Basecamp["emergencyContacts"];
 }) {
+  const { t } = useLocale();
   return (
     <Card>
       <h3 className="text-sm font-semibold text-midnight mb-2">
-        Emergency Contacts
+        {t.basecamp.emergency_contacts}
       </h3>
       {contacts && contacts.length > 0 ? (
         <div className="space-y-2">
@@ -124,7 +129,7 @@ function EmergencyCard({
           ))}
         </div>
       ) : (
-        <p className="text-sm text-mist">No emergency contacts</p>
+        <p className="text-sm text-mist">{t.basecamp.no_emergency_contacts}</p>
       )}
     </Card>
   );

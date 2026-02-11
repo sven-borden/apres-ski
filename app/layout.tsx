@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "@/components/providers/UserProvider";
+import { LocaleProvider } from "@/lib/i18n/LocaleProvider";
 import { AppShell } from "@/components/layout/AppShell";
 
 const inter = Inter({
@@ -43,11 +44,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body className={`${inter.className} antialiased`}>
-        <UserProvider>
-          <AppShell>{children}</AppShell>
-        </UserProvider>
+        <LocaleProvider>
+          <UserProvider>
+            <AppShell>{children}</AppShell>
+          </UserProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

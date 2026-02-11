@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { updateTrip } from "@/lib/actions/trip";
 import { seedMeals } from "@/lib/actions/meals";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Trip } from "@/lib/types";
 
 const inputClass =
@@ -23,6 +24,7 @@ export function EditTripModal({
   const [startDate, setStartDate] = useState(trip?.startDate ?? "");
   const [endDate, setEndDate] = useState(trip?.endDate ?? "");
   const [saving, setSaving] = useState(false);
+  const { t } = useLocale();
 
   const isValid =
     name.trim().length > 0 && startDate && endDate && startDate <= endDate;
@@ -42,17 +44,17 @@ export function EditTripModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={trip ? "Edit Trip" : "Set Up Trip"}>
+    <Modal isOpen={isOpen} onClose={onClose} title={trip ? t.trip.edit_trip : t.trip.set_up_trip}>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-sm font-medium text-midnight mb-1.5">
-            Trip Name
+            {t.trip.trip_name}
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ski Week 2026"
+            placeholder={t.trip.placeholder_name}
             className={inputClass}
           />
         </div>
@@ -60,7 +62,7 @@ export function EditTripModal({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-midnight mb-1.5">
-              Start Date
+              {t.trip.start_date}
             </label>
             <input
               type="date"
@@ -71,7 +73,7 @@ export function EditTripModal({
           </div>
           <div>
             <label className="block text-sm font-medium text-midnight mb-1.5">
-              End Date
+              {t.trip.end_date}
             </label>
             <input
               type="date"
@@ -84,10 +86,10 @@ export function EditTripModal({
 
         <div className="flex gap-3 pt-2">
           <Button variant="secondary" onClick={onClose} className="flex-1">
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button type="submit" disabled={saving || !isValid} className="flex-1">
-            {saving ? "Saving\u2026" : "Save"}
+            {saving ? t.common.saving : t.common.save}
           </Button>
         </div>
       </form>

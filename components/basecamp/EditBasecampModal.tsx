@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { updateBasecamp } from "@/lib/actions/basecamp";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Basecamp } from "@/lib/types";
 
 interface FormState {
@@ -85,6 +86,7 @@ export function EditBasecampModal({
   const [form, setForm] = useState<FormState>(() => basecampToForm(basecamp));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useLocale();
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -181,32 +183,32 @@ export function EditBasecampModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Basecamp">
+    <Modal isOpen={isOpen} onClose={onClose} title={t.basecamp.edit_basecamp}>
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Chalet Name */}
-        <Field label="Chalet Name">
+        <Field label={t.basecamp.chalet_name}>
           <input
             type="text"
             value={form.name}
             onChange={(e) => update("name", e.target.value)}
-            placeholder="e.g. Chalet Les Étoiles"
+            placeholder={t.basecamp.placeholder_chalet}
             className={inputClass}
           />
         </Field>
 
         {/* Address */}
-        <Field label="Address">
+        <Field label={t.basecamp.address}>
           <textarea
             value={form.address}
             onChange={(e) => update("address", e.target.value)}
-            placeholder="123 Mountain Rd, Verbier"
+            placeholder={t.basecamp.placeholder_address}
             className={inputClass}
             rows={2}
           />
         </Field>
 
         {/* Coordinates */}
-        <Field label="Coordinates" hint="lat, lng (e.g. 46.096, 7.228)">
+        <Field label={t.basecamp.coordinates} hint={t.basecamp.coordinates_hint}>
           <input
             type="text"
             value={form.coordinatesText}
@@ -217,7 +219,7 @@ export function EditBasecampModal({
         </Field>
 
         {/* Maps URL */}
-        <Field label="Maps URL">
+        <Field label={t.basecamp.maps_url}>
           <input
             type="text"
             value={form.mapsUrl}
@@ -228,28 +230,28 @@ export function EditBasecampModal({
         </Field>
 
         {/* WiFi */}
-        <Field label="WiFi Network">
+        <Field label={t.basecamp.wifi_network}>
           <input
             type="text"
             value={form.wifiNetwork}
             onChange={(e) => update("wifiNetwork", e.target.value)}
-            placeholder="Network name"
+            placeholder={t.basecamp.placeholder_network}
             className={inputClass}
           />
         </Field>
-        <Field label="WiFi Password">
+        <Field label={t.basecamp.wifi_password}>
           <input
             type="text"
             value={form.wifiPassword}
             onChange={(e) => update("wifiPassword", e.target.value)}
-            placeholder="Password"
+            placeholder={t.basecamp.placeholder_password}
             className={inputClass}
           />
         </Field>
 
         {/* Schedule */}
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Check-in">
+          <Field label={t.basecamp.check_in}>
             <input
               type="text"
               value={form.checkIn}
@@ -258,7 +260,7 @@ export function EditBasecampModal({
               className={inputClass}
             />
           </Field>
-          <Field label="Check-out">
+          <Field label={t.basecamp.check_out}>
             <input
               type="text"
               value={form.checkOut}
@@ -270,7 +272,7 @@ export function EditBasecampModal({
         </div>
 
         {/* Capacity */}
-        <Field label="Capacity" hint="number of beds">
+        <Field label={t.basecamp.capacity} hint={t.basecamp.capacity_hint}>
           <input
             type="number"
             min="0"
@@ -284,7 +286,7 @@ export function EditBasecampModal({
         {/* Access Codes */}
         <fieldset>
           <legend className="block text-sm font-medium text-midnight mb-1.5">
-            Access Codes
+            {t.basecamp.access_codes}
           </legend>
           <div className="space-y-2">
             {form.accessCodes.map((code, i) => (
@@ -293,14 +295,14 @@ export function EditBasecampModal({
                   type="text"
                   value={code.label}
                   onChange={(e) => updateAccessCode(i, "label", e.target.value)}
-                  placeholder="Label"
+                  placeholder={t.basecamp.placeholder_label}
                   className={inputClass}
                 />
                 <input
                   type="text"
                   value={code.code}
                   onChange={(e) => updateAccessCode(i, "code", e.target.value)}
-                  placeholder="Code"
+                  placeholder={t.basecamp.placeholder_code}
                   className={inputClass}
                 />
                 <button
@@ -308,7 +310,7 @@ export function EditBasecampModal({
                   onClick={() => removeAccessCode(i)}
                   className="shrink-0 text-sm text-spritz hover:text-spritz/80 font-medium"
                 >
-                  Remove
+                  {t.common.remove}
                 </button>
               </div>
             ))}
@@ -318,14 +320,14 @@ export function EditBasecampModal({
             onClick={addAccessCode}
             className="mt-2 text-sm text-alpine hover:text-alpine/80 font-medium"
           >
-            + Add code
+            {t.basecamp.add_code}
           </button>
         </fieldset>
 
         {/* Emergency Contacts */}
         <fieldset>
           <legend className="block text-sm font-medium text-midnight mb-1.5">
-            Emergency Contacts
+            {t.basecamp.emergency_contacts}
           </legend>
           <div className="space-y-3">
             {form.emergencyContacts.map((contact, i) => (
@@ -334,21 +336,21 @@ export function EditBasecampModal({
                   type="text"
                   value={contact.name}
                   onChange={(e) => updateContact(i, "name", e.target.value)}
-                  placeholder="Name"
+                  placeholder={t.basecamp.placeholder_contact_name}
                   className={inputClass}
                 />
                 <input
                   type="tel"
                   value={contact.phone}
                   onChange={(e) => updateContact(i, "phone", e.target.value)}
-                  placeholder="Phone"
+                  placeholder={t.basecamp.placeholder_phone}
                   className={inputClass}
                 />
                 <input
                   type="text"
                   value={contact.role}
                   onChange={(e) => updateContact(i, "role", e.target.value)}
-                  placeholder="Role (e.g. Owner, Caretaker)"
+                  placeholder={t.basecamp.placeholder_role}
                   className={inputClass}
                 />
                 <button
@@ -356,7 +358,7 @@ export function EditBasecampModal({
                   onClick={() => removeContact(i)}
                   className="text-sm text-spritz hover:text-spritz/80 font-medium"
                 >
-                  Remove contact
+                  {t.basecamp.remove_contact}
                 </button>
               </div>
             ))}
@@ -366,16 +368,16 @@ export function EditBasecampModal({
             onClick={addContact}
             className="mt-2 text-sm text-alpine hover:text-alpine/80 font-medium"
           >
-            + Add contact
+            {t.basecamp.add_contact}
           </button>
         </fieldset>
 
         {/* Notes */}
-        <Field label="Notes">
+        <Field label={t.basecamp.notes}>
           <textarea
             value={form.notes}
             onChange={(e) => update("notes", e.target.value)}
-            placeholder="Parking info, house rules, etc."
+            placeholder={t.basecamp.placeholder_notes}
             className={inputClass}
             rows={3}
           />
@@ -394,14 +396,14 @@ export function EditBasecampModal({
             onClick={onClose}
             className="flex-1"
           >
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button
             type="submit"
             disabled={saving}
             className="flex-1"
           >
-            {saving ? "Saving…" : "Save"}
+            {saving ? t.common.saving : t.common.save}
           </Button>
         </div>
       </form>

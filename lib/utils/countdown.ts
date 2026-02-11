@@ -1,3 +1,5 @@
+import type { Translations } from "@/lib/i18n/locales";
+
 export function getTodayString(): string {
   const now = new Date();
   const y = now.getFullYear();
@@ -6,7 +8,7 @@ export function getTodayString(): string {
   return `${y}-${m}-${d}`;
 }
 
-export function getCountdownText(startDate: string, endDate: string): string {
+export function getCountdownText(startDate: string, endDate: string, t: Translations): string {
   const today = new Date(`${getTodayString()}T00:00:00`);
   const start = new Date(`${startDate}T00:00:00`);
   const end = new Date(`${endDate}T00:00:00`);
@@ -15,11 +17,11 @@ export function getCountdownText(startDate: string, endDate: string): string {
     const diff = Math.ceil(
       (start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
     );
-    return diff === 1 ? "1 day until the trip!" : `${diff} days until the trip!`;
+    return t.countdown.in_days(diff);
   }
 
   if (today > end) {
-    return "Hope you had fun!";
+    return t.countdown.hope_fun;
   }
 
   const dayNum =
@@ -30,7 +32,7 @@ export function getCountdownText(startDate: string, endDate: string): string {
     Math.floor(
       (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
     ) + 1;
-  return `Day ${dayNum} of ${totalDays}`;
+  return t.countdown.day_of(dayNum, totalDays);
 }
 
 export type CountdownData =

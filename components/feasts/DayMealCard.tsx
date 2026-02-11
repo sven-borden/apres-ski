@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/Card";
 import { DinnerSection } from "@/components/feasts/DinnerSection";
 import { ShoppingList } from "@/components/feasts/ShoppingList";
 import { EditDinnerModal } from "@/components/feasts/EditDinnerModal";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { formatDateLong } from "@/lib/utils/dates";
 import type { Meal, Participant } from "@/lib/types";
 
 export function DayMealCard({
@@ -17,12 +19,9 @@ export function DayMealCard({
   participants: Participant[];
 }) {
   const [editOpen, setEditOpen] = useState(false);
+  const { locale } = useLocale();
 
-  const longDate = new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  const longDate = formatDateLong(date, locale);
 
   return (
     <>

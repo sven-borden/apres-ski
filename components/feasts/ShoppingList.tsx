@@ -7,6 +7,7 @@ import {
   toggleShoppingItem,
   removeShoppingItem,
 } from "@/lib/actions/meals";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { ShoppingItem } from "@/lib/types";
 
 export function ShoppingList({
@@ -17,6 +18,7 @@ export function ShoppingList({
   items: ShoppingItem[];
 }) {
   const [newItem, setNewItem] = useState("");
+  const { t } = useLocale();
 
   const unchecked = items.filter((i) => !i.checked);
   const checked = items.filter((i) => i.checked);
@@ -39,7 +41,7 @@ export function ShoppingList({
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-midnight">Shopping List</h3>
+      <h3 className="font-semibold text-midnight">{t.feasts.shopping_list}</h3>
 
       {sorted.length > 0 && (
         <ul className="space-y-1.5">
@@ -84,7 +86,7 @@ export function ShoppingList({
                 type="button"
                 onClick={() => removeShoppingItem(date, item.id, "anonymous")}
                 className="opacity-0 group-hover:opacity-100 text-mist hover:text-red-500 transition-opacity p-1"
-                aria-label={`Remove ${item.text}`}
+                aria-label={`${t.common.remove} ${item.text}`}
               >
                 <svg
                   width="14"
@@ -108,7 +110,7 @@ export function ShoppingList({
           type="text"
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
-          placeholder="Add item..."
+          placeholder={t.feasts.placeholder_item}
           className="flex-1 rounded-lg border border-mist/30 bg-white/50 px-3 py-2 text-sm text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50"
         />
         <button
@@ -116,7 +118,7 @@ export function ShoppingList({
           disabled={!newItem.trim()}
           className="rounded-lg bg-alpine px-3 py-2 text-sm font-medium text-white hover:bg-alpine/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          Add
+          {t.common.add}
         </button>
       </form>
     </div>

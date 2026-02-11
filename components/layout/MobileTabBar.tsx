@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import type { Translations } from "@/lib/i18n/locales";
 
-const tabs = [
+const tabs: {
+  key: keyof Translations["nav"];
+  href: string;
+  icon: React.ReactNode;
+}[] = [
   {
-    label: "Hub",
+    key: "hub",
     href: "/",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -16,7 +22,7 @@ const tabs = [
     ),
   },
   {
-    label: "Lineup",
+    key: "lineup",
     href: "/lineup",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -29,7 +35,7 @@ const tabs = [
     ),
   },
   {
-    label: "Feasts",
+    key: "feasts",
     href: "/feasts",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -40,7 +46,7 @@ const tabs = [
     ),
   },
   {
-    label: "Crew",
+    key: "crew",
     href: "/crew",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -52,7 +58,7 @@ const tabs = [
     ),
   },
   {
-    label: "Basecamp",
+    key: "basecamp",
     href: "/basecamp",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -65,6 +71,7 @@ const tabs = [
 
 export function MobileTabBar() {
   const pathname = usePathname();
+  const { t } = useLocale();
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
@@ -84,7 +91,7 @@ export function MobileTabBar() {
             )}
           >
             {tab.icon}
-            <span className="text-[10px] font-medium">{tab.label}</span>
+            <span className="text-[10px] font-medium">{t.nav[tab.key]}</span>
           </Link>
         ))}
       </div>

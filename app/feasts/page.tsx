@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useMeals } from "@/lib/hooks/useMeals";
 import { useParticipants } from "@/lib/hooks/useParticipants";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { getDateRange, isToday } from "@/lib/utils/dates";
 import { DateScroller } from "@/components/feasts/DateScroller";
 import { DayMealCard } from "@/components/feasts/DayMealCard";
@@ -19,6 +20,7 @@ function FeastsContent() {
   const { trip, loading: tripLoading } = useTrip();
   const { meals, loading: mealsLoading } = useMeals();
   const { participants, loading: participantsLoading } = useParticipants();
+  const { t } = useLocale();
   const dates = useMemo(
     () => (trip ? getDateRange(trip.startDate, trip.endDate) : []),
     [trip],
@@ -29,7 +31,6 @@ function FeastsContent() {
 
   const [selectedDate, setSelectedDate] = useState<string>("");
 
-  // Set initial date once dates are available
   const resolvedDate = selectedDate || (dateParam && dates.includes(dateParam) ? dateParam : getInitialDate(dates));
 
   const loading = tripLoading || mealsLoading || participantsLoading;
@@ -37,7 +38,7 @@ function FeastsContent() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-midnight">Feasts</h1>
+        <h1 className="text-2xl font-bold text-midnight">{t.feasts.title}</h1>
         <Card className="animate-pulse h-48"><span /></Card>
       </div>
     );
@@ -46,10 +47,10 @@ function FeastsContent() {
   if (!trip) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-midnight">Feasts</h1>
+        <h1 className="text-2xl font-bold text-midnight">{t.feasts.title}</h1>
         <Card>
           <div className="text-center py-8">
-            <p className="text-mist">No trip set up yet — head to Basecamp to create one</p>
+            <p className="text-mist">{t.feasts.no_trip}</p>
           </div>
         </Card>
       </div>
@@ -60,7 +61,7 @@ function FeastsContent() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-midnight">Feasts</h1>
+      <h1 className="text-2xl font-bold text-midnight">{t.feasts.title}</h1>
 
       <DateScroller
         dates={dates}

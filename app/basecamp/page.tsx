@@ -10,6 +10,7 @@ import { AddressBlock } from "@/components/basecamp/AddressBlock";
 import { EssentialsGrid } from "@/components/basecamp/EssentialsGrid";
 import { EditBasecampModal } from "@/components/basecamp/EditBasecampModal";
 import { EditTripModal } from "@/components/basecamp/EditTripModal";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { formatDateShort } from "@/lib/utils/dates";
 
 export default function BasecampPage() {
@@ -17,13 +18,14 @@ export default function BasecampPage() {
   const { trip, loading: tripLoading } = useTrip();
   const [editBasecampOpen, setEditBasecampOpen] = useState(false);
   const [editTripOpen, setEditTripOpen] = useState(false);
+  const { locale, t } = useLocale();
 
   const loading = basecampLoading || tripLoading;
 
   if (loading) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-midnight">Basecamp</h1>
+        <h1 className="text-2xl font-bold text-midnight">{t.basecamp.title}</h1>
         <Card className="animate-pulse h-48"><span /></Card>
       </div>
     );
@@ -31,30 +33,30 @@ export default function BasecampPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-midnight">Basecamp</h1>
+      <h1 className="text-2xl font-bold text-midnight">{t.basecamp.title}</h1>
 
       {/* Trip section */}
       {trip ? (
         <Card>
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-sm font-semibold text-midnight">Trip</h2>
+            <h2 className="text-sm font-semibold text-midnight">{t.trip.title}</h2>
             <button
               onClick={() => setEditTripOpen(true)}
               className="text-xs text-alpine font-medium hover:underline"
             >
-              Edit
+              {t.common.edit}
             </button>
           </div>
           <p className="text-lg font-semibold text-midnight">{trip.name}</p>
           <p className="text-sm text-mist">
-            {formatDateShort(trip.startDate)} – {formatDateShort(trip.endDate)}
+            {formatDateShort(trip.startDate, locale)} – {formatDateShort(trip.endDate, locale)}
           </p>
         </Card>
       ) : (
         <Card>
           <div className="text-center py-4 space-y-3">
-            <p className="text-mist">No trip set up yet</p>
-            <Button onClick={() => setEditTripOpen(true)}>Set Up Trip</Button>
+            <p className="text-mist">{t.trip.no_trip}</p>
+            <Button onClick={() => setEditTripOpen(true)}>{t.trip.set_up_trip}</Button>
           </div>
         </Card>
       )}
@@ -63,9 +65,9 @@ export default function BasecampPage() {
       {basecamp ? (
         <>
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-midnight">{basecamp.name || "Chalet"}</h2>
+            <h2 className="text-lg font-bold text-midnight">{basecamp.name || t.hub.chalet}</h2>
             <Button variant="secondary" onClick={() => setEditBasecampOpen(true)}>
-              Edit
+              {t.common.edit}
             </Button>
           </div>
 
@@ -73,7 +75,7 @@ export default function BasecampPage() {
 
           {basecamp.address && (
             <Card>
-              <h2 className="text-sm font-semibold text-midnight mb-2">Address</h2>
+              <h2 className="text-sm font-semibold text-midnight mb-2">{t.basecamp.address}</h2>
               <AddressBlock address={basecamp.address} />
             </Card>
           )}
@@ -82,7 +84,7 @@ export default function BasecampPage() {
 
           {basecamp.notes && (
             <Card>
-              <h2 className="text-sm font-semibold text-midnight mb-2">Notes</h2>
+              <h2 className="text-sm font-semibold text-midnight mb-2">{t.basecamp.notes}</h2>
               <p className="text-sm text-midnight/80 whitespace-pre-line">
                 {basecamp.notes}
               </p>
@@ -92,8 +94,8 @@ export default function BasecampPage() {
       ) : (
         <Card>
           <div className="text-center py-4 space-y-3">
-            <p className="text-mist">No chalet info yet</p>
-            <Button onClick={() => setEditBasecampOpen(true)}>Set Up Basecamp</Button>
+            <p className="text-mist">{t.basecamp.no_chalet}</p>
+            <Button onClick={() => setEditBasecampOpen(true)}>{t.basecamp.set_up_basecamp}</Button>
           </div>
         </Card>
       )}

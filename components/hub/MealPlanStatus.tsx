@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { formatDateShort } from "@/lib/utils/dates";
 import { cn } from "@/lib/utils/cn";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Meal } from "@/lib/types";
 
 export function MealPlanStatus({
@@ -13,6 +13,7 @@ export function MealPlanStatus({
   meals: Meal[];
   dates: string[];
 }) {
+  const { locale, t } = useLocale();
   const mealByDate = new Map(meals.map((m) => [m.date, m]));
 
   const assigned = dates.filter((d) => {
@@ -36,22 +37,11 @@ export function MealPlanStatus({
   return (
     <Card>
       <div className="space-y-3">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-midnight">Meal Plan</h3>
-          <Link
-            href="/feasts"
-            className="text-xs font-medium text-alpine hover:text-alpine/80 transition-colors"
-          >
-            View all &rarr;
-          </Link>
-        </div>
-
         {/* Stat row */}
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>
             <p className="text-2xl font-bold text-pine">{assigned.length}</p>
-            <p className="text-[11px] text-mist">Assigned</p>
+            <p className="text-[11px] text-mist">{t.hub.assigned}</p>
           </div>
           <div>
             <p
@@ -62,7 +52,7 @@ export function MealPlanStatus({
             >
               {unassigned.length}
             </p>
-            <p className="text-[11px] text-mist">Unassigned</p>
+            <p className="text-[11px] text-mist">{t.hub.unassigned}</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-midnight">
@@ -70,7 +60,7 @@ export function MealPlanStatus({
                 ? `${Math.round((checkedItems / totalItems) * 100)}%`
                 : "--"}
             </p>
-            <p className="text-[11px] text-mist">Shopped</p>
+            <p className="text-[11px] text-mist">{t.hub.shopped}</p>
           </div>
         </div>
 
@@ -82,7 +72,7 @@ export function MealPlanStatus({
                 key={d}
                 className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-spritz/10 text-spritz"
               >
-                {formatDateShort(d)}
+                {formatDateShort(d, locale)}
               </span>
             ))}
           </div>

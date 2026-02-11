@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { formatDateShort } from "@/lib/utils/dates";
 import { cn } from "@/lib/utils/cn";
 import { useUser } from "@/components/providers/UserProvider";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { updateDinner } from "@/lib/actions/meals";
 import type { Participant, Meal } from "@/lib/types";
 
@@ -25,6 +26,7 @@ export function SpotlightCard({
   meal: Meal | undefined;
 }) {
   const { user } = useUser();
+  const { locale, t } = useLocale();
   const [claiming, setClaiming] = useState(false);
 
   const responsibleNames =
@@ -62,7 +64,7 @@ export function SpotlightCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-bold text-midnight">
-              {formatDateShort(date)}
+              {formatDateShort(date, locale)}
             </h2>
             {badge && (
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-alpine text-white">
@@ -71,7 +73,7 @@ export function SpotlightCard({
             )}
           </div>
           <p className="text-sm text-midnight">
-            <span className="mr-1">⛷️</span>
+            <span className="mr-1">{"\u26F7\uFE0F"}</span>
             <span className="font-bold">{presentIds.size}</span>
           </p>
         </div>
@@ -84,7 +86,7 @@ export function SpotlightCard({
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm text-midnight min-w-0 flex-1">
-                <span className="text-mist">Dinner by</span>{" "}
+                <span className="text-mist">{t.hub.dinner_by}</span>{" "}
                 <span className="font-medium">{responsibleNames.join(", ")}</span>
               </span>
               <svg
@@ -104,7 +106,7 @@ export function SpotlightCard({
           </Link>
         ) : (
           <div className="space-y-2 px-3 py-2 -mx-3">
-            <span className="text-sm text-mist block">No dinner planned yet</span>
+            <span className="text-sm text-mist block">{t.hub.no_dinner}</span>
             {user && (
               <button
                 type="button"
@@ -112,7 +114,7 @@ export function SpotlightCard({
                 disabled={claiming}
                 className="text-xs font-medium px-3 py-1.5 rounded-full bg-alpine/10 text-alpine hover:bg-alpine/20 transition-colors disabled:opacity-50"
               >
-                {claiming ? "Claiming..." : "I cook tonight"}
+                {claiming ? t.hub.claiming : t.hub.i_cook_tonight}
               </button>
             )}
           </div>
