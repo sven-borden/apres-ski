@@ -59,6 +59,9 @@ const en: Translations = {
     more_info: "More info",
     check_in: "Check-in",
     max: "max",
+    meal_nudge: (n: number) => `${n} dinners still need a chef`,
+    meal_nudge_one: "1 dinner still needs a chef",
+    meal_nudge_cta: "Pick a night",
   },
   weather: {
     conditions: {

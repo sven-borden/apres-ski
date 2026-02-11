@@ -7,7 +7,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { LiteHero } from "@/components/hub/LiteHero";
 import { SpotlightCard } from "@/components/hub/SpotlightCard";
 import { CrewStrip } from "@/components/hub/CrewStrip";
-import { MealPlanStatus } from "@/components/hub/MealPlanStatus";
+import { MealNudge } from "@/components/hub/MealNudge";
 import { ChaletSnippet } from "@/components/hub/ChaletSnippet";
 
 import { EditTripModal } from "@/components/basecamp/EditTripModal";
@@ -109,7 +109,7 @@ export default function HubPage() {
           <SectionHeader title={t.hub.schedule} href="/lineup" />
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
             {[1, 2, 3].map((i) => (
-              <Card key={i} className="shrink-0 w-72 animate-pulse">
+              <Card key={i} className="shrink-0 w-[38vw] min-w-[160px] md:w-72 animate-pulse">
                 <div className="space-y-3">
                   <div className="h-5 w-32 rounded bg-mist/20" />
                   <div className="h-4 w-20 rounded bg-mist/20" />
@@ -135,19 +135,6 @@ export default function HubPage() {
           </Card>
         </div>
 
-        {/* Meal Plan skeleton */}
-        <div>
-          <SectionHeader title={t.hub.meal_plan} href="/feasts" />
-          <Card className="animate-pulse">
-            <div className="space-y-3">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="h-10 rounded bg-mist/20" />
-                <div className="h-10 rounded bg-mist/20" />
-                <div className="h-10 rounded bg-mist/20" />
-              </div>
-            </div>
-          </Card>
-        </div>
       </div>
     );
   }
@@ -189,7 +176,17 @@ export default function HubPage() {
         </>
       ) : (
         <>
-          {/* 3. Date Carousel */}
+          {/* 3. Meal Nudge */}
+          <MealNudge
+            unclaimedCount={
+              dates.filter((d) => {
+                const m = mealByDate.get(d);
+                return !m || m.responsibleIds.length === 0;
+              }).length
+            }
+          />
+
+          {/* 4. Date Carousel */}
           {dates.length > 0 && (
             <div>
               <SectionHeader title={t.hub.schedule} href="/lineup" />
@@ -218,7 +215,7 @@ export default function HubPage() {
             </div>
           )}
 
-          {/* 4. Attendance */}
+          {/* 5. Attendance */}
           <div>
             <SectionHeader title={t.hub.attendance} href="/crew" />
             <CrewStrip
@@ -228,12 +225,6 @@ export default function HubPage() {
               capacity={capacity}
               today={today}
             />
-          </div>
-
-          {/* 5. Meal Plan */}
-          <div>
-            <SectionHeader title={t.hub.meal_plan} href="/feasts" />
-            <MealPlanStatus meals={meals} dates={dates} />
           </div>
         </>
       )}

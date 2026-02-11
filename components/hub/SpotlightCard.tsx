@@ -58,7 +58,7 @@ export function SpotlightCard({
     meal?.shoppingList?.filter((i) => i.checked).length ?? 0;
 
   return (
-    <Card className={cn("shrink-0 w-72 h-full", highlighted && "border-2 border-alpine")}>
+    <Card className={cn("shrink-0 w-[38vw] min-w-[160px] md:w-72 h-full", highlighted && "border-2 border-alpine")}>
       <div className="space-y-3">
         {/* Header: date + headcount */}
         <div className="flex items-center justify-between">

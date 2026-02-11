@@ -57,6 +57,9 @@ export interface Translations {
     more_info: string;
     check_in: string;
     max: string;
+    meal_nudge: (n: number) => string;
+    meal_nudge_one: string;
+    meal_nudge_cta: string;
   };
   weather: {
     conditions: {
@@ -250,6 +253,9 @@ const fr: Translations = {
     more_info: "Plus d'infos",
     check_in: "Arrivée",
     max: "max",
+    meal_nudge: (n: number) => `${n} dîners cherchent un chef`,
+    meal_nudge_one: "1 dîner cherche un chef",
+    meal_nudge_cta: "Choisir un soir",
   },
   weather: {
     conditions: {

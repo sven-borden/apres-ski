@@ -22,19 +22,6 @@ const tabs: {
     ),
   },
   {
-    key: "lineup",
-    href: "/lineup",
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-        <path d="M9 16l2 2 4-4" />
-      </svg>
-    ),
-  },
-  {
     key: "feasts",
     href: "/feasts",
     icon: (
@@ -80,18 +67,18 @@ export function MobileTabBar() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-glass backdrop-blur-md border-t border-glass-border md:hidden pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-center justify-around h-16">
+      <div className="grid grid-cols-4 h-16">
         {tabs.map((tab) => (
           <Link
             key={tab.href}
             href={tab.href}
             className={cn(
-              "flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors",
+              "flex flex-col items-center justify-center gap-0.5 py-1.5 transition-colors min-w-0",
               isActive(tab.href) ? "text-alpine" : "text-mist",
             )}
           >
             {tab.icon}
-            <span className="text-[10px] font-medium">{t.nav[tab.key]}</span>
+            <span className="text-[10px] font-medium truncate max-w-full px-1">{t.nav[tab.key]}</span>
           </Link>
         ))}
       </div>
