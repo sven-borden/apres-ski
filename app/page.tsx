@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { LiteHero } from "@/components/hub/LiteHero";
-import { WeatherWidget } from "@/components/hub/WeatherWidget";
 import { SpotlightCard } from "@/components/hub/SpotlightCard";
 import { CrewStrip } from "@/components/hub/CrewStrip";
 import { MealPlanStatus } from "@/components/hub/MealPlanStatus";
@@ -92,28 +91,16 @@ export default function HubPage() {
         {/* Hero skeleton */}
         <div className="h-28 rounded-lg bg-mist/20 animate-pulse" />
 
-        {/* Chalet + Weather skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <SectionHeader title={t.hub.chalet} href="/basecamp" linkLabel={t.hub.more_info} />
-            <div className="bg-glass backdrop-blur-md rounded-2xl shadow-lg overflow-hidden flex animate-pulse">
-              <div className="flex-1 p-5 space-y-2">
-                <div className="h-4 w-24 rounded bg-mist/20" />
-                <div className="h-3 w-36 rounded bg-mist/20" />
-                <div className="h-3 w-20 rounded bg-mist/20" />
-              </div>
-              <div className="shrink-0 w-1/3 bg-mist/20" />
+        {/* Chalet skeleton */}
+        <div>
+          <SectionHeader title={t.hub.chalet} href="/basecamp" linkLabel={t.hub.more_info} />
+          <div className="bg-glass backdrop-blur-md rounded-2xl shadow-lg overflow-hidden flex animate-pulse">
+            <div className="flex-1 p-5 space-y-2">
+              <div className="h-4 w-24 rounded bg-mist/20" />
+              <div className="h-3 w-36 rounded bg-mist/20" />
+              <div className="h-3 w-20 rounded bg-mist/20" />
             </div>
-          </div>
-          <div>
-            <SectionHeader title={t.hub.weather} />
-            <Card className="animate-pulse">
-              <div className="space-y-3">
-                <div className="h-4 w-24 rounded bg-mist/20" />
-                <div className="h-8 w-16 rounded bg-mist/20" />
-                <div className="h-3 w-32 rounded bg-mist/20" />
-              </div>
-            </Card>
+            <div className="shrink-0 w-1/3 bg-mist/20" />
           </div>
         </div>
 
@@ -174,19 +161,13 @@ export default function HubPage() {
         endDate={trip?.endDate ?? null}
       />
 
-      {/* 2. Chalet + Weather */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {basecamp && (
-          <div>
-            <SectionHeader title={t.hub.chalet} href="/basecamp" linkLabel={t.hub.more_info} />
-            <ChaletSnippet basecamp={basecamp} />
-          </div>
-        )}
+      {/* 2. Chalet */}
+      {basecamp && (
         <div>
-          <SectionHeader title={t.hub.weather} />
-          <WeatherWidget />
+          <SectionHeader title={t.hub.chalet} href="/basecamp" linkLabel={t.hub.more_info} />
+          <ChaletSnippet basecamp={basecamp} />
         </div>
-      </div>
+      )}
 
       {!trip ? (
         <>

@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 import { getCountdownData } from "@/lib/utils/countdown";
+import { useWeather } from "@/lib/hooks/useWeather";
+import { getWeatherCondition } from "@/lib/utils/weather";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function LiteHero({
@@ -14,6 +16,7 @@ export function LiteHero({
   endDate: string | null;
 }) {
   const { t } = useLocale();
+  const { data: weather } = useWeather();
 
   const data = useMemo(
     () =>
@@ -32,16 +35,33 @@ export function LiteHero({
     return t.countdown.hope_fun;
   }, [data, t]);
 
-  return (
-    <div className="flex items-center justify-between py-2">
-      <h1 className="text-2xl font-bold text-white drop-shadow-sm">
-        {tripName ?? "Apres-Ski"}
-      </h1>
+  const weatherCondition = useMemo(
+    () => (weather ? getWeatherCondition(weather.weatherCode, t) : null),
+    [weather, t],
+  );
 
-      {countdownText && (
-        <span className="bg-spritz text-white text-sm font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg shadow-lg">
-          {countdownText}
-        </span>
+  return (
+    <div className="py-2 space-y-1">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white drop-shadow-sm">
+          {tripName ?? "Apres-Ski"}
+        </h1>
+
+        {countdownText && (
+          <span className="bg-spritz text-white text-sm font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg shadow-lg">
+            {countdownText}
+          </span>
+        )}
+      </div>
+
+      {weather && weatherCondition && (
+        <p className="text-white/80 text-sm font-medium">
+          {weatherCondition.emoji} {Math.round(weather.temperature)}°C
+          <span className="mx-1.5">·</span>
+          <span className="text-alpine font-semibold drop-shadow-sm">
+            {Math.round(weather.snowDepth)} cm
+          </span>
+        </p>
       )}
     </div>
   );
