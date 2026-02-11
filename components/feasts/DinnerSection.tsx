@@ -3,6 +3,7 @@
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { getInitials } from "@/lib/utils/colors";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Meal, Participant } from "@/lib/types";
 
 export function DinnerSection({
@@ -14,6 +15,7 @@ export function DinnerSection({
   participants: Participant[];
   onEdit: () => void;
 }) {
+  const { t } = useLocale();
   const hasResponsible = meal && meal.responsibleIds.length > 0;
   const responsibleParticipants = hasResponsible
     ? meal.responsibleIds
@@ -24,13 +26,13 @@ export function DinnerSection({
   return (
     <div className="border-l-4 border-alpine pl-4 space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-midnight">Dinner</h3>
+        <h3 className="font-semibold text-midnight">{t.feasts.dinner}</h3>
         <Button
           variant="secondary"
           onClick={onEdit}
           className="text-xs px-3 py-1.5"
         >
-          Edit
+          {t.common.edit}
         </Button>
       </div>
 
@@ -55,7 +57,7 @@ export function DinnerSection({
           )}
         </div>
       ) : (
-        <p className="text-sm text-mist py-1">No one assigned yet</p>
+        <p className="text-sm text-mist py-1">{t.feasts.no_one_assigned}</p>
       )}
     </div>
   );

@@ -3,6 +3,7 @@
 import { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils/cn";
 import { formatDateShort, isToday } from "@/lib/utils/dates";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function DateScroller({
   dates,
@@ -14,6 +15,7 @@ export function DateScroller({
   onSelectDate: (d: string) => void;
 }) {
   const selectedRef = useRef<HTMLButtonElement>(null);
+  const { locale } = useLocale();
 
   useEffect(() => {
     selectedRef.current?.scrollIntoView({
@@ -44,7 +46,7 @@ export function DateScroller({
                   : "bg-glass backdrop-blur-sm border border-glass-border text-midnight",
             )}
           >
-            {formatDateShort(date)}
+            {formatDateShort(date, locale)}
           </button>
         );
       })}

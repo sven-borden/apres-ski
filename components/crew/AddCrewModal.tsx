@@ -7,6 +7,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
 import { PARTICIPANT_COLORS, getInitials } from "@/lib/utils/colors";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function AddCrewModal({
   isOpen,
@@ -20,6 +21,7 @@ export function AddCrewModal({
     PARTICIPANT_COLORS[0].hex,
   );
   const [saving, setSaving] = useState(false);
+  const { t } = useLocale();
 
   const initials = getInitials(name);
   const canSubmit = name.trim().length >= 2 && !saving;
@@ -49,28 +51,28 @@ export function AddCrewModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add Crew Member">
+    <Modal isOpen={isOpen} onClose={onClose} title={t.crew.add_member}>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label
             htmlFor="crew-name"
             className="block text-sm font-medium text-midnight mb-1.5"
           >
-            Name
+            {t.crew.name}
           </label>
           <input
             id="crew-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Enter their name"
+            placeholder={t.crew.placeholder_name}
             className="w-full rounded-xl border border-mist/30 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50"
             autoFocus
           />
         </div>
 
         <div>
-          <p className="text-sm font-medium text-midnight mb-2">Pick a Color</p>
+          <p className="text-sm font-medium text-midnight mb-2">{t.crew.pick_color}</p>
           <div className="flex flex-wrap gap-2">
             {PARTICIPANT_COLORS.map((c) => (
               <button
@@ -95,7 +97,7 @@ export function AddCrewModal({
         {initials && (
           <div className="flex items-center gap-3">
             <Avatar initials={initials} color={selectedColor} size="lg" />
-            <span className="text-sm text-mist">Preview</span>
+            <span className="text-sm text-mist">{t.common.preview}</span>
           </div>
         )}
 
@@ -105,14 +107,14 @@ export function AddCrewModal({
             onClick={onClose}
             className="flex-1"
           >
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button
             type="submit"
             disabled={!canSubmit}
             className="flex-1"
           >
-            {saving ? "Adding..." : "Add"}
+            {saving ? t.crew.adding : t.common.add}
           </Button>
         </div>
       </form>

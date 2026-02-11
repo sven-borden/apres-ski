@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { ParticipantPicker } from "@/components/feasts/ParticipantPicker";
 import { updateDinner } from "@/lib/actions/meals";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Meal, Participant } from "@/lib/types";
 
 const inputClass =
@@ -28,6 +29,7 @@ export function EditDinnerModal({
   );
   const [description, setDescription] = useState(meal?.description ?? "");
   const [saving, setSaving] = useState(false);
+  const { t } = useLocale();
 
   function toggleParticipant(id: string) {
     setResponsibleIds((prev) =>
@@ -51,11 +53,11 @@ export function EditDinnerModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Dinner">
+    <Modal isOpen={isOpen} onClose={onClose} title={t.feasts.edit_dinner}>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-sm font-medium text-midnight mb-2">
-            Who&apos;s cooking?
+            {t.feasts.whos_cooking}
           </label>
           <ParticipantPicker
             participants={participants}
@@ -66,12 +68,12 @@ export function EditDinnerModal({
 
         <div>
           <label className="block text-sm font-medium text-midnight mb-1.5">
-            What&apos;s for dinner?
+            {t.feasts.whats_for_dinner}
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe the meal..."
+            placeholder={t.feasts.placeholder_meal}
             rows={3}
             className={inputClass}
           />
@@ -79,10 +81,10 @@ export function EditDinnerModal({
 
         <div className="flex gap-3 pt-2">
           <Button variant="secondary" onClick={onClose} className="flex-1">
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button type="submit" disabled={saving} className="flex-1">
-            {saving ? "Saving..." : "Save"}
+            {saving ? t.common.saving : t.common.save}
           </Button>
         </div>
       </form>

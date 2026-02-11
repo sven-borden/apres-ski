@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function CopyButton({
   text,
-  label = "Copy",
+  label,
   className,
 }: {
   text: string;
@@ -13,6 +14,7 @@ export function CopyButton({
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const { t } = useLocale();
 
   async function handleCopy() {
     await navigator.clipboard.writeText(text);
@@ -29,7 +31,7 @@ export function CopyButton({
         className,
       )}
     >
-      {copied ? "Copied!" : label}
+      {copied ? t.common.copied : (label ?? t.common.copy)}
     </button>
   );
 }

@@ -4,9 +4,11 @@ import { Card } from "@/components/ui/Card";
 import { useWeather } from "@/lib/hooks/useWeather";
 import { getWeatherCondition, getSnowVibe } from "@/lib/utils/weather";
 import { cn } from "@/lib/utils/cn";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function WeatherWidget() {
   const { data, loading, error } = useWeather();
+  const { t } = useLocale();
 
   if (loading) {
     return (
@@ -23,13 +25,13 @@ export function WeatherWidget() {
   if (error || !data) {
     return (
       <Card className="min-w-[220px]">
-        <p className="text-sm text-mist">Weather unavailable</p>
+        <p className="text-sm text-mist">{t.hub.weather_unavailable}</p>
       </Card>
     );
   }
 
-  const condition = getWeatherCondition(data.weatherCode);
-  const snowVibe = getSnowVibe(data.snowDepth);
+  const condition = getWeatherCondition(data.weatherCode, t);
+  const snowVibe = getSnowVibe(data.snowDepth, t);
   const hasSnow = data.snowDepth > 10;
 
   return (
@@ -44,27 +46,26 @@ export function WeatherWidget() {
           <span className="text-lg">
             {condition.emoji} {condition.label}
           </span>
-          <span className="text-xs text-mist">La Tzoumaz</span>
         </div>
 
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>
             <p className="text-2xl font-bold text-alpine">{data.snowDepth}cm</p>
-            <p className="text-[11px] text-mist">Snow depth</p>
+            <p className="text-[11px] text-mist">{t.hub.snow_depth}</p>
           </div>
           <div>
             <p className="text-lg font-semibold text-midnight">
-              {Math.round(data.temperature)}°
+              {Math.round(data.temperature)}&deg;
             </p>
             <p className="text-[11px] text-mist">
-              {Math.round(data.temperatureMin)}° / {Math.round(data.temperatureMax)}°
+              {Math.round(data.temperatureMin)}&deg; / {Math.round(data.temperatureMax)}&deg;
             </p>
           </div>
           <div>
             <p className="text-lg font-semibold text-midnight">
               {data.freezingLevel}m
             </p>
-            <p className="text-[11px] text-mist">0° level</p>
+            <p className="text-[11px] text-mist">{t.hub.freezing_level}</p>
           </div>
         </div>
 

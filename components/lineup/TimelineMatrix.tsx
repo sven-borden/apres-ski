@@ -6,6 +6,7 @@ import { getDateRange, formatDateShort, isToday } from "@/lib/utils/dates";
 import { TimelineRow } from "@/components/lineup/TimelineRow";
 import { toggleAttendance } from "@/lib/actions/attendance";
 import { sortParticipants } from "@/lib/utils/colors";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Trip, Participant, Attendance } from "@/lib/types";
 
 export function TimelineMatrix({
@@ -21,6 +22,8 @@ export function TimelineMatrix({
   capacity: number | null;
   onEditParticipant?: (participant: Participant) => void;
 }) {
+  const { locale, t } = useLocale();
+
   const { dates, todayStr, attendanceMap, dailyCounts } = useMemo(() => {
     const dates = getDateRange(trip.startDate, trip.endDate);
     const todayStr = dates.find(isToday) ?? "";
@@ -60,7 +63,7 @@ export function TimelineMatrix({
         <div className="flex items-end gap-2">
           <div className="w-32 shrink-0" />
           {dates.map((date) => {
-            const label = formatDateShort(date);
+            const label = formatDateShort(date, locale);
             const [weekday, day] = label.split(" ");
             const today = date === todayStr;
             return (
@@ -82,7 +85,7 @@ export function TimelineMatrix({
         {capacity != null && capacity > 0 && (
           <div className="flex items-center gap-2 border-b border-midnight/10 pb-2 mb-1">
             <div className="w-32 shrink-0 text-xs font-semibold text-mist truncate">
-              Capacity ({capacity})
+              {t.crew.capacity(capacity)}
             </div>
             {dates.map((date) => {
               const count = dailyCounts.get(date) ?? 0;

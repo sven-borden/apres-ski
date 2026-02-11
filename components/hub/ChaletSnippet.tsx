@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Basecamp } from "@/lib/types";
 
 function buildGoogleMapsUrl(basecamp: Basecamp): string {
@@ -13,6 +13,7 @@ function buildGoogleMapsUrl(basecamp: Basecamp): string {
 }
 
 export function ChaletSnippet({ basecamp }: { basecamp: Basecamp }) {
+  const { t } = useLocale();
   const mapsUrl = buildGoogleMapsUrl(basecamp);
 
   return (
@@ -20,7 +21,7 @@ export function ChaletSnippet({ basecamp }: { basecamp: Basecamp }) {
       {/* Left side — info */}
       <div className="flex-1 min-w-0 p-5 space-y-1.5">
         <h3 className="text-sm font-bold text-midnight truncate">
-          {basecamp.name || "Chalet"}
+          {basecamp.name || t.hub.chalet}
         </h3>
 
         {basecamp.address && (
@@ -50,23 +51,16 @@ export function ChaletSnippet({ basecamp }: { basecamp: Basecamp }) {
 
         {basecamp.checkIn && (
           <p className="text-xs text-mist">
-            Check-in: <span className="font-medium text-midnight">{basecamp.checkIn}</span>
+            {t.hub.check_in}: <span className="font-medium text-midnight">{basecamp.checkIn}</span>
           </p>
         )}
-
-        <Link
-          href="/basecamp"
-          className="inline-block text-xs text-alpine hover:text-alpine/80 transition-colors pt-0.5"
-        >
-          More info &rarr;
-        </Link>
       </div>
 
       {/* Right side — chalet photo, edge-to-edge */}
       <div className="shrink-0 w-1/3 relative">
         <Image
           src="/images/chalet.webp"
-          alt="Chalet"
+          alt={t.hub.chalet}
           fill
           className="object-cover"
           sizes="(min-width: 640px) 144px, 112px"

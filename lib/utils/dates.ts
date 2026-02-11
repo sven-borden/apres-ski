@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/i18n/locales";
+
 export function getDateRange(start: string, end: string): string[] {
   const dates: string[] = [];
   const current = new Date(`${start}T00:00:00`);
@@ -14,9 +16,23 @@ export function getDateRange(start: string, end: string): string[] {
   return dates;
 }
 
-export function formatDateShort(dateStr: string): string {
+const LOCALE_MAP: Record<Locale, string> = {
+  fr: "fr-FR",
+  en: "en-US",
+};
+
+export function formatDateShort(dateStr: string, locale: Locale = "fr"): string {
   const date = new Date(`${dateStr}T00:00:00`);
-  return date.toLocaleDateString("en-US", { weekday: "short", day: "numeric" });
+  return date.toLocaleDateString(LOCALE_MAP[locale], { weekday: "short", day: "numeric" });
+}
+
+export function formatDateLong(dateStr: string, locale: Locale = "fr"): string {
+  const date = new Date(`${dateStr}T00:00:00`);
+  return date.toLocaleDateString(LOCALE_MAP[locale], {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 export function isToday(dateStr: string): boolean {
