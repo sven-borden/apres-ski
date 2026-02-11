@@ -7,6 +7,7 @@ import { updateBasecamp } from "@/lib/actions/basecamp";
 import type { Basecamp } from "@/lib/types";
 
 interface FormState {
+  name: string;
   address: string;
   coordinatesText: string;
   mapsUrl: string;
@@ -23,6 +24,7 @@ interface FormState {
 function basecampToForm(b: Basecamp | null): FormState {
   if (!b) {
     return {
+      name: "",
       address: "",
       coordinatesText: "",
       mapsUrl: "",
@@ -37,6 +39,7 @@ function basecampToForm(b: Basecamp | null): FormState {
     };
   }
   return {
+    name: b.name || "",
     address: b.address || "",
     coordinatesText:
       b.coordinates?.lat && b.coordinates?.lng
@@ -152,6 +155,7 @@ export function EditBasecampModal({
       const coords = parseCoordinates(form.coordinatesText);
       await updateBasecamp(
         {
+          name: form.name,
           address: form.address,
           coordinates: coords ?? { lat: 0, lng: 0 },
           mapsUrl: form.mapsUrl,
@@ -179,6 +183,17 @@ export function EditBasecampModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Basecamp">
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Chalet Name */}
+        <Field label="Chalet Name">
+          <input
+            type="text"
+            value={form.name}
+            onChange={(e) => update("name", e.target.value)}
+            placeholder="e.g. Chalet Les Étoiles"
+            className={inputClass}
+          />
+        </Field>
+
         {/* Address */}
         <Field label="Address">
           <textarea

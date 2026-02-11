@@ -45,6 +45,7 @@ export interface Meal {
 }
 
 export interface Basecamp {
+  name: string;
   address: string;
   coordinates: { lat: number; lng: number };
   mapsUrl: string;
