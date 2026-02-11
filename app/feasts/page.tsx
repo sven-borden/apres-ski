@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { Suspense, useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useMeals } from "@/lib/hooks/useMeals";
@@ -14,7 +15,7 @@ function getInitialDate(dates: string[]): string {
   return today ?? dates[0] ?? "";
 }
 
-export default function FeastsPage() {
+function FeastsContent() {
   const { trip, loading: tripLoading } = useTrip();
   const { meals, loading: mealsLoading } = useMeals();
   const { participants, loading: participantsLoading } = useParticipants();
@@ -23,10 +24,13 @@ export default function FeastsPage() {
     [trip],
   );
 
+  const searchParams = useSearchParams();
+  const dateParam = searchParams.get("date");
+
   const [selectedDate, setSelectedDate] = useState<string>("");
 
   // Set initial date once dates are available
-  const resolvedDate = selectedDate || getInitialDate(dates);
+  const resolvedDate = selectedDate || (dateParam && dates.includes(dateParam) ? dateParam : getInitialDate(dates));
 
   const loading = tripLoading || mealsLoading || participantsLoading;
 
@@ -72,5 +76,18 @@ export default function FeastsPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function FeastsPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-4">
+        <h1 className="text-2xl font-bold text-midnight">Feasts</h1>
+        <Card className="animate-pulse h-48"><span /></Card>
+      </div>
+    }>
+      <FeastsContent />
+    </Suspense>
   );
 }

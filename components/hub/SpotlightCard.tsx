@@ -1,34 +1,31 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
-import { Avatar } from "@/components/ui/Avatar";
-import { getInitials, sortParticipants } from "@/lib/utils/colors";
 import { formatDateShort } from "@/lib/utils/dates";
 import { cn } from "@/lib/utils/cn";
+import { useUser } from "@/components/providers/UserProvider";
+import { updateDinner } from "@/lib/actions/meals";
 import type { Participant, Meal } from "@/lib/types";
-
-const MAX_AVATARS = 6;
 
 export function SpotlightCard({
   date,
   badge,
+  highlighted = false,
   presentIds,
   allParticipants,
   meal,
-  capacity,
 }: {
   date: string;
-  badge: "Today" | "Next Up" | string;
+  badge?: string;
+  highlighted?: boolean;
   presentIds: Set<string>;
   allParticipants: Participant[];
   meal: Meal | undefined;
-  capacity: number | null;
 }) {
-  const presentParticipants = sortParticipants(
-    allParticipants.filter((p) => presentIds.has(p.id)),
-  );
-  const overflow = presentParticipants.length - MAX_AVATARS;
+  const { user } = useUser();
+  const [claiming, setClaiming] = useState(false);
 
   const responsibleNames =
     meal && meal.responsibleIds.length > 0
@@ -38,102 +35,93 @@ export function SpotlightCard({
           .map((p) => (p as Participant).name)
       : [];
 
+  async function handleClaim(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user || claiming) return;
+    setClaiming(true);
+    try {
+      await updateDinner(
+        date,
+        { responsibleIds: [user.id], description: "" },
+        user.id,
+      );
+    } finally {
+      setClaiming(false);
+    }
+  }
+
   const itemCount = meal?.shoppingList?.length ?? 0;
   const checkedCount =
     meal?.shoppingList?.filter((i) => i.checked).length ?? 0;
 
-  const isOverCapacity =
-    capacity !== null && presentIds.size > capacity;
-
   return (
-    <Card className="ring-2 ring-alpine">
+    <Card className={cn("shrink-0 w-72 h-full", highlighted && "border-2 border-alpine")}>
       <div className="space-y-3">
-        {/* Header: date + badge */}
+        {/* Header: date + headcount */}
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-midnight">
-            {formatDateShort(date)}
-          </h2>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-alpine text-white">
-            {badge}
-          </span>
-        </div>
-
-        {/* Avatar row + headcount */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center -space-x-2">
-            {presentParticipants.slice(0, MAX_AVATARS).map((p) => (
-              <Avatar
-                key={p.id}
-                initials={getInitials(p.name)}
-                color={p.color}
-                size="sm"
-              />
-            ))}
-            {overflow > 0 && (
-              <div className="w-8 h-8 rounded-full bg-mist/30 flex items-center justify-center text-xs font-semibold text-midnight">
-                +{overflow}
-              </div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-bold text-midnight">
+              {formatDateShort(date)}
+            </h2>
+            {badge && (
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-alpine text-white">
+                {badge}
+              </span>
             )}
           </div>
-          <span
-            className={cn(
-              "text-xs font-medium px-2 py-0.5 rounded-full",
-              isOverCapacity
-                ? "bg-red-100 text-red-600"
-                : "bg-pine/10 text-pine",
-            )}
-          >
-            {capacity !== null
-              ? `${presentIds.size}/${capacity}`
-              : `${presentIds.size} going`}
-          </span>
+          <p className="text-sm text-midnight">
+            <span className="mr-1">⛷️</span>
+            <span className="font-bold">{presentIds.size}</span>
+          </p>
         </div>
 
         {/* Dinner summary */}
-        <Link
-          href="/feasts"
-          className="block rounded-lg px-3 py-2 -mx-3 hover:bg-white/40 transition-colors"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              {responsibleNames.length > 0 ? (
-                <>
-                  <span className="text-sm font-medium text-midnight">
-                    {responsibleNames.join(", ")}
-                  </span>
-                  {meal?.description && (
-                    <span className="text-sm text-mist">
-                      {" "}
-                      &mdash; {meal.description}
-                    </span>
-                  )}
-                </>
-              ) : (
-                <span className="text-sm text-mist">
-                  No dinner planned yet
-                </span>
-              )}
+        {responsibleNames.length > 0 ? (
+          <Link
+            href={`/feasts?date=${date}`}
+            className="block rounded-lg px-3 py-2 -mx-3 hover:bg-white/40 transition-colors"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm text-midnight min-w-0 flex-1">
+                <span className="text-mist">Dinner by</span>{" "}
+                <span className="font-medium">{responsibleNames.join(", ")}</span>
+              </span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="shrink-0 text-mist"
+              >
+                <path d="M6 3l5 5-5 5" />
+              </svg>
             </div>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="shrink-0 text-mist"
-            >
-              <path d="M6 3l5 5-5 5" />
-            </svg>
+          </Link>
+        ) : (
+          <div className="space-y-2 px-3 py-2 -mx-3">
+            <span className="text-sm text-mist block">No dinner planned yet</span>
+            {user && (
+              <button
+                type="button"
+                onClick={handleClaim}
+                disabled={claiming}
+                className="text-xs font-medium px-3 py-1.5 rounded-full bg-alpine/10 text-alpine hover:bg-alpine/20 transition-colors disabled:opacity-50"
+              >
+                {claiming ? "Claiming..." : "I cook tonight"}
+              </button>
+            )}
           </div>
-        </Link>
+        )}
 
         {/* Shopping progress */}
         {meal && itemCount > 0 && (
           <Link
-            href="/feasts"
+            href={`/feasts?date=${date}`}
             className="flex items-center gap-2 text-sm text-mist hover:text-midnight transition-colors"
           >
             <svg

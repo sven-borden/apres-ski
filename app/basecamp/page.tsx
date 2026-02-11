@@ -63,7 +63,7 @@ export default function BasecampPage() {
       {basecamp ? (
         <>
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-midnight">Chalet</h2>
+            <h2 className="text-lg font-bold text-midnight">{basecamp.name || "Chalet"}</h2>
             <Button variant="secondary" onClick={() => setEditBasecampOpen(true)}>
               Edit
             </Button>
