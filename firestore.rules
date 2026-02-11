@@ -2,8 +2,201 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
+
+    // ── Helpers ───────────────────────────────────────────────────────
+
+    function bounded(val, maxLen) {
+      return val is string && val.size() <= maxLen;
+    }
+
+    function isDateString(val) {
+      return val is string && val.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+
+    function isHexColor(val) {
+      return val is string && val.matches('^#[0-9a-fA-F]{6}$');
+    }
+
+    function isNum(val) {
+      return val is int || val is float;
+    }
+
+    // ── trips (singleton: trips/current) ──────────────────────────────
+
+    match /trips/current {
+      allow read: if true;
+
+      allow create, update: if
+        request.resource.data.keys().hasOnly(
+          ['name', 'startDate', 'endDate', 'updatedAt', 'createdAt']
+        )
+        && request.resource.data.updatedAt is timestamp
+        && (!request.resource.data.keys().hasAny(['name']) || bounded(request.resource.data.name, 200))
+        && (!request.resource.data.keys().hasAny(['startDate']) || isDateString(request.resource.data.startDate))
+        && (!request.resource.data.keys().hasAny(['endDate']) || isDateString(request.resource.data.endDate))
+        && (!request.resource.data.keys().hasAny(['createdAt']) || request.resource.data.createdAt is timestamp);
+
+      allow delete: if false;
+    }
+
+    // Deny other doc IDs in trips
+    match /trips/{tripId} {
+      allow read, write: if false;
+    }
+
+    // ── participants ──────────────────────────────────────────────────
+
+    match /participants/{participantId} {
+      allow read: if true;
+
+      allow create: if
+        request.resource.data.keys().hasOnly(
+          ['id', 'name', 'color', 'avatar', 'joinedAt', 'tripId']
+        )
+        && request.resource.data.id == participantId
+        && bounded(request.resource.data.name, 100)
+        && isHexColor(request.resource.data.color)
+        && bounded(request.resource.data.avatar, 4)
+        && request.resource.data.joinedAt is timestamp
+        && request.resource.data.tripId is string;
+
+      allow update: if
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['name', 'avatar', 'color', 'updatedAt'])
+        && bounded(request.resource.data.name, 100)
+        && isHexColor(request.resource.data.color)
+        && bounded(request.resource.data.avatar, 4)
+        && (!request.resource.data.keys().hasAny(['updatedAt']) || request.resource.data.updatedAt is timestamp);
+
+      allow delete: if false;
+    }
+
+    // ── attendance ────────────────────────────────────────────────────
+
+    match /attendance/{docId} {
+      allow read: if true;
+
+      allow create: if
+        docId.matches('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.keys().hasOnly(
+          ['participantId', 'participantName', 'participantColor', 'date', 'present', 'tripId', 'updatedAt']
+        )
+        && request.resource.data.participantId is string
+        && bounded(request.resource.data.participantName, 100)
+        && isHexColor(request.resource.data.participantColor)
+        && isDateString(request.resource.data.date)
+        && request.resource.data.present == true
+        && request.resource.data.tripId is string
+        && request.resource.data.updatedAt is timestamp;
+
+      allow update: if false;
+      allow delete: if true;
+    }
+
+    // ── meals ─────────────────────────────────────────────────────────
+
+    match /meals/{mealId} {
+      allow read: if true;
+
+      allow create, update: if
+        isDateString(mealId)
+        && request.resource.data.keys().hasOnly(
+          ['date', 'tripId', 'responsibleIds', 'description', 'shoppingList', 'updatedAt', 'updatedBy']
+        )
+        && request.resource.data.updatedAt is timestamp
+        && bounded(request.resource.data.updatedBy, 100)
+        && (!request.resource.data.keys().hasAny(['date']) || request.resource.data.date == mealId)
+        && (!request.resource.data.keys().hasAny(['tripId']) || request.resource.data.tripId is string)
+        && (!request.resource.data.keys().hasAny(['responsibleIds'])
+            || (request.resource.data.responsibleIds is list
+                && request.resource.data.responsibleIds.size() <= 20))
+        && (!request.resource.data.keys().hasAny(['description'])
+            || bounded(request.resource.data.description, 2000))
+        && (!request.resource.data.keys().hasAny(['shoppingList'])
+            || (request.resource.data.shoppingList is list
+                && request.resource.data.shoppingList.size() <= 100));
+
+      allow delete: if false;
+    }
+
+    // ── basecamp (singleton: basecamp/current) ────────────────────────
+
+    match /basecamp/current {
+      allow read: if true;
+
+      allow create, update: if
+        request.resource.data.keys().hasOnly([
+          'name', 'address', 'coordinates', 'mapsUrl', 'wifi',
+          'checkIn', 'checkOut', 'capacity', 'accessCodes',
+          'emergencyContacts', 'notes', 'updatedAt', 'updatedBy'
+        ])
+        && request.resource.data.updatedAt is timestamp
+        && bounded(request.resource.data.updatedBy, 100)
+        && (!request.resource.data.keys().hasAny(['name'])
+            || bounded(request.resource.data.name, 200))
+        && (!request.resource.data.keys().hasAny(['address'])
+            || bounded(request.resource.data.address, 500))
+        && (!request.resource.data.keys().hasAny(['coordinates'])
+            || (request.resource.data.coordinates is map
+                && request.resource.data.coordinates.keys().hasOnly(['lat', 'lng'])
+                && isNum(request.resource.data.coordinates.lat)
+                && isNum(request.resource.data.coordinates.lng)))
+        && (!request.resource.data.keys().hasAny(['mapsUrl'])
+            || bounded(request.resource.data.mapsUrl, 2000))
+        && (!request.resource.data.keys().hasAny(['wifi'])
+            || (request.resource.data.wifi is map
+                && request.resource.data.wifi.keys().hasOnly(['network', 'password'])
+                && request.resource.data.wifi.network is string
+                && request.resource.data.wifi.password is string))
+        && (!request.resource.data.keys().hasAny(['checkIn'])
+            || bounded(request.resource.data.checkIn, 50))
+        && (!request.resource.data.keys().hasAny(['checkOut'])
+            || bounded(request.resource.data.checkOut, 50))
+        && (!request.resource.data.keys().hasAny(['capacity'])
+            || (isNum(request.resource.data.capacity)
+                && request.resource.data.capacity >= 0
+                && request.resource.data.capacity <= 200))
+        && (!request.resource.data.keys().hasAny(['accessCodes'])
+            || (request.resource.data.accessCodes is list
+                && request.resource.data.accessCodes.size() <= 20))
+        && (!request.resource.data.keys().hasAny(['emergencyContacts'])
+            || (request.resource.data.emergencyContacts is list
+                && request.resource.data.emergencyContacts.size() <= 20))
+        && (!request.resource.data.keys().hasAny(['notes'])
+            || bounded(request.resource.data.notes, 5000));
+
+      allow delete: if false;
+    }
+
+    // Deny other doc IDs in basecamp
+    match /basecamp/{basecampId} {
+      allow read, write: if false;
+    }
+
+    // ── weather (singleton: weather/la-tzoumaz) ───────────────────────
+
+    match /weather/la-tzoumaz {
+      allow read: if true;
+
+      allow create, update: if
+        request.resource.data.keys().hasOnly([
+          'temperature', 'temperatureMin', 'temperatureMax',
+          'weatherCode', 'snowDepth', 'freezingLevel', 'fetchedAt'
+        ])
+        && isNum(request.resource.data.temperature)
+        && isNum(request.resource.data.temperatureMin)
+        && isNum(request.resource.data.temperatureMax)
+        && isNum(request.resource.data.weatherCode)
+        && isNum(request.resource.data.snowDepth)
+        && isNum(request.resource.data.freezingLevel)
+        && request.resource.data.fetchedAt is timestamp;
+
+      allow delete: if false;
+    }
+
+    // Deny other doc IDs in weather
+    match /weather/{weatherId} {
+      allow read, write: if false;
     }
   }
 }
