@@ -55,22 +55,23 @@ export function EditDinnerModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t.feasts.edit_dinner}>
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label className="block text-sm font-medium text-midnight mb-2">
+        <fieldset>
+          <legend className="block text-sm font-medium text-midnight mb-2">
             {t.feasts.whos_cooking}
-          </label>
+          </legend>
           <ParticipantPicker
             participants={participants}
             selectedIds={responsibleIds}
             onToggle={toggleParticipant}
           />
-        </div>
+        </fieldset>
 
         <div>
-          <label className="block text-sm font-medium text-midnight mb-1.5">
+          <label htmlFor="dinner-description" className="block text-sm font-medium text-midnight mb-1.5">
             {t.feasts.whats_for_dinner}
           </label>
           <textarea
+            id="dinner-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t.feasts.placeholder_meal}

@@ -186,8 +186,9 @@ export function EditBasecampModal({
     <Modal isOpen={isOpen} onClose={onClose} title={t.basecamp.edit_basecamp}>
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Chalet Name */}
-        <Field label={t.basecamp.chalet_name}>
+        <Field id="basecamp-name" label={t.basecamp.chalet_name}>
           <input
+            id="basecamp-name"
             type="text"
             value={form.name}
             onChange={(e) => update("name", e.target.value)}
@@ -197,8 +198,9 @@ export function EditBasecampModal({
         </Field>
 
         {/* Address */}
-        <Field label={t.basecamp.address}>
+        <Field id="basecamp-address" label={t.basecamp.address}>
           <textarea
+            id="basecamp-address"
             value={form.address}
             onChange={(e) => update("address", e.target.value)}
             placeholder={t.basecamp.placeholder_address}
@@ -208,8 +210,9 @@ export function EditBasecampModal({
         </Field>
 
         {/* Coordinates */}
-        <Field label={t.basecamp.coordinates} hint={t.basecamp.coordinates_hint}>
+        <Field id="basecamp-coordinates" label={t.basecamp.coordinates} hint={t.basecamp.coordinates_hint}>
           <input
+            id="basecamp-coordinates"
             type="text"
             value={form.coordinatesText}
             onChange={(e) => update("coordinatesText", e.target.value)}
@@ -219,8 +222,9 @@ export function EditBasecampModal({
         </Field>
 
         {/* Maps URL */}
-        <Field label={t.basecamp.maps_url}>
+        <Field id="basecamp-maps-url" label={t.basecamp.maps_url}>
           <input
+            id="basecamp-maps-url"
             type="text"
             value={form.mapsUrl}
             onChange={(e) => update("mapsUrl", e.target.value)}
@@ -230,8 +234,9 @@ export function EditBasecampModal({
         </Field>
 
         {/* WiFi */}
-        <Field label={t.basecamp.wifi_network}>
+        <Field id="basecamp-wifi-network" label={t.basecamp.wifi_network}>
           <input
+            id="basecamp-wifi-network"
             type="text"
             value={form.wifiNetwork}
             onChange={(e) => update("wifiNetwork", e.target.value)}
@@ -239,8 +244,9 @@ export function EditBasecampModal({
             className={inputClass}
           />
         </Field>
-        <Field label={t.basecamp.wifi_password}>
+        <Field id="basecamp-wifi-password" label={t.basecamp.wifi_password}>
           <input
+            id="basecamp-wifi-password"
             type="text"
             value={form.wifiPassword}
             onChange={(e) => update("wifiPassword", e.target.value)}
@@ -251,8 +257,9 @@ export function EditBasecampModal({
 
         {/* Schedule */}
         <div className="grid grid-cols-2 gap-3">
-          <Field label={t.basecamp.check_in}>
+          <Field id="basecamp-check-in" label={t.basecamp.check_in}>
             <input
+              id="basecamp-check-in"
               type="text"
               value={form.checkIn}
               onChange={(e) => update("checkIn", e.target.value)}
@@ -260,8 +267,9 @@ export function EditBasecampModal({
               className={inputClass}
             />
           </Field>
-          <Field label={t.basecamp.check_out}>
+          <Field id="basecamp-check-out" label={t.basecamp.check_out}>
             <input
+              id="basecamp-check-out"
               type="text"
               value={form.checkOut}
               onChange={(e) => update("checkOut", e.target.value)}
@@ -272,8 +280,9 @@ export function EditBasecampModal({
         </div>
 
         {/* Capacity */}
-        <Field label={t.basecamp.capacity} hint={t.basecamp.capacity_hint}>
+        <Field id="basecamp-capacity" label={t.basecamp.capacity} hint={t.basecamp.capacity_hint}>
           <input
+            id="basecamp-capacity"
             type="number"
             min="0"
             value={form.capacity}
@@ -296,6 +305,7 @@ export function EditBasecampModal({
                   value={code.label}
                   onChange={(e) => updateAccessCode(i, "label", e.target.value)}
                   placeholder={t.basecamp.placeholder_label}
+                  aria-label={`${t.basecamp.placeholder_label} ${i + 1}`}
                   className={inputClass}
                 />
                 <input
@@ -303,6 +313,7 @@ export function EditBasecampModal({
                   value={code.code}
                   onChange={(e) => updateAccessCode(i, "code", e.target.value)}
                   placeholder={t.basecamp.placeholder_code}
+                  aria-label={`${t.basecamp.placeholder_code} ${i + 1}`}
                   className={inputClass}
                 />
                 <button
@@ -337,6 +348,7 @@ export function EditBasecampModal({
                   value={contact.name}
                   onChange={(e) => updateContact(i, "name", e.target.value)}
                   placeholder={t.basecamp.placeholder_contact_name}
+                  aria-label={`${t.basecamp.placeholder_contact_name} ${i + 1}`}
                   className={inputClass}
                 />
                 <input
@@ -344,6 +356,7 @@ export function EditBasecampModal({
                   value={contact.phone}
                   onChange={(e) => updateContact(i, "phone", e.target.value)}
                   placeholder={t.basecamp.placeholder_phone}
+                  aria-label={`${t.basecamp.placeholder_phone} ${i + 1}`}
                   className={inputClass}
                 />
                 <input
@@ -351,6 +364,7 @@ export function EditBasecampModal({
                   value={contact.role}
                   onChange={(e) => updateContact(i, "role", e.target.value)}
                   placeholder={t.basecamp.placeholder_role}
+                  aria-label={`${t.basecamp.placeholder_role} ${i + 1}`}
                   className={inputClass}
                 />
                 <button
@@ -373,8 +387,9 @@ export function EditBasecampModal({
         </fieldset>
 
         {/* Notes */}
-        <Field label={t.basecamp.notes}>
+        <Field id="basecamp-notes" label={t.basecamp.notes}>
           <textarea
+            id="basecamp-notes"
             value={form.notes}
             onChange={(e) => update("notes", e.target.value)}
             placeholder={t.basecamp.placeholder_notes}
@@ -412,17 +427,19 @@ export function EditBasecampModal({
 }
 
 function Field({
+  id,
   label,
   hint,
   children,
 }: {
+  id: string;
   label: string;
   hint?: string;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-midnight mb-1.5">
+      <label htmlFor={id} className="block text-sm font-medium text-midnight mb-1.5">
         {label}
         {hint && (
           <span className="font-normal text-mist ml-1">({hint})</span>
