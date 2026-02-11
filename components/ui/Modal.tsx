@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { cn } from "@/lib/utils/cn";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function Modal({
   isOpen,
@@ -14,6 +15,8 @@ export function Modal({
   children: React.ReactNode;
   title?: string;
 }) {
+  const { t } = useLocale();
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -37,7 +40,7 @@ export function Modal({
         }}
         role={onClose ? "button" : undefined}
         tabIndex={onClose ? 0 : undefined}
-        aria-label={onClose ? "Close modal" : undefined}
+        aria-label={onClose ? t.common.close : undefined}
       />
       <div
         className={cn(

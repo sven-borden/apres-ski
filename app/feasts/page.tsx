@@ -81,10 +81,11 @@ function FeastsContent() {
 }
 
 export default function FeastsPage() {
+  const { t } = useLocale();
   return (
     <Suspense fallback={
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-midnight">Feasts</h1>
+        <h1 className="text-2xl font-bold text-midnight">{t.feasts.title}</h1>
         <Card className="animate-pulse h-48"><span /></Card>
       </div>
     }>

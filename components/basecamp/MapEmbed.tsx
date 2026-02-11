@@ -1,6 +1,7 @@
 "use client";
 
 import type { Basecamp } from "@/lib/types";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function MapEmbed({
   coordinates,
@@ -9,10 +10,12 @@ export function MapEmbed({
   coordinates?: Basecamp["coordinates"];
   mapsUrl?: string;
 }) {
+  const { t } = useLocale();
+
   if (!coordinates?.lat || !coordinates?.lng) {
     return (
       <div className="w-full h-48 rounded-2xl bg-mist/20 flex items-center justify-center">
-        <p className="text-sm text-mist">No location set</p>
+        <p className="text-sm text-mist">{t.basecamp.no_location}</p>
       </div>
     );
   }
@@ -21,7 +24,7 @@ export function MapEmbed({
     <div className="space-y-2">
       <div className="w-full h-48 rounded-2xl overflow-hidden">
         <iframe
-          title="Chalet location"
+          title={t.basecamp.chalet_location}
           src={`https://maps.google.com/maps?q=${coordinates.lat},${coordinates.lng}&z=15&output=embed`}
           className="w-full h-full border-0"
           loading="lazy"
@@ -35,7 +38,7 @@ export function MapEmbed({
           rel="noopener noreferrer"
           className="inline-block text-sm text-alpine hover:text-alpine/80 font-medium transition-colors"
         >
-          Open in Maps
+          {t.basecamp.open_in_maps}
         </a>
       )}
     </div>
