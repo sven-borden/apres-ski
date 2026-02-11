@@ -10,6 +10,7 @@ export interface Translations {
     save: string;
     saving: string;
     cancel: string;
+    close: string;
     edit: string;
     add: string;
     remove: string;
@@ -165,6 +166,12 @@ export interface Translations {
     wifi: string;
     schedule: string;
     password: string;
+    no_location: string;
+    chalet_location: string;
+    open_in_maps: string;
+    placeholder_coordinates_example: string;
+    placeholder_check_in_time: string;
+    placeholder_check_out_time: string;
   };
   crew: {
     title: string;
@@ -206,6 +213,7 @@ const fr: Translations = {
     save: "Enregistrer",
     saving: "Enregistrement\u2026",
     cancel: "Annuler",
+    close: "Fermer",
     edit: "Modifier",
     add: "Ajouter",
     remove: "Retirer",
@@ -361,6 +369,12 @@ const fr: Translations = {
     wifi: "WiFi",
     schedule: "Horaires",
     password: "Mot de passe",
+    no_location: "Aucun emplacement défini",
+    chalet_location: "Emplacement du chalet",
+    open_in_maps: "Ouvrir dans Maps",
+    placeholder_coordinates_example: "46.096, 7.228",
+    placeholder_check_in_time: "16:00",
+    placeholder_check_out_time: "10:00",
   },
   crew: {
     title: "Crew",

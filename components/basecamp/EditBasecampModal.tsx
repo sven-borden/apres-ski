@@ -216,7 +216,7 @@ export function EditBasecampModal({
             type="text"
             value={form.coordinatesText}
             onChange={(e) => update("coordinatesText", e.target.value)}
-            placeholder="46.096, 7.228"
+            placeholder={t.basecamp.placeholder_coordinates_example}
             className={inputClass}
           />
         </Field>
@@ -263,7 +263,7 @@ export function EditBasecampModal({
               type="text"
               value={form.checkIn}
               onChange={(e) => update("checkIn", e.target.value)}
-              placeholder="16:00"
+              placeholder={t.basecamp.placeholder_check_in_time}
               className={inputClass}
             />
           </Field>
@@ -273,7 +273,7 @@ export function EditBasecampModal({
               type="text"
               value={form.checkOut}
               onChange={(e) => update("checkOut", e.target.value)}
-              placeholder="10:00"
+              placeholder={t.basecamp.placeholder_check_out_time}
               className={inputClass}
             />
           </Field>
