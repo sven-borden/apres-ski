@@ -47,10 +47,11 @@ export function EditTripModal({
     <Modal isOpen={isOpen} onClose={onClose} title={trip ? t.trip.edit_trip : t.trip.set_up_trip}>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-midnight mb-1.5">
+          <label htmlFor="trip-name" className="block text-sm font-medium text-midnight mb-1.5">
             {t.trip.trip_name}
           </label>
           <input
+            id="trip-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -61,10 +62,11 @@ export function EditTripModal({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-midnight mb-1.5">
+            <label htmlFor="trip-start-date" className="block text-sm font-medium text-midnight mb-1.5">
               {t.trip.start_date}
             </label>
             <input
+              id="trip-start-date"
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
@@ -72,10 +74,11 @@ export function EditTripModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-midnight mb-1.5">
+            <label htmlFor="trip-end-date" className="block text-sm font-medium text-midnight mb-1.5">
               {t.trip.end_date}
             </label>
             <input
+              id="trip-end-date"
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
