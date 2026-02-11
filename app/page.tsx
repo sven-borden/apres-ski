@@ -1,18 +1,22 @@
 "use client";
 
-import { useMemo, useRef, useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { LiteHero } from "@/components/hub/LiteHero";
 import { WeatherWidget } from "@/components/hub/WeatherWidget";
-import { DayCard } from "@/components/hub/DayCard";
+import { SpotlightCard } from "@/components/hub/SpotlightCard";
+import { CrewStrip } from "@/components/hub/CrewStrip";
+import { MealPlanStatus } from "@/components/hub/MealPlanStatus";
+import { QuickInfoCard } from "@/components/hub/QuickInfoCard";
+import { QuickActions } from "@/components/hub/QuickActions";
 import { EditTripModal } from "@/components/basecamp/EditTripModal";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useParticipants } from "@/lib/hooks/useParticipants";
 import { useAttendance } from "@/lib/hooks/useAttendance";
 import { useMeals } from "@/lib/hooks/useMeals";
 import { useBasecamp } from "@/lib/hooks/useBasecamp";
-import { getTodayString } from "@/lib/utils/countdown";
+import { getTodayString, getCountdownData } from "@/lib/utils/countdown";
 import { getDateRange } from "@/lib/utils/dates";
 import type { Meal } from "@/lib/types";
 
@@ -57,19 +61,30 @@ export default function HubPage() {
     return map;
   }, [meals]);
 
-  const todayRef = useRef<HTMLDivElement>(null);
+  const countdown = useMemo(() => {
+    if (!trip) return null;
+    return getCountdownData(trip.startDate, trip.endDate);
+  }, [trip]);
 
-  useEffect(() => {
-    if (!loading && todayRef.current) {
-      todayRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+  // Spotlight: today during trip, first day before trip, hidden after
+  const spotlight = useMemo(() => {
+    if (!trip || !countdown) return null;
+    if (countdown.state === "after") return null;
+
+    if (countdown.state === "during") {
+      return { date: today, badge: "Today" as const };
     }
-  }, [loading]);
+
+    // before
+    return { date: trip.startDate, badge: "Next Up" as const };
+  }, [trip, countdown, today]);
 
   const capacity = basecamp?.capacity ?? null;
 
   if (loading) {
     return (
       <div className="space-y-4">
+        {/* Hero + weather skeleton */}
         <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 items-start">
           <div className="h-8 w-48 rounded-lg bg-mist/20 animate-pulse" />
           <Card className="animate-pulse min-w-[220px]">
@@ -80,11 +95,47 @@ export default function HubPage() {
             </div>
           </Card>
         </div>
-        <Card className="animate-pulse h-48">
-          <span />
+        {/* Spotlight skeleton */}
+        <Card className="animate-pulse">
+          <div className="space-y-3">
+            <div className="h-5 w-32 rounded bg-mist/20" />
+            <div className="flex gap-2">
+              <div className="w-8 h-8 rounded-full bg-mist/20" />
+              <div className="w-8 h-8 rounded-full bg-mist/20" />
+              <div className="w-8 h-8 rounded-full bg-mist/20" />
+            </div>
+            <div className="h-4 w-48 rounded bg-mist/20" />
+          </div>
         </Card>
-        <Card className="animate-pulse h-48">
-          <span />
+        {/* Crew + info skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="animate-pulse">
+            <div className="space-y-3">
+              <div className="h-4 w-20 rounded bg-mist/20" />
+              <div className="flex gap-1.5">
+                <div className="w-8 h-8 rounded-full bg-mist/20" />
+                <div className="w-8 h-8 rounded-full bg-mist/20" />
+                <div className="w-8 h-8 rounded-full bg-mist/20" />
+              </div>
+            </div>
+          </Card>
+          <Card className="animate-pulse">
+            <div className="space-y-3">
+              <div className="h-4 w-28 rounded bg-mist/20" />
+              <div className="h-4 w-40 rounded bg-mist/20" />
+            </div>
+          </Card>
+        </div>
+        {/* Meal status skeleton */}
+        <Card className="animate-pulse">
+          <div className="space-y-3">
+            <div className="h-4 w-24 rounded bg-mist/20" />
+            <div className="grid grid-cols-3 gap-3">
+              <div className="h-10 rounded bg-mist/20" />
+              <div className="h-10 rounded bg-mist/20" />
+              <div className="h-10 rounded bg-mist/20" />
+            </div>
+          </div>
         </Card>
       </div>
     );
@@ -92,6 +143,7 @@ export default function HubPage() {
 
   return (
     <div className="space-y-4">
+      {/* 1. Hero + Weather */}
       <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 items-start">
         <LiteHero
           tripName={trip?.name ?? null}
@@ -100,6 +152,7 @@ export default function HubPage() {
         />
         <WeatherWidget />
       </div>
+
       {!trip ? (
         <>
           <Card>
@@ -119,21 +172,37 @@ export default function HubPage() {
           />
         </>
       ) : (
-        dates.map((date) => {
-          const isTodayDate = date === today;
-          return (
-            <div key={date} ref={isTodayDate ? todayRef : undefined}>
-              <DayCard
-                date={date}
-                presentIds={attendanceByDate.get(date) ?? new Set()}
-                allParticipants={participants}
-                meal={mealByDate.get(date)}
-                capacity={capacity}
-                isToday={isTodayDate}
-              />
-            </div>
-          );
-        })
+        <>
+          {/* 2. Spotlight */}
+          {spotlight && (
+            <SpotlightCard
+              date={spotlight.date}
+              badge={spotlight.badge}
+              presentIds={attendanceByDate.get(spotlight.date) ?? new Set()}
+              allParticipants={participants}
+              meal={mealByDate.get(spotlight.date)}
+              capacity={capacity}
+            />
+          )}
+
+          {/* 3. Crew + Quick Info (2-col on md+) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CrewStrip
+              participants={participants}
+              dates={dates}
+              attendanceByDate={attendanceByDate}
+              capacity={capacity}
+              today={today}
+            />
+            {basecamp && <QuickInfoCard basecamp={basecamp} />}
+          </div>
+
+          {/* 4. Meal Plan Status */}
+          <MealPlanStatus meals={meals} dates={dates} />
+
+          {/* 5. Quick Actions */}
+          <QuickActions />
+        </>
       )}
     </div>
   );
