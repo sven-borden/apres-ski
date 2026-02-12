@@ -120,8 +120,8 @@ export function TimelineMatrix({
               const count = dailyCounts.get(date) ?? 0;
               const ratio = count / capacity;
               let colorClass = "text-pine";
-              if (ratio > 1.2) colorClass = "text-red-500";
-              else if (ratio > 1.1) colorClass = "text-amber-500";
+              if (ratio > 1.2) colorClass = "text-danger";
+              else if (ratio > 1.1) colorClass = "text-caution";
               return (
                 <div
                   key={date}

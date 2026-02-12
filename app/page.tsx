@@ -219,7 +219,6 @@ export default function HubPage() {
           <div>
             <SectionHeader title={t.hub.attendance} href="/crew" />
             <CrewStrip
-              participants={participants}
               dates={dates}
               attendanceByDate={attendanceByDate}
               capacity={capacity}

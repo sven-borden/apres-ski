@@ -10,6 +10,8 @@
   --mist-grey: #94A3B8;
   --glass-bg: rgba(255, 255, 255, 0.70);
   --glass-border: rgba(255, 255, 255, 0.20);
+  --danger-red: #EF4444;
+  --caution-amber: #F59E0B;
 }
 
 @theme inline {
@@ -22,6 +24,8 @@
   --color-mist: var(--mist-grey);
   --color-glass: var(--glass-bg);
   --color-glass-border: var(--glass-border);
+  --color-danger: var(--danger-red);
+  --color-caution: var(--caution-amber);
 }
 
 body {
