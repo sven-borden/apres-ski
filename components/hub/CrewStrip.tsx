@@ -23,7 +23,6 @@ export function CrewStrip({
   capacity,
   today,
 }: {
-  participants: { id: string }[];
   dates: string[];
   attendanceByDate: Map<string, Set<string>>;
   capacity: number | null;

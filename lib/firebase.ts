@@ -48,6 +48,3 @@ export function getDb() {
   }
   return _db;
 }
-
-export const app = typeof window !== "undefined" ? getFirebaseInstance() : undefined;
-export const db = typeof window !== "undefined" ? getDb() : undefined;
