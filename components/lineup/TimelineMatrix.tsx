@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { getDateRange, formatDateShort, isToday } from "@/lib/utils/dates";
 import { TimelineRow } from "@/components/lineup/TimelineRow";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toggleAttendance } from "@/lib/actions/attendance";
 import { sortParticipants } from "@/lib/utils/colors";
 import { useUser } from "@/components/providers/UserProvider";
@@ -26,6 +27,11 @@ export function TimelineMatrix({
   const { user } = useUser();
   const { locale, t } = useLocale();
   const [error, setError] = useState<string | null>(null);
+  const [pendingAbsent, setPendingAbsent] = useState<{
+    participantId: string;
+    participantName: string;
+    date: string;
+  } | null>(null);
 
   const { dates, todayStr, attendanceMap, dailyCounts } = useMemo(() => {
     const dates = getDateRange(trip.startDate, trip.endDate);
@@ -56,8 +62,19 @@ export function TimelineMatrix({
   async function handleToggle(participantId: string, date: string, currentlyPresent: boolean) {
     const p = participants.find((p) => p.id === participantId);
     if (!p) return;
+
+    // Confirm before marking someone else as absent
+    if (currentlyPresent && participantId !== user?.id) {
+      setPendingAbsent({ participantId: p.id, participantName: p.name, date });
+      return;
+    }
+
+    await doToggle(p.id, p.name, p.color, date, currentlyPresent);
+  }
+
+  async function doToggle(id: string, name: string, color: string, date: string, currentlyPresent: boolean) {
     try {
-      await toggleAttendance({ id: p.id, name: p.name, color: p.color }, date, currentlyPresent, user?.id ?? "anonymous");
+      await toggleAttendance({ id, name, color }, date, currentlyPresent, user?.id ?? "anonymous");
     } catch {
       setError(t.errors.toggle_failed);
       setTimeout(() => setError(null), 3000);
@@ -133,6 +150,20 @@ export function TimelineMatrix({
           />
         ))}
       </div>
+
+      <ConfirmDialog
+        isOpen={pendingAbsent !== null}
+        onClose={() => setPendingAbsent(null)}
+        onConfirm={() => {
+          if (pendingAbsent) {
+            const p = participants.find((p) => p.id === pendingAbsent.participantId);
+            if (p) doToggle(p.id, p.name, p.color, pendingAbsent.date, true);
+          }
+        }}
+        title={t.confirm.mark_absent_title}
+        message={pendingAbsent ? t.confirm.mark_absent_message(pendingAbsent.participantName) : ""}
+        confirmLabel={t.confirm.confirm_remove}
+      />
     </div>
   );
 }

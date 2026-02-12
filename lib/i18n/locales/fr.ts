@@ -224,6 +224,20 @@ export interface Translations {
     invalid_date_range: string;
     at_least_one_chef: string;
   };
+  confirm: {
+    remove_access_code_title: string;
+    remove_access_code_message: string;
+    remove_contact_title: string;
+    remove_contact_message: string;
+    mark_absent_title: string;
+    mark_absent_message: (name: string) => string;
+    trip_dates_title: string;
+    trip_dates_message: (count: number) => string;
+    remove_shopping_item_title: string;
+    remove_shopping_item_message: (item: string) => string;
+    confirm_remove: string;
+    confirm_save: string;
+  };
 }
 
 const fr: Translations = {
@@ -452,6 +466,23 @@ const fr: Translations = {
     longitude_range: "La longitude doit être entre -180 et 180",
     invalid_date_range: "La date de fin doit être après la date de début",
     at_least_one_chef: "Au moins un chef doit être sélectionné",
+  },
+  confirm: {
+    remove_access_code_title: "Retirer le code d\u2019acc\u00e8s",
+    remove_access_code_message: "\u00cates-vous s\u00fbr de vouloir retirer ce code d\u2019acc\u00e8s ?",
+    remove_contact_title: "Retirer le contact",
+    remove_contact_message: "\u00cates-vous s\u00fbr de vouloir retirer ce contact d\u2019urgence ?",
+    mark_absent_title: "Marquer comme absent",
+    mark_absent_message: (name: string) => `\u00cates-vous s\u00fbr de vouloir marquer ${name} comme absent(e) ?`,
+    trip_dates_title: "Dates de repas affect\u00e9es",
+    trip_dates_message: (count: number) =>
+      count === 1
+        ? "1 jour avec des repas attribu\u00e9s sera en dehors des nouvelles dates. Les repas concern\u00e9s ne seront plus visibles."
+        : `${count} jours avec des repas attribu\u00e9s seront en dehors des nouvelles dates. Les repas concern\u00e9s ne seront plus visibles.`,
+    remove_shopping_item_title: "Retirer l\u2019article",
+    remove_shopping_item_message: (item: string) => `\u00cates-vous s\u00fbr de vouloir retirer \u00ab\u202f${item}\u202f\u00bb de la liste ?`,
+    confirm_remove: "Retirer",
+    confirm_save: "Enregistrer quand m\u00eame",
   },
 };
 
