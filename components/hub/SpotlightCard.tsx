@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { formatDateShort } from "@/lib/utils/dates";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils/cn";
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { updateDinner } from "@/lib/actions/meals";
+import { isDefined } from "@/lib/utils/typeGuards";
 import type { Participant, Meal } from "@/lib/types";
 
 export function SpotlightCard({
@@ -30,13 +31,16 @@ export function SpotlightCard({
   const [claiming, setClaiming] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const responsibleNames =
-    meal && meal.responsibleIds.length > 0
-      ? meal.responsibleIds
-          .map((id) => allParticipants.find((p) => p.id === id))
-          .filter(Boolean)
-          .map((p) => (p as Participant).name)
-      : [];
+  const responsibleNames = useMemo(
+    () =>
+      meal && meal.responsibleIds.length > 0
+        ? meal.responsibleIds
+            .map((id) => allParticipants.find((p) => p.id === id))
+            .filter(isDefined)
+            .map((p) => p.name)
+        : [],
+    [meal, allParticipants],
+  );
 
   async function handleClaim(e: React.MouseEvent) {
     e.preventDefault();
