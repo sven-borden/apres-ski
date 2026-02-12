@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { updateTrip } from "@/lib/actions/trip";
 import { seedMeals } from "@/lib/actions/meals";
 import { useUser } from "@/components/providers/UserProvider";
@@ -19,10 +20,12 @@ export function EditTripModal({
   isOpen,
   onClose,
   trip,
+  existingMealDates,
 }: {
   isOpen: boolean;
   onClose: () => void;
   trip: Trip | null;
+  existingMealDates?: string[];
 }) {
   const [name, setName] = useState(trip?.name ?? "");
   const [startDate, setStartDate] = useState(trip?.startDate ?? "");
@@ -30,6 +33,8 @@ export function EditTripModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [showDateWarning, setShowDateWarning] = useState(false);
+  const [orphanCount, setOrphanCount] = useState(0);
   const { user } = useUser();
   const { t } = useLocale();
 
@@ -86,10 +91,7 @@ export function EditTripModal({
 
   const hasFieldErrors = Object.keys(fieldErrors).length > 0;
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!validateAll()) return;
-
+  async function doSave() {
     setSaving(true);
     setError(null);
     try {
@@ -101,6 +103,23 @@ export function EditTripModal({
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!validateAll()) return;
+
+    // Check if editing an existing trip would orphan assigned meals
+    if (trip && existingMealDates && existingMealDates.length > 0) {
+      const orphaned = existingMealDates.filter((d) => d < startDate || d > endDate);
+      if (orphaned.length > 0) {
+        setOrphanCount(orphaned.length);
+        setShowDateWarning(true);
+        return;
+      }
+    }
+
+    await doSave();
   }
 
   return (
@@ -185,6 +204,16 @@ export function EditTripModal({
           </Button>
         </div>
       </form>
+
+      <ConfirmDialog
+        isOpen={showDateWarning}
+        onClose={() => setShowDateWarning(false)}
+        onConfirm={() => doSave()}
+        title={t.confirm.trip_dates_title}
+        message={t.confirm.trip_dates_message(orphanCount)}
+        confirmLabel={t.confirm.confirm_save}
+        variant="warn"
+      />
     </Modal>
   );
 }

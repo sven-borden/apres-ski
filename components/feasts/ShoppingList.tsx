@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   addShoppingItem,
   toggleShoppingItem,
@@ -20,6 +21,7 @@ export function ShoppingList({
 }) {
   const [newItem, setNewItem] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [pendingRemoveItem, setPendingRemoveItem] = useState<{ id: string; text: string } | null>(null);
   const { user } = useUser();
   const { t } = useLocale();
 
@@ -121,7 +123,7 @@ export function ShoppingList({
               </span>
               <button
                 type="button"
-                onClick={() => handleRemove(item.id)}
+                onClick={() => setPendingRemoveItem({ id: item.id, text: item.text })}
                 className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-mist hover:text-red-500 transition-opacity p-1"
                 aria-label={`${t.common.remove} ${item.text}`}
               >
@@ -159,6 +161,17 @@ export function ShoppingList({
           {t.common.add}
         </button>
       </form>
+
+      <ConfirmDialog
+        isOpen={pendingRemoveItem !== null}
+        onClose={() => setPendingRemoveItem(null)}
+        onConfirm={() => {
+          if (pendingRemoveItem) handleRemove(pendingRemoveItem.id);
+        }}
+        title={t.confirm.remove_shopping_item_title}
+        message={pendingRemoveItem ? t.confirm.remove_shopping_item_message(pendingRemoveItem.text) : ""}
+        confirmLabel={t.confirm.confirm_remove}
+      />
     </div>
   );
 }

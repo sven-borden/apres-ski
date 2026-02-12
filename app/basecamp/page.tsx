@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { useBasecamp } from "@/lib/hooks/useBasecamp";
 import { useTrip } from "@/lib/hooks/useTrip";
+import { useMeals } from "@/lib/hooks/useMeals";
 import { MapEmbed } from "@/components/basecamp/MapEmbed";
 import { AddressBlock } from "@/components/basecamp/AddressBlock";
 import { EssentialsGrid } from "@/components/basecamp/EssentialsGrid";
@@ -16,9 +17,18 @@ import { formatDateShort } from "@/lib/utils/dates";
 export default function BasecampPage() {
   const { basecamp, loading: basecampLoading } = useBasecamp();
   const { trip, loading: tripLoading } = useTrip();
+  const { meals } = useMeals();
   const [editBasecampOpen, setEditBasecampOpen] = useState(false);
   const [editTripOpen, setEditTripOpen] = useState(false);
   const { locale, t } = useLocale();
+
+  const existingMealDates = useMemo(
+    () =>
+      meals
+        .filter((m) => m.responsibleIds.length > 0 || m.description || m.shoppingList.length > 0)
+        .map((m) => m.date),
+    [meals],
+  );
 
   const loading = basecampLoading || tripLoading;
 
@@ -104,6 +114,7 @@ export default function BasecampPage() {
         isOpen={editTripOpen}
         onClose={() => setEditTripOpen(false)}
         trip={trip ?? null}
+        existingMealDates={existingMealDates}
       />
       <EditBasecampModal
         isOpen={editBasecampOpen}

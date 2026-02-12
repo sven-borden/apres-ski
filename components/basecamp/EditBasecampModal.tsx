@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { updateBasecamp } from "@/lib/actions/basecamp";
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
@@ -104,6 +105,8 @@ export function EditBasecampModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [pendingRemoveCodeIndex, setPendingRemoveCodeIndex] = useState<number | null>(null);
+  const [pendingRemoveContactIndex, setPendingRemoveContactIndex] = useState<number | null>(null);
   const { user } = useUser();
   const { t } = useLocale();
 
@@ -390,7 +393,7 @@ export function EditBasecampModal({
                 />
                 <button
                   type="button"
-                  onClick={() => removeAccessCode(i)}
+                  onClick={() => setPendingRemoveCodeIndex(i)}
                   className="shrink-0 text-sm text-spritz hover:text-spritz/80 font-medium"
                 >
                   {t.common.remove}
@@ -444,7 +447,7 @@ export function EditBasecampModal({
                 />
                 <button
                   type="button"
-                  onClick={() => removeContact(i)}
+                  onClick={() => setPendingRemoveContactIndex(i)}
                   className="text-sm text-spritz hover:text-spritz/80 font-medium"
                 >
                   {t.basecamp.remove_contact}
@@ -498,6 +501,28 @@ export function EditBasecampModal({
           </Button>
         </div>
       </form>
+
+      <ConfirmDialog
+        isOpen={pendingRemoveCodeIndex !== null}
+        onClose={() => setPendingRemoveCodeIndex(null)}
+        onConfirm={() => {
+          if (pendingRemoveCodeIndex !== null) removeAccessCode(pendingRemoveCodeIndex);
+        }}
+        title={t.confirm.remove_access_code_title}
+        message={t.confirm.remove_access_code_message}
+        confirmLabel={t.confirm.confirm_remove}
+      />
+
+      <ConfirmDialog
+        isOpen={pendingRemoveContactIndex !== null}
+        onClose={() => setPendingRemoveContactIndex(null)}
+        onConfirm={() => {
+          if (pendingRemoveContactIndex !== null) removeContact(pendingRemoveContactIndex);
+        }}
+        title={t.confirm.remove_contact_title}
+        message={t.confirm.remove_contact_message}
+        confirmLabel={t.confirm.confirm_remove}
+      />
     </Modal>
   );
 }

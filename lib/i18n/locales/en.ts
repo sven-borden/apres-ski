@@ -227,6 +227,23 @@ const en: Translations = {
     invalid_date_range: "End date must be after start date",
     at_least_one_chef: "At least one chef must be selected",
   },
+  confirm: {
+    remove_access_code_title: "Remove access code",
+    remove_access_code_message: "Are you sure you want to remove this access code?",
+    remove_contact_title: "Remove contact",
+    remove_contact_message: "Are you sure you want to remove this emergency contact?",
+    mark_absent_title: "Mark as absent",
+    mark_absent_message: (name: string) => `Are you sure you want to mark ${name} as absent?`,
+    trip_dates_title: "Assigned meals affected",
+    trip_dates_message: (count: number) =>
+      count === 1
+        ? "1 day with assigned meals will fall outside the new dates. Those meals will no longer be visible."
+        : `${count} days with assigned meals will fall outside the new dates. Those meals will no longer be visible.`,
+    remove_shopping_item_title: "Remove item",
+    remove_shopping_item_message: (item: string) => `Are you sure you want to remove "${item}" from the list?`,
+    confirm_remove: "Remove",
+    confirm_save: "Save anyway",
+  },
 };
 
 export default en;
