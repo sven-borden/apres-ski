@@ -8,6 +8,7 @@ import { updateBasecamp } from "@/lib/actions/basecamp";
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Basecamp } from "@/lib/types";
+import { inputClass, inputErrorClass } from "@/lib/utils/styles";
 import type { Translations } from "@/lib/i18n/locales/fr";
 
 interface FormState {
@@ -85,12 +86,6 @@ function validateCoordinates(
   if (parsed.lng < -180 || parsed.lng > 180) return v.longitude_range;
   return null;
 }
-
-const inputClass =
-  "w-full rounded-xl border border-mist/30 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50";
-
-const inputErrorClass =
-  "w-full rounded-xl border border-red-400 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-red-400/50";
 
 export function EditBasecampModal({
   isOpen,

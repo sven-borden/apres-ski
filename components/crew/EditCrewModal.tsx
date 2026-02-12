@@ -7,6 +7,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
 import { PARTICIPANT_COLORS, getInitials } from "@/lib/utils/colors";
+import { inputClass } from "@/lib/utils/styles";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Participant } from "@/lib/types";
 
@@ -76,7 +77,7 @@ export function EditCrewModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t.crew.placeholder_name}
-            className="w-full rounded-xl border border-mist/30 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50"
+            className={inputClass}
             autoFocus
           />
         </div>

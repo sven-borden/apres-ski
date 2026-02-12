@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
 import { LanguageToggle } from "@/components/ui/LanguageToggle";
 import { PARTICIPANT_COLORS, getInitials } from "@/lib/utils/colors";
+import { inputClass } from "@/lib/utils/styles";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function UserSetupModal({
@@ -46,7 +47,7 @@ export function UserSetupModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t.user_setup.placeholder_name}
-            className="w-full rounded-xl border border-mist/30 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50"
+            className={inputClass}
             autoFocus
           />
         </div>
