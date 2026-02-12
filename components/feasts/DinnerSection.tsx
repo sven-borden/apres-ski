@@ -1,9 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { getInitials } from "@/lib/utils/colors";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { isDefined } from "@/lib/utils/typeGuards";
 import type { Meal, Participant } from "@/lib/types";
 
 export function DinnerSection({
@@ -17,11 +19,15 @@ export function DinnerSection({
 }) {
   const { t } = useLocale();
   const hasResponsible = meal && meal.responsibleIds.length > 0;
-  const responsibleParticipants = hasResponsible
-    ? meal.responsibleIds
-        .map((id) => participants.find((p) => p.id === id))
-        .filter(Boolean) as Participant[]
-    : [];
+  const responsibleParticipants = useMemo(
+    () =>
+      hasResponsible
+        ? meal.responsibleIds
+            .map((id) => participants.find((p) => p.id === id))
+            .filter(isDefined)
+        : [],
+    [meal, participants, hasResponsible],
+  );
 
   return (
     <div className="border-l-4 border-alpine pl-4 space-y-3">
