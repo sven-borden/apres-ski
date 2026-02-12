@@ -7,13 +7,8 @@ import { updateTrip } from "@/lib/actions/trip";
 import { seedMeals } from "@/lib/actions/meals";
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { inputClass, inputErrorClass } from "@/lib/utils/styles";
 import type { Trip } from "@/lib/types";
-
-const inputClass =
-  "w-full rounded-xl border border-mist/30 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50";
-
-const inputErrorClass =
-  "w-full rounded-xl border border-red-400 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-red-400/50";
 
 export function EditTripModal({
   isOpen,
