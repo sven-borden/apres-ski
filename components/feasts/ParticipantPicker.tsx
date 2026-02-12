@@ -25,6 +25,8 @@ export function ParticipantPicker({
             key={p.id}
             type="button"
             onClick={() => onToggle(p.id)}
+            aria-pressed={selected}
+            aria-label={p.name}
             className={cn(
               "flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors border",
               selected
@@ -40,6 +42,7 @@ export function ParticipantPicker({
             <span>{p.name}</span>
             {selected && (
               <svg
+                aria-hidden="true"
                 width="14"
                 height="14"
                 viewBox="0 0 14 14"

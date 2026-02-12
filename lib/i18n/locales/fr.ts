@@ -5,6 +5,7 @@ export interface Translations {
     feasts: string;
     crew: string;
     basecamp: string;
+    main_navigation: string;
   };
   common: {
     save: string;
@@ -20,6 +21,8 @@ export interface Translations {
     preview: string;
     view_all: string;
     loading: string;
+    switch_to_en: string;
+    switch_to_fr: string;
   };
   status: {
     unassigned: string;
@@ -198,6 +201,13 @@ export interface Translations {
     no_one_assigned: string;
     shopping_list: string;
     placeholder_item: string;
+    mark_purchased: (item: string) => string;
+    mark_unpurchased: (item: string) => string;
+  };
+  lineup: {
+    present: string;
+    absent: string;
+    toggle_attendance: (name: string, date: string, status: string) => string;
   };
   errors: {
     save_failed: string;
@@ -223,6 +233,7 @@ const fr: Translations = {
     feasts: "Repas",
     crew: "Crew",
     basecamp: "Chalet",
+    main_navigation: "Navigation principale",
   },
   common: {
     save: "Enregistrer",
@@ -238,6 +249,8 @@ const fr: Translations = {
     preview: "Aperçu",
     view_all: "Tout voir",
     loading: "Chargement\u2026",
+    switch_to_en: "Passer en anglais",
+    switch_to_fr: "Passer en français",
   },
   status: {
     unassigned: "Non attribué",
@@ -416,6 +429,14 @@ const fr: Translations = {
     no_one_assigned: "Personne n'est encore assigné",
     shopping_list: "Liste de courses",
     placeholder_item: "Ajouter un article\u2026",
+    mark_purchased: (item: string) => `Marquer ${item} comme acheté`,
+    mark_unpurchased: (item: string) => `Démarquer ${item}`,
+  },
+  lineup: {
+    present: "Présent",
+    absent: "Absent",
+    toggle_attendance: (name: string, date: string, status: string) =>
+      `Basculer la présence de ${name} le ${date}, actuellement ${status}`,
   },
   errors: {
     save_failed: "Échec de l\u2019enregistrement — veuillez réessayer",

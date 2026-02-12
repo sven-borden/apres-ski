@@ -32,11 +32,12 @@ export function DesktopHeader() {
           Apres-Ski
         </Link>
         <div className="flex items-center gap-1">
-          <nav className="flex items-center gap-1">
+          <nav aria-label={t.nav.main_navigation} className="flex items-center gap-1">
             {navKeys.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={isActive(link.href) ? "page" : undefined}
                 className={cn(
                   "px-4 py-1.5 rounded-full text-sm font-medium transition-colors",
                   isActive(link.href)

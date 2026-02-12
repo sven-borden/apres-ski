@@ -7,6 +7,7 @@ const en: Translations = {
     feasts: "Feasts",
     crew: "Crew",
     basecamp: "Basecamp",
+    main_navigation: "Main navigation",
   },
   common: {
     save: "Save",
@@ -22,6 +23,8 @@ const en: Translations = {
     preview: "Preview",
     view_all: "View all",
     loading: "Loading\u2026",
+    switch_to_en: "Switch to English",
+    switch_to_fr: "Switch to French",
   },
   status: {
     unassigned: "Unassigned",
@@ -200,6 +203,14 @@ const en: Translations = {
     no_one_assigned: "No one assigned yet",
     shopping_list: "Shopping List",
     placeholder_item: "Add item\u2026",
+    mark_purchased: (item: string) => `Mark ${item} as purchased`,
+    mark_unpurchased: (item: string) => `Unmark ${item}`,
+  },
+  lineup: {
+    present: "Present",
+    absent: "Absent",
+    toggle_attendance: (name: string, date: string, status: string) =>
+      `Toggle attendance for ${name} on ${date}, currently ${status}`,
   },
   errors: {
     save_failed: "Failed to save \u2014 please try again",

@@ -46,6 +46,8 @@ export function TimelineRow({
             key={date}
             isPresent={present}
             participantColor={participant.color}
+            participantName={participant.name}
+            date={date}
             isToday={date === todayStr}
             onToggle={() => onToggle(participant.id, date, present)}
           />

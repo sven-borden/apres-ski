@@ -82,6 +82,9 @@ export function ShoppingList({
             <li key={item.id} className="flex items-center gap-2 group">
               <button
                 type="button"
+                role="checkbox"
+                aria-checked={item.checked}
+                aria-label={item.checked ? t.feasts.mark_unpurchased(item.text) : t.feasts.mark_purchased(item.text)}
                 onClick={() => handleToggle(item.id)}
                 className={cn(
                   "w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors",
@@ -92,6 +95,7 @@ export function ShoppingList({
               >
                 {item.checked && (
                   <svg
+                    aria-hidden="true"
                     width="12"
                     height="12"
                     viewBox="0 0 12 12"
@@ -118,7 +122,7 @@ export function ShoppingList({
               <button
                 type="button"
                 onClick={() => handleRemove(item.id)}
-                className="opacity-0 group-hover:opacity-100 text-mist hover:text-red-500 transition-opacity p-1"
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-mist hover:text-red-500 transition-opacity p-1"
                 aria-label={`${t.common.remove} ${item.text}`}
               >
                 <svg

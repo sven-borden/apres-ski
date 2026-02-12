@@ -15,7 +15,7 @@ const tabs: {
     key: "hub",
     href: "/",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
         <polyline points="9 22 9 12 15 12 15 22" />
       </svg>
@@ -25,7 +25,7 @@ const tabs: {
     key: "feasts",
     href: "/feasts",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
         <path d="M7 2v20" />
         <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
@@ -36,7 +36,7 @@ const tabs: {
     key: "crew",
     href: "/crew",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -48,7 +48,7 @@ const tabs: {
     key: "basecamp",
     href: "/basecamp",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
         <circle cx="12" cy="10" r="3" />
       </svg>
@@ -66,12 +66,16 @@ export function MobileTabBar() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-glass backdrop-blur-md border-t border-glass-border md:hidden pb-[env(safe-area-inset-bottom)]">
+    <nav
+      aria-label={t.nav.main_navigation}
+      className="fixed bottom-0 left-0 right-0 z-40 bg-glass backdrop-blur-md border-t border-glass-border md:hidden pb-[env(safe-area-inset-bottom)]"
+    >
       <div className="grid grid-cols-4 h-16">
         {tabs.map((tab) => (
           <Link
             key={tab.href}
             href={tab.href}
+            aria-current={isActive(tab.href) ? "page" : undefined}
             className={cn(
               "flex flex-col items-center justify-center gap-0.5 py-1.5 transition-colors min-w-0",
               isActive(tab.href) ? "text-alpine" : "text-mist",
