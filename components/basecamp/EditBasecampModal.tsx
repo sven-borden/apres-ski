@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { updateBasecamp } from "@/lib/actions/basecamp";
+import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Basecamp } from "@/lib/types";
 
@@ -86,6 +87,7 @@ export function EditBasecampModal({
   const [form, setForm] = useState<FormState>(() => basecampToForm(basecamp));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useUser();
   const { t } = useLocale();
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -171,12 +173,11 @@ export function EditBasecampModal({
           ),
           notes: form.notes,
         },
-        "anonymous",
+        user?.id ?? "anonymous",
       );
       onClose();
-    } catch (err) {
-      console.error("Failed to save basecamp:", err);
-      setError(err instanceof Error ? err.message : "Failed to save");
+    } catch {
+      setError(t.errors.save_failed);
     } finally {
       setSaving(false);
     }

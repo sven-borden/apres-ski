@@ -7,6 +7,7 @@ import {
   toggleShoppingItem,
   removeShoppingItem,
 } from "@/lib/actions/meals";
+import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { ShoppingItem } from "@/lib/types";
 
@@ -18,11 +19,19 @@ export function ShoppingList({
   items: ShoppingItem[];
 }) {
   const [newItem, setNewItem] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useUser();
   const { t } = useLocale();
 
+  const userId = user?.id ?? "anonymous";
   const unchecked = items.filter((i) => !i.checked);
   const checked = items.filter((i) => i.checked);
   const sorted = [...unchecked, ...checked];
+
+  function showError(message: string) {
+    setError(message);
+    setTimeout(() => setError(null), 3000);
+  }
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -36,12 +45,36 @@ export function ShoppingList({
     };
 
     setNewItem("");
-    await addShoppingItem(date, item, "anonymous");
+    try {
+      await addShoppingItem(date, item, userId);
+    } catch {
+      showError(t.errors.add_failed);
+    }
+  }
+
+  async function handleToggle(itemId: string) {
+    try {
+      await toggleShoppingItem(date, itemId, userId);
+    } catch {
+      showError(t.errors.toggle_failed);
+    }
+  }
+
+  async function handleRemove(itemId: string) {
+    try {
+      await removeShoppingItem(date, itemId, userId);
+    } catch {
+      showError(t.errors.delete_failed);
+    }
   }
 
   return (
     <div className="space-y-3">
       <h3 className="font-semibold text-midnight">{t.feasts.shopping_list}</h3>
+
+      {error && (
+        <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1">{error}</p>
+      )}
 
       {sorted.length > 0 && (
         <ul className="space-y-1.5">
@@ -49,7 +82,7 @@ export function ShoppingList({
             <li key={item.id} className="flex items-center gap-2 group">
               <button
                 type="button"
-                onClick={() => toggleShoppingItem(date, item.id, "anonymous")}
+                onClick={() => handleToggle(item.id)}
                 className={cn(
                   "w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors",
                   item.checked
@@ -84,7 +117,7 @@ export function ShoppingList({
               </span>
               <button
                 type="button"
-                onClick={() => removeShoppingItem(date, item.id, "anonymous")}
+                onClick={() => handleRemove(item.id)}
                 className="opacity-0 group-hover:opacity-100 text-mist hover:text-red-500 transition-opacity p-1"
                 aria-label={`${t.common.remove} ${item.text}`}
               >

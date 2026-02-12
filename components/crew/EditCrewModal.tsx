@@ -22,12 +22,14 @@ export function EditCrewModal({
   const [name, setName] = useState(participant.name);
   const [selectedColor, setSelectedColor] = useState<string>(participant.color);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { t } = useLocale();
 
   useEffect(() => {
     if (isOpen) {
       setName(participant.name);
       setSelectedColor(participant.color);
+      setError(null);
     }
   }, [isOpen, participant.name, participant.color]);
 
@@ -40,6 +42,7 @@ export function EditCrewModal({
     if (!canSubmit) return;
 
     setSaving(true);
+    setError(null);
     try {
       const db = getDb();
       const trimmed = name.trim();
@@ -50,6 +53,8 @@ export function EditCrewModal({
         updatedAt: serverTimestamp(),
       });
       onClose();
+    } catch {
+      setError(t.errors.save_failed);
     } finally {
       setSaving(false);
     }
@@ -104,6 +109,10 @@ export function EditCrewModal({
             <Avatar initials={initials} color={selectedColor} size="lg" />
             <span className="text-sm text-mist">{t.common.preview}</span>
           </div>
+        )}
+
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
         )}
 
         <div className="flex gap-3">

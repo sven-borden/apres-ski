@@ -28,6 +28,7 @@ export function SpotlightCard({
   const { user } = useUser();
   const { locale, t } = useLocale();
   const [claiming, setClaiming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const responsibleNames =
     meal && meal.responsibleIds.length > 0
@@ -42,12 +43,16 @@ export function SpotlightCard({
     e.stopPropagation();
     if (!user || claiming) return;
     setClaiming(true);
+    setError(null);
     try {
       await updateDinner(
         date,
         { responsibleIds: [user.id], description: "" },
         user.id,
       );
+    } catch {
+      setError(t.errors.claim_failed);
+      setTimeout(() => setError(null), 3000);
     } finally {
       setClaiming(false);
     }
@@ -116,6 +121,9 @@ export function SpotlightCard({
               >
                 {claiming ? t.hub.claiming : t.hub.i_cook_tonight}
               </button>
+            )}
+            {error && (
+              <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1">{error}</p>
             )}
           </div>
         )}

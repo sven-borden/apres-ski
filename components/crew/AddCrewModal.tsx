@@ -21,6 +21,7 @@ export function AddCrewModal({
     PARTICIPANT_COLORS[0].hex,
   );
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { t } = useLocale();
 
   const initials = getInitials(name);
@@ -31,6 +32,7 @@ export function AddCrewModal({
     if (!canSubmit) return;
 
     setSaving(true);
+    setError(null);
     try {
       const id = crypto.randomUUID();
       const db = getDb();
@@ -45,6 +47,8 @@ export function AddCrewModal({
       setName("");
       setSelectedColor(PARTICIPANT_COLORS[0].hex);
       onClose();
+    } catch {
+      setError(t.errors.add_failed);
     } finally {
       setSaving(false);
     }
@@ -99,6 +103,10 @@ export function AddCrewModal({
             <Avatar initials={initials} color={selectedColor} size="lg" />
             <span className="text-sm text-mist">{t.common.preview}</span>
           </div>
+        )}
+
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
         )}
 
         <div className="flex gap-3">
