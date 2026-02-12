@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { getDateRange, formatDateShort, isToday } from "@/lib/utils/dates";
 import { TimelineRow } from "@/components/lineup/TimelineRow";
 import { toggleAttendance } from "@/lib/actions/attendance";
 import { sortParticipants } from "@/lib/utils/colors";
+import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Trip, Participant, Attendance } from "@/lib/types";
 
@@ -22,7 +23,9 @@ export function TimelineMatrix({
   capacity: number | null;
   onEditParticipant?: (participant: Participant) => void;
 }) {
+  const { user } = useUser();
   const { locale, t } = useLocale();
+  const [error, setError] = useState<string | null>(null);
 
   const { dates, todayStr, attendanceMap, dailyCounts } = useMemo(() => {
     const dates = getDateRange(trip.startDate, trip.endDate);
@@ -50,15 +53,24 @@ export function TimelineMatrix({
     return { dates, todayStr, attendanceMap, dailyCounts };
   }, [trip.startDate, trip.endDate, attendance]);
 
-  function handleToggle(participantId: string, date: string, currentlyPresent: boolean) {
+  async function handleToggle(participantId: string, date: string, currentlyPresent: boolean) {
     const p = participants.find((p) => p.id === participantId);
     if (!p) return;
-    toggleAttendance({ id: p.id, name: p.name, color: p.color }, date, currentlyPresent);
+    try {
+      await toggleAttendance({ id: p.id, name: p.name, color: p.color }, date, currentlyPresent, user?.id ?? "anonymous");
+    } catch {
+      setError(t.errors.toggle_failed);
+      setTimeout(() => setError(null), 3000);
+    }
   }
 
   return (
     <div className="overflow-x-auto -mx-5 px-5">
       <div className="flex flex-col min-w-max w-fit mx-auto gap-2">
+        {error && (
+          <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1">{error}</p>
+        )}
+
         {/* Date header row */}
         <div className="flex items-end gap-2">
           <div className="w-32 shrink-0" />

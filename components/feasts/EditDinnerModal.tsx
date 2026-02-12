@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { ParticipantPicker } from "@/components/feasts/ParticipantPicker";
 import { updateDinner } from "@/lib/actions/meals";
+import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Meal, Participant } from "@/lib/types";
 
@@ -29,6 +30,8 @@ export function EditDinnerModal({
   );
   const [description, setDescription] = useState(meal?.description ?? "");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useUser();
   const { t } = useLocale();
 
   function toggleParticipant(id: string) {
@@ -40,13 +43,16 @@ export function EditDinnerModal({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setError(null);
     try {
       await updateDinner(
         date,
         { responsibleIds, description: description.trim() },
-        "anonymous",
+        user?.id ?? "anonymous",
       );
       onClose();
+    } catch {
+      setError(t.errors.save_failed);
     } finally {
       setSaving(false);
     }
@@ -79,6 +85,10 @@ export function EditDinnerModal({
             className={inputClass}
           />
         </div>
+
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+        )}
 
         <div className="flex gap-3 pt-2">
           <Button variant="secondary" onClick={onClose} className="flex-1">

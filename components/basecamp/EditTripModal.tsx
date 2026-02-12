@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { updateTrip } from "@/lib/actions/trip";
 import { seedMeals } from "@/lib/actions/meals";
+import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Trip } from "@/lib/types";
 
@@ -24,6 +25,8 @@ export function EditTripModal({
   const [startDate, setStartDate] = useState(trip?.startDate ?? "");
   const [endDate, setEndDate] = useState(trip?.endDate ?? "");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useUser();
   const { t } = useLocale();
 
   const isValid =
@@ -34,10 +37,13 @@ export function EditTripModal({
     if (!isValid) return;
 
     setSaving(true);
+    setError(null);
     try {
-      await updateTrip({ name: name.trim(), startDate, endDate });
+      await updateTrip({ name: name.trim(), startDate, endDate }, user?.id ?? "anonymous");
       await seedMeals(startDate, endDate);
       onClose();
+    } catch {
+      setError(t.errors.save_failed);
     } finally {
       setSaving(false);
     }
@@ -86,6 +92,10 @@ export function EditTripModal({
             />
           </div>
         </div>
+
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+        )}
 
         <div className="flex gap-3 pt-2">
           <Button variant="secondary" onClick={onClose} className="flex-1">

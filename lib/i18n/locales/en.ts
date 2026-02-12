@@ -201,6 +201,13 @@ const en: Translations = {
     shopping_list: "Shopping List",
     placeholder_item: "Add item\u2026",
   },
+  errors: {
+    save_failed: "Failed to save \u2014 please try again",
+    claim_failed: "Failed to claim \u2014 please try again",
+    add_failed: "Failed to add \u2014 please try again",
+    toggle_failed: "Failed to update \u2014 please try again",
+    delete_failed: "Failed to delete \u2014 please try again",
+  },
 };
 
 export default en;

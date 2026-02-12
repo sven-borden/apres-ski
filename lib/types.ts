@@ -6,6 +6,7 @@ export interface Trip {
   endDate: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  updatedBy: string;
 }
 
 export interface Participant {

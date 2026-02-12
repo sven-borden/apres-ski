@@ -8,14 +8,19 @@ export async function updateBasecamp(
   fields: UpdatableFields,
   updatedBy: string,
 ) {
-  const db = getDb();
-  await setDoc(
-    doc(db, "basecamp", "current"),
-    {
-      ...fields,
-      updatedAt: serverTimestamp(),
-      updatedBy,
-    },
-    { merge: true },
-  );
+  try {
+    const db = getDb();
+    await setDoc(
+      doc(db, "basecamp", "current"),
+      {
+        ...fields,
+        updatedAt: serverTimestamp(),
+        updatedBy,
+      },
+      { merge: true },
+    );
+  } catch (err) {
+    console.error("Failed to update basecamp:", err);
+    throw err;
+  }
 }

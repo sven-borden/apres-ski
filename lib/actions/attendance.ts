@@ -5,22 +5,29 @@ export async function toggleAttendance(
   participant: { id: string; name: string; color: string },
   date: string,
   currentlyPresent: boolean,
+  updatedBy: string,
 ) {
-  const db = getDb();
-  const docId = `${participant.id}_${date}`;
-  const ref = doc(db, "attendance", docId);
+  try {
+    const db = getDb();
+    const docId = `${participant.id}_${date}`;
+    const ref = doc(db, "attendance", docId);
 
-  if (currentlyPresent) {
-    await deleteDoc(ref);
-  } else {
-    await setDoc(ref, {
-      participantId: participant.id,
-      participantName: participant.name,
-      participantColor: participant.color,
-      date,
-      present: true,
-      tripId: "current",
-      updatedAt: serverTimestamp(),
-    });
+    if (currentlyPresent) {
+      await deleteDoc(ref);
+    } else {
+      await setDoc(ref, {
+        participantId: participant.id,
+        participantName: participant.name,
+        participantColor: participant.color,
+        date,
+        present: true,
+        tripId: "current",
+        updatedAt: serverTimestamp(),
+        updatedBy,
+      });
+    }
+  } catch (err) {
+    console.error("Failed to toggle attendance:", err);
+    throw err;
   }
 }

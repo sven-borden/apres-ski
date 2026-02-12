@@ -199,6 +199,13 @@ export interface Translations {
     shopping_list: string;
     placeholder_item: string;
   };
+  errors: {
+    save_failed: string;
+    claim_failed: string;
+    add_failed: string;
+    toggle_failed: string;
+    delete_failed: string;
+  };
 }
 
 const fr: Translations = {
@@ -401,6 +408,13 @@ const fr: Translations = {
     no_one_assigned: "Personne n'est encore assigné",
     shopping_list: "Liste de courses",
     placeholder_item: "Ajouter un article\u2026",
+  },
+  errors: {
+    save_failed: "Échec de l\u2019enregistrement — veuillez réessayer",
+    claim_failed: "Échec de la réservation — veuillez réessayer",
+    add_failed: "Échec de l\u2019ajout — veuillez réessayer",
+    toggle_failed: "Échec de la mise à jour — veuillez réessayer",
+    delete_failed: "Échec de la suppression — veuillez réessayer",
   },
 };
 
