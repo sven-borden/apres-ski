@@ -42,7 +42,7 @@ export function AddCrewModal({
         color: selectedColor,
         avatar: getInitials(name.trim()),
         joinedAt: serverTimestamp(),
-        tripId: "",
+        tripId: "current",
       });
       setName("");
       setSelectedColor(PARTICIPANT_COLORS[0].hex);

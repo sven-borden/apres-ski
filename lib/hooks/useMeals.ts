@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
 import type { Meal } from "@/lib/types";
 
@@ -25,8 +25,9 @@ export function useMeals() {
 
   useEffect(() => {
     const db = getDb();
+    const q = query(collection(db, "meals"), where("tripId", "==", "current"));
     const unsub = onSnapshot(
-      collection(db, "meals"),
+      q,
       (snap) => {
         setMeals(
           snap.docs.map((d) => normalizeMeal(d.data(), d.id)),

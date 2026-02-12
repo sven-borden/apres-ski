@@ -105,7 +105,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         color: data.color,
         avatar: data.avatar,
         joinedAt: serverTimestamp(),
-        tripId: "",
+        tripId: "current",
       });
     },
     [],

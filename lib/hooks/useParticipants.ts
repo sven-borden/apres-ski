@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
 import type { Participant } from "@/lib/types";
 
@@ -23,8 +23,9 @@ export function useParticipants() {
 
   useEffect(() => {
     const db = getDb();
+    const q = query(collection(db, "participants"), where("tripId", "in", ["current", ""]));
     const unsub = onSnapshot(
-      collection(db, "participants"),
+      q,
       (snap) => {
         setParticipants(
           snap.docs.map((d) => normalizeParticipant(d.data(), d.id)),
