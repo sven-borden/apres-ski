@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
 import type { Attendance } from "@/lib/types";
 
@@ -12,8 +12,9 @@ export function useAttendance() {
 
   useEffect(() => {
     const db = getDb();
+    const q = query(collection(db, "attendance"), where("tripId", "==", "current"));
     const unsub = onSnapshot(
-      collection(db, "attendance"),
+      q,
       (snap) => {
         setAttendance(
           snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Attendance),
