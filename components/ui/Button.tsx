@@ -9,6 +9,7 @@ export function Button({
   disabled,
   type = "button",
   className,
+  "aria-label": ariaLabel,
 }: {
   variant?: "primary" | "secondary";
   children: React.ReactNode;
@@ -16,12 +17,14 @@ export function Button({
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
   className?: string;
+  "aria-label"?: string;
 }) {
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
       className={cn(
         "rounded-full px-5 py-2.5 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
         variant === "primary" && "bg-alpine text-white hover:bg-alpine/90",

@@ -6,10 +6,12 @@ export function Avatar({
   initials,
   color,
   size = "md",
+  name,
 }: {
   initials: string;
   color: string;
   size?: "sm" | "md" | "lg";
+  name?: string;
 }) {
   const sizeClasses = {
     sm: "w-8 h-8 text-xs",
@@ -24,6 +26,9 @@ export function Avatar({
         sizeClasses[size],
       )}
       style={{ backgroundColor: color }}
+      {...(name
+        ? { role: "img", "aria-label": name }
+        : { "aria-hidden": true })}
     >
       {initials}
     </div>

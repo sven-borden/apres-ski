@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils/cn";
-import { formatDateShort, isToday } from "@/lib/utils/dates";
+import { formatDateShort, formatDateLong, isToday } from "@/lib/utils/dates";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function DateScroller({
@@ -37,6 +37,8 @@ export function DateScroller({
             ref={selected ? selectedRef : undefined}
             type="button"
             onClick={() => onSelectDate(date)}
+            aria-current={selected ? "date" : undefined}
+            aria-label={formatDateLong(date, locale)}
             className={cn(
               "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
               selected

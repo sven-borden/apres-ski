@@ -31,6 +31,7 @@ export function DinnerSection({
           variant="secondary"
           onClick={onEdit}
           className="text-xs px-3 py-1.5"
+          aria-label={t.feasts.edit_dinner}
         >
           {t.common.edit}
         </Button>
