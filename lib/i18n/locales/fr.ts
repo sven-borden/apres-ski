@@ -206,6 +206,14 @@ export interface Translations {
     toggle_failed: string;
     delete_failed: string;
   };
+  validation: {
+    required_field: string;
+    invalid_coordinates: string;
+    latitude_range: string;
+    longitude_range: string;
+    invalid_date_range: string;
+    at_least_one_chef: string;
+  };
 }
 
 const fr: Translations = {
@@ -415,6 +423,14 @@ const fr: Translations = {
     add_failed: "Échec de l\u2019ajout — veuillez réessayer",
     toggle_failed: "Échec de la mise à jour — veuillez réessayer",
     delete_failed: "Échec de la suppression — veuillez réessayer",
+  },
+  validation: {
+    required_field: "Ce champ est requis",
+    invalid_coordinates: "Format invalide. Utilisez : latitude, longitude",
+    latitude_range: "La latitude doit être entre -90 et 90",
+    longitude_range: "La longitude doit être entre -180 et 180",
+    invalid_date_range: "La date de fin doit être après la date de début",
+    at_least_one_chef: "Au moins un chef doit être sélectionné",
   },
 };
 

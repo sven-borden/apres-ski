@@ -12,6 +12,9 @@ import type { Trip } from "@/lib/types";
 const inputClass =
   "w-full rounded-xl border border-mist/30 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50";
 
+const inputErrorClass =
+  "w-full rounded-xl border border-red-400 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-red-400/50";
+
 export function EditTripModal({
   isOpen,
   onClose,
@@ -26,15 +29,66 @@ export function EditTripModal({
   const [endDate, setEndDate] = useState(trip?.endDate ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { user } = useUser();
   const { t } = useLocale();
 
-  const isValid =
-    name.trim().length > 0 && startDate && endDate && startDate <= endDate;
+  function setFieldError(field: string, error: string | null) {
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      if (error) {
+        next[field] = error;
+      } else {
+        delete next[field];
+      }
+      return next;
+    });
+  }
+
+  function validateName() {
+    if (!name.trim()) {
+      setFieldError("name", t.validation.required_field);
+    } else {
+      setFieldError("name", null);
+    }
+  }
+
+  function validateStartDate() {
+    if (!startDate) {
+      setFieldError("startDate", t.validation.required_field);
+    } else {
+      setFieldError("startDate", null);
+    }
+  }
+
+  function validateEndDate() {
+    if (!endDate) {
+      setFieldError("endDate", t.validation.required_field);
+    } else if (startDate && endDate < startDate) {
+      setFieldError("endDate", t.validation.invalid_date_range);
+    } else {
+      setFieldError("endDate", null);
+    }
+  }
+
+  function validateAll(): boolean {
+    const errors: Record<string, string> = {};
+    if (!name.trim()) errors.name = t.validation.required_field;
+    if (!startDate) errors.startDate = t.validation.required_field;
+    if (!endDate) {
+      errors.endDate = t.validation.required_field;
+    } else if (startDate && endDate < startDate) {
+      errors.endDate = t.validation.invalid_date_range;
+    }
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
+
+  const hasFieldErrors = Object.keys(fieldErrors).length > 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!isValid) return;
+    if (!validateAll()) return;
 
     setSaving(true);
     setError(null);
@@ -61,9 +115,18 @@ export function EditTripModal({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            onBlur={validateName}
             placeholder={t.trip.placeholder_name}
-            className={inputClass}
+            maxLength={200}
+            aria-invalid={!!fieldErrors.name}
+            aria-describedby={fieldErrors.name ? "trip-name-error" : undefined}
+            className={fieldErrors.name ? inputErrorClass : inputClass}
           />
+          {fieldErrors.name && (
+            <p id="trip-name-error" role="alert" className="mt-1 text-sm text-red-600">
+              {fieldErrors.name}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -76,8 +139,16 @@ export function EditTripModal({
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className={inputClass}
+              onBlur={validateStartDate}
+              aria-invalid={!!fieldErrors.startDate}
+              aria-describedby={fieldErrors.startDate ? "trip-start-date-error" : undefined}
+              className={fieldErrors.startDate ? inputErrorClass : inputClass}
             />
+            {fieldErrors.startDate && (
+              <p id="trip-start-date-error" role="alert" className="mt-1 text-sm text-red-600">
+                {fieldErrors.startDate}
+              </p>
+            )}
           </div>
           <div>
             <label htmlFor="trip-end-date" className="block text-sm font-medium text-midnight mb-1.5">
@@ -88,8 +159,16 @@ export function EditTripModal({
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className={inputClass}
+              onBlur={validateEndDate}
+              aria-invalid={!!fieldErrors.endDate}
+              aria-describedby={fieldErrors.endDate ? "trip-end-date-error" : undefined}
+              className={fieldErrors.endDate ? inputErrorClass : inputClass}
             />
+            {fieldErrors.endDate && (
+              <p id="trip-end-date-error" role="alert" className="mt-1 text-sm text-red-600">
+                {fieldErrors.endDate}
+              </p>
+            )}
           </div>
         </div>
 
@@ -101,7 +180,7 @@ export function EditTripModal({
           <Button variant="secondary" onClick={onClose} className="flex-1">
             {t.common.cancel}
           </Button>
-          <Button type="submit" disabled={saving || !isValid} className="flex-1">
+          <Button type="submit" disabled={saving || hasFieldErrors} className="flex-1">
             {saving ? t.common.saving : t.common.save}
           </Button>
         </div>

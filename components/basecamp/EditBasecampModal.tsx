@@ -7,6 +7,7 @@ import { updateBasecamp } from "@/lib/actions/basecamp";
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Basecamp } from "@/lib/types";
+import type { Translations } from "@/lib/i18n/locales/fr";
 
 interface FormState {
   name: string;
@@ -72,8 +73,23 @@ function parseCoordinates(
   return { lat, lng };
 }
 
+function validateCoordinates(
+  text: string,
+  v: Translations["validation"],
+): string | null {
+  if (!text.trim()) return null; // optional field
+  const parsed = parseCoordinates(text);
+  if (!parsed) return v.invalid_coordinates;
+  if (parsed.lat < -90 || parsed.lat > 90) return v.latitude_range;
+  if (parsed.lng < -180 || parsed.lng > 180) return v.longitude_range;
+  return null;
+}
+
 const inputClass =
   "w-full rounded-xl border border-mist/30 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50";
+
+const inputErrorClass =
+  "w-full rounded-xl border border-red-400 bg-white/50 px-4 py-2.5 text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-red-400/50";
 
 export function EditBasecampModal({
   isOpen,
@@ -87,11 +103,50 @@ export function EditBasecampModal({
   const [form, setForm] = useState<FormState>(() => basecampToForm(basecamp));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { user } = useUser();
   const { t } = useLocale();
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function setFieldError(field: string, error: string | null) {
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      if (error) {
+        next[field] = error;
+      } else {
+        delete next[field];
+      }
+      return next;
+    });
+  }
+
+  function validateName() {
+    if (!form.name.trim()) {
+      setFieldError("name", t.validation.required_field);
+    } else {
+      setFieldError("name", null);
+    }
+  }
+
+  function validateCoords() {
+    const err = validateCoordinates(form.coordinatesText, t.validation);
+    setFieldError("coordinates", err);
+  }
+
+  function validateAll(): boolean {
+    const errors: Record<string, string> = {};
+    if (!form.name.trim()) {
+      errors.name = t.validation.required_field;
+    }
+    const coordErr = validateCoordinates(form.coordinatesText, t.validation);
+    if (coordErr) {
+      errors.coordinates = coordErr;
+    }
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   }
 
   function addAccessCode() {
@@ -151,15 +206,19 @@ export function EditBasecampModal({
     }));
   }
 
+  const hasFieldErrors = Object.keys(fieldErrors).length > 0;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validateAll()) return;
+
     setSaving(true);
     setError(null);
     try {
       const coords = parseCoordinates(form.coordinatesText);
       await updateBasecamp(
         {
-          name: form.name,
+          name: form.name.trim(),
           address: form.address,
           coordinates: coords ?? { lat: 0, lng: 0 },
           mapsUrl: form.mapsUrl,
@@ -187,14 +246,18 @@ export function EditBasecampModal({
     <Modal isOpen={isOpen} onClose={onClose} title={t.basecamp.edit_basecamp}>
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Chalet Name */}
-        <Field id="basecamp-name" label={t.basecamp.chalet_name}>
+        <Field id="basecamp-name" label={t.basecamp.chalet_name} error={fieldErrors.name}>
           <input
             id="basecamp-name"
             type="text"
             value={form.name}
             onChange={(e) => update("name", e.target.value)}
+            onBlur={validateName}
             placeholder={t.basecamp.placeholder_chalet}
-            className={inputClass}
+            maxLength={200}
+            aria-invalid={!!fieldErrors.name}
+            aria-describedby={fieldErrors.name ? "basecamp-name-error" : undefined}
+            className={fieldErrors.name ? inputErrorClass : inputClass}
           />
         </Field>
 
@@ -205,20 +268,25 @@ export function EditBasecampModal({
             value={form.address}
             onChange={(e) => update("address", e.target.value)}
             placeholder={t.basecamp.placeholder_address}
+            maxLength={500}
             className={inputClass}
             rows={2}
           />
         </Field>
 
         {/* Coordinates */}
-        <Field id="basecamp-coordinates" label={t.basecamp.coordinates} hint={t.basecamp.coordinates_hint}>
+        <Field id="basecamp-coordinates" label={t.basecamp.coordinates} hint={t.basecamp.coordinates_hint} error={fieldErrors.coordinates}>
           <input
             id="basecamp-coordinates"
             type="text"
             value={form.coordinatesText}
             onChange={(e) => update("coordinatesText", e.target.value)}
+            onBlur={validateCoords}
             placeholder={t.basecamp.placeholder_coordinates_example}
-            className={inputClass}
+            maxLength={200}
+            aria-invalid={!!fieldErrors.coordinates}
+            aria-describedby={fieldErrors.coordinates ? "basecamp-coordinates-error" : undefined}
+            className={fieldErrors.coordinates ? inputErrorClass : inputClass}
           />
         </Field>
 
@@ -230,6 +298,7 @@ export function EditBasecampModal({
             value={form.mapsUrl}
             onChange={(e) => update("mapsUrl", e.target.value)}
             placeholder="https://maps.app.goo.gl/..."
+            maxLength={500}
             className={inputClass}
           />
         </Field>
@@ -242,16 +311,18 @@ export function EditBasecampModal({
             value={form.wifiNetwork}
             onChange={(e) => update("wifiNetwork", e.target.value)}
             placeholder={t.basecamp.placeholder_network}
+            maxLength={200}
             className={inputClass}
           />
         </Field>
         <Field id="basecamp-wifi-password" label={t.basecamp.wifi_password}>
           <input
             id="basecamp-wifi-password"
-            type="text"
+            type="password"
             value={form.wifiPassword}
             onChange={(e) => update("wifiPassword", e.target.value)}
             placeholder={t.basecamp.placeholder_password}
+            maxLength={200}
             className={inputClass}
           />
         </Field>
@@ -261,20 +332,18 @@ export function EditBasecampModal({
           <Field id="basecamp-check-in" label={t.basecamp.check_in}>
             <input
               id="basecamp-check-in"
-              type="text"
+              type="time"
               value={form.checkIn}
               onChange={(e) => update("checkIn", e.target.value)}
-              placeholder={t.basecamp.placeholder_check_in_time}
               className={inputClass}
             />
           </Field>
           <Field id="basecamp-check-out" label={t.basecamp.check_out}>
             <input
               id="basecamp-check-out"
-              type="text"
+              type="time"
               value={form.checkOut}
               onChange={(e) => update("checkOut", e.target.value)}
-              placeholder={t.basecamp.placeholder_check_out_time}
               className={inputClass}
             />
           </Field>
@@ -307,6 +376,7 @@ export function EditBasecampModal({
                   onChange={(e) => updateAccessCode(i, "label", e.target.value)}
                   placeholder={t.basecamp.placeholder_label}
                   aria-label={`${t.basecamp.placeholder_label} ${i + 1}`}
+                  maxLength={200}
                   className={inputClass}
                 />
                 <input
@@ -315,6 +385,7 @@ export function EditBasecampModal({
                   onChange={(e) => updateAccessCode(i, "code", e.target.value)}
                   placeholder={t.basecamp.placeholder_code}
                   aria-label={`${t.basecamp.placeholder_code} ${i + 1}`}
+                  maxLength={200}
                   className={inputClass}
                 />
                 <button
@@ -350,6 +421,7 @@ export function EditBasecampModal({
                   onChange={(e) => updateContact(i, "name", e.target.value)}
                   placeholder={t.basecamp.placeholder_contact_name}
                   aria-label={`${t.basecamp.placeholder_contact_name} ${i + 1}`}
+                  maxLength={200}
                   className={inputClass}
                 />
                 <input
@@ -358,6 +430,7 @@ export function EditBasecampModal({
                   onChange={(e) => updateContact(i, "phone", e.target.value)}
                   placeholder={t.basecamp.placeholder_phone}
                   aria-label={`${t.basecamp.placeholder_phone} ${i + 1}`}
+                  maxLength={50}
                   className={inputClass}
                 />
                 <input
@@ -366,6 +439,7 @@ export function EditBasecampModal({
                   onChange={(e) => updateContact(i, "role", e.target.value)}
                   placeholder={t.basecamp.placeholder_role}
                   aria-label={`${t.basecamp.placeholder_role} ${i + 1}`}
+                  maxLength={200}
                   className={inputClass}
                 />
                 <button
@@ -394,6 +468,7 @@ export function EditBasecampModal({
             value={form.notes}
             onChange={(e) => update("notes", e.target.value)}
             placeholder={t.basecamp.placeholder_notes}
+            maxLength={1000}
             className={inputClass}
             rows={3}
           />
@@ -416,7 +491,7 @@ export function EditBasecampModal({
           </Button>
           <Button
             type="submit"
-            disabled={saving}
+            disabled={saving || hasFieldErrors}
             className="flex-1"
           >
             {saving ? t.common.saving : t.common.save}
@@ -431,11 +506,13 @@ function Field({
   id,
   label,
   hint,
+  error,
   children,
 }: {
   id: string;
   label: string;
   hint?: string;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -447,6 +524,11 @@ function Field({
         )}
       </label>
       {children}
+      {error && (
+        <p id={`${id}-error`} role="alert" className="mt-1 text-sm text-red-600">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
