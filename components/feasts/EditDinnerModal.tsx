@@ -31,17 +31,42 @@ export function EditDinnerModal({
   const [description, setDescription] = useState(meal?.description ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { user } = useUser();
   const { t } = useLocale();
 
   function toggleParticipant(id: string) {
-    setResponsibleIds((prev) =>
-      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id],
-    );
+    setResponsibleIds((prev) => {
+      const next = prev.includes(id)
+        ? prev.filter((pid) => pid !== id)
+        : [...prev, id];
+      // Clear chef error when selection becomes non-empty
+      if (next.length > 0 && fieldErrors.chefs) {
+        setFieldErrors((fe) => {
+          const updated = { ...fe };
+          delete updated.chefs;
+          return updated;
+        });
+      }
+      return next;
+    });
   }
+
+  function validateAll(): boolean {
+    const errors: Record<string, string> = {};
+    if (responsibleIds.length === 0) {
+      errors.chefs = t.validation.at_least_one_chef;
+    }
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
+
+  const hasFieldErrors = Object.keys(fieldErrors).length > 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validateAll()) return;
+
     setSaving(true);
     setError(null);
     try {
@@ -70,6 +95,11 @@ export function EditDinnerModal({
             selectedIds={responsibleIds}
             onToggle={toggleParticipant}
           />
+          {fieldErrors.chefs && (
+            <p role="alert" className="mt-1 text-sm text-red-600">
+              {fieldErrors.chefs}
+            </p>
+          )}
         </fieldset>
 
         <div>
@@ -82,6 +112,7 @@ export function EditDinnerModal({
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t.feasts.placeholder_meal}
             rows={3}
+            maxLength={500}
             className={inputClass}
           />
         </div>
@@ -94,7 +125,7 @@ export function EditDinnerModal({
           <Button variant="secondary" onClick={onClose} className="flex-1">
             {t.common.cancel}
           </Button>
-          <Button type="submit" disabled={saving} className="flex-1">
+          <Button type="submit" disabled={saving || hasFieldErrors} className="flex-1">
             {saving ? t.common.saving : t.common.save}
           </Button>
         </div>

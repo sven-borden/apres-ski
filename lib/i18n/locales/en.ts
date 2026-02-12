@@ -208,6 +208,14 @@ const en: Translations = {
     toggle_failed: "Failed to update \u2014 please try again",
     delete_failed: "Failed to delete \u2014 please try again",
   },
+  validation: {
+    required_field: "This field is required",
+    invalid_coordinates: "Invalid format. Use: latitude, longitude",
+    latitude_range: "Latitude must be between -90 and 90",
+    longitude_range: "Longitude must be between -180 and 180",
+    invalid_date_range: "End date must be after start date",
+    at_least_one_chef: "At least one chef must be selected",
+  },
 };
 
 export default en;
