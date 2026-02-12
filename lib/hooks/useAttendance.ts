@@ -5,6 +5,18 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
 import type { Attendance } from "@/lib/types";
 
+function normalizeAttendance(raw: Record<string, unknown>, id: string): Attendance {
+  return {
+    id,
+    participantId: (raw.participantId as string) ?? "",
+    participantName: (raw.participantName as string) ?? "",
+    participantColor: (raw.participantColor as string) ?? "",
+    date: (raw.date as string) ?? "",
+    present: typeof raw.present === "boolean" ? raw.present : false,
+    tripId: (raw.tripId as string) ?? "",
+  };
+}
+
 export function useAttendance() {
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +28,7 @@ export function useAttendance() {
       collection(db, "attendance"),
       (snap) => {
         setAttendance(
-          snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Attendance),
+          snap.docs.map((d) => normalizeAttendance(d.data(), d.id)),
         );
         setLoading(false);
       },
