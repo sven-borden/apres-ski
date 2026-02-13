@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
 import { getInitials } from "@/lib/utils/colors";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { isDefined } from "@/lib/utils/typeGuards";
@@ -32,15 +31,17 @@ export function DinnerSection({
   return (
     <div className="border-l-4 border-alpine pl-4 space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-midnight">{t.feasts.dinner}</h3>
-        <Button
-          variant="secondary"
+        <h3 className="font-semibold text-midnight">{meal?.description || t.feasts.dinner}</h3>
+        <button
+          type="button"
           onClick={onEdit}
-          className="text-xs px-3 py-1.5"
+          className="text-mist hover:text-alpine transition-colors p-1 shrink-0"
           aria-label={t.feasts.edit_dinner}
         >
-          {t.common.edit}
-        </Button>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+          </svg>
+        </button>
       </div>
 
       {hasResponsible ? (
@@ -59,9 +60,6 @@ export function DinnerSection({
               </div>
             ))}
           </div>
-          {meal.description && (
-            <p className="text-sm text-mist">{meal.description}</p>
-          )}
         </div>
       ) : (
         <p className="text-sm text-mist py-1">{t.feasts.no_one_assigned}</p>
