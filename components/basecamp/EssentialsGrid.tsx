@@ -12,6 +12,7 @@ export function EssentialsGrid({ basecamp }: { basecamp: Basecamp }) {
       <WifiCard wifi={basecamp.wifi} />
       <ScheduleCard checkIn={basecamp.checkIn} checkOut={basecamp.checkOut} capacity={basecamp.capacity} />
       <AccessCodesCard codes={basecamp.accessCodes} />
+      <TricountCard tricountUrl={basecamp.tricountUrl} />
       <EmergencyCard contacts={basecamp.emergencyContacts} />
     </div>
   );
@@ -98,6 +99,25 @@ function AccessCodesCard({
       ) : (
         <p className="text-sm text-mist">{t.basecamp.no_access_codes}</p>
       )}
+    </Card>
+  );
+}
+
+function TricountCard({ tricountUrl }: { tricountUrl?: string }) {
+  const { t } = useLocale();
+  if (!tricountUrl) return null;
+  return (
+    <Card>
+      <h3 className="text-sm font-semibold text-midnight mb-2">Tricount</h3>
+      <a
+        href={tricountUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-sm text-alpine hover:text-alpine/80 font-medium transition-colors"
+      >
+        {t.basecamp.open_tricount}
+        <span aria-hidden="true">&rarr;</span>
+      </a>
     </Card>
   );
 }
