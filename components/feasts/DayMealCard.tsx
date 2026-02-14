@@ -47,6 +47,7 @@ export function DayMealCard({
       </Card>
 
       <EditDinnerModal
+        key={date}
         isOpen={editOpen}
         onClose={() => setEditOpen(false)}
         date={date}
