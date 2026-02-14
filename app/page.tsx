@@ -106,7 +106,7 @@ export default function HubPage() {
 
         {/* Carousel skeleton */}
         <div>
-          <SectionHeader title={t.hub.schedule} href="/crew" />
+          <SectionHeader title={t.hub.schedule} href="/feasts" />
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="shrink-0 w-[38vw] min-w-[160px] md:w-72 animate-pulse">
@@ -189,7 +189,7 @@ export default function HubPage() {
           {/* 4. Date Carousel */}
           {dates.length > 0 && (
             <div>
-              <SectionHeader title={t.hub.schedule} href="/crew" />
+              <SectionHeader title={t.hub.schedule} href="/feasts" />
               <div className="flex items-stretch gap-4 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4">
                 {dates.map((date) => (
                   <div
