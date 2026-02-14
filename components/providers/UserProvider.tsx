@@ -5,10 +5,12 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
   useSyncExternalStore,
 } from "react";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { getDb } from "@/lib/firebase";
+import { getDb, initAnalytics } from "@/lib/firebase";
+import { trackUserSetup } from "@/lib/analytics";
 
 import type { LocalUser } from "@/lib/types";
 
@@ -79,6 +81,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   );
   const [savedThisSession, setSavedThisSession] = useState(false);
 
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+
   const user = storedUser;
   const isReady = true;
   const needsSetup = !user && !savedThisSession;
@@ -107,6 +113,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         joinedAt: serverTimestamp(),
         tripId: "current",
       });
+      trackUserSetup();
     },
     [],
   );

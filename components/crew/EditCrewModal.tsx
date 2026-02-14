@@ -9,6 +9,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { PARTICIPANT_COLORS, getInitials } from "@/lib/utils/colors";
 import { inputClass } from "@/lib/utils/styles";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { trackCrewMemberEdited } from "@/lib/analytics";
 import type { Participant } from "@/lib/types";
 
 export function EditCrewModal({
@@ -53,6 +54,7 @@ export function EditCrewModal({
         color: selectedColor,
         updatedAt: serverTimestamp(),
       });
+      trackCrewMemberEdited();
       onClose();
     } catch {
       setError(t.errors.save_failed);

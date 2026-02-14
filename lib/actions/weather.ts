@@ -1,5 +1,6 @@
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
+import { trackWeatherRefreshed } from "@/lib/analytics";
 
 export async function refreshWeather() {
   const url =
@@ -42,4 +43,5 @@ export async function refreshWeather() {
     },
     { merge: true },
   );
+  trackWeatherRefreshed();
 }

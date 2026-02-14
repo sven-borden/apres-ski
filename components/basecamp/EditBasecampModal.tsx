@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { updateBasecamp } from "@/lib/actions/basecamp";
 import { useUser } from "@/components/providers/UserProvider";
+import { trackBasecampSaved } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Basecamp } from "@/lib/types";
 import { inputClass, inputErrorClass } from "@/lib/utils/styles";
@@ -232,6 +233,7 @@ export function EditBasecampModal({
         },
         user?.id ?? "anonymous",
       );
+      trackBasecampSaved(!basecamp);
       onClose();
     } catch {
       setError(t.errors.save_failed);

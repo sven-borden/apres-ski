@@ -10,6 +10,7 @@ import {
 } from "@/lib/actions/meals";
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { trackShoppingItemAdded, trackShoppingItemToggled, trackShoppingItemRemoved } from "@/lib/analytics";
 import type { ShoppingItem } from "@/lib/types";
 
 export function ShoppingList({
@@ -49,14 +50,17 @@ export function ShoppingList({
     setNewItem("");
     try {
       await addShoppingItem(date, item, userId);
+      trackShoppingItemAdded();
     } catch {
       showError(t.errors.add_failed);
     }
   }
 
   async function handleToggle(itemId: string) {
+    const item = items.find((i) => i.id === itemId);
     try {
       await toggleShoppingItem(date, itemId, userId);
+      trackShoppingItemToggled(!item?.checked);
     } catch {
       showError(t.errors.toggle_failed);
     }
@@ -65,6 +69,7 @@ export function ShoppingList({
   async function handleRemove(itemId: string) {
     try {
       await removeShoppingItem(date, itemId, userId);
+      trackShoppingItemRemoved();
     } catch {
       showError(t.errors.delete_failed);
     }

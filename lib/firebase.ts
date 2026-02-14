@@ -4,6 +4,7 @@ import {
   persistentLocalCache,
   type Firestore,
 } from "firebase/firestore";
+import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,6 +13,7 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 function getFirebaseApp(): FirebaseApp {
@@ -31,6 +33,8 @@ function getFirebaseApp(): FirebaseApp {
 
 let _app: FirebaseApp | undefined;
 let _db: Firestore | undefined;
+let _analytics: Analytics | undefined;
+let _analyticsReady: Promise<Analytics | null> | undefined;
 
 export function getFirebaseInstance() {
   if (!_app) {
@@ -47,4 +51,21 @@ export function getDb() {
     });
   }
   return _db;
+}
+
+export function getAnalyticsInstance(): Analytics | undefined {
+  return _analytics;
+}
+
+export function initAnalytics(): Promise<Analytics | null> {
+  if (_analyticsReady) return _analyticsReady;
+  _analyticsReady = isSupported().then((supported) => {
+    if (supported) {
+      const app = getFirebaseInstance();
+      _analytics = getAnalytics(app);
+      return _analytics;
+    }
+    return null;
+  });
+  return _analyticsReady;
 }
