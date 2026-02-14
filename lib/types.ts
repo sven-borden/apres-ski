@@ -57,6 +57,7 @@ export interface Basecamp {
   accessCodes: { label: string; code: string }[];
   emergencyContacts: { name: string; phone: string; role: string }[];
   notes: string;
+  tricountUrl: string;
   updatedAt: Timestamp;
   updatedBy: string;
 }

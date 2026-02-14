@@ -25,6 +25,7 @@ interface FormState {
   accessCodes: { label: string; code: string }[];
   emergencyContacts: { name: string; phone: string; role: string }[];
   notes: string;
+  tricountUrl: string;
 }
 
 function basecampToForm(b: Basecamp | null): FormState {
@@ -42,6 +43,7 @@ function basecampToForm(b: Basecamp | null): FormState {
       accessCodes: [],
       emergencyContacts: [],
       notes: "",
+      tricountUrl: "",
     };
   }
   return {
@@ -62,6 +64,7 @@ function basecampToForm(b: Basecamp | null): FormState {
       ? [...b.emergencyContacts]
       : [],
     notes: b.notes || "",
+    tricountUrl: b.tricountUrl || "",
   };
 }
 
@@ -230,6 +233,7 @@ export function EditBasecampModal({
             (c) => c.name || c.phone,
           ),
           notes: form.notes,
+          tricountUrl: form.tricountUrl.trim(),
         },
         user?.id ?? "anonymous",
       );
@@ -471,6 +475,19 @@ export function EditBasecampModal({
             maxLength={1000}
             className={inputClass}
             rows={3}
+          />
+        </Field>
+
+        {/* Tricount URL */}
+        <Field id="basecamp-tricount-url" label={t.basecamp.tricount_url}>
+          <input
+            id="basecamp-tricount-url"
+            type="url"
+            value={form.tricountUrl}
+            onChange={(e) => update("tricountUrl", e.target.value)}
+            placeholder={t.basecamp.placeholder_tricount_url}
+            maxLength={500}
+            className={inputClass}
           />
         </Field>
 
