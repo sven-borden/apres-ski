@@ -124,7 +124,7 @@ export function ShoppingList({
               <button
                 type="button"
                 onClick={() => setPendingRemoveItem({ id: item.id, text: item.text })}
-                className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-mist hover:text-red-500 transition-opacity p-1"
+                className="text-mist hover:text-red-500 transition-colors p-1"
                 aria-label={`${t.common.remove} ${item.text}`}
               >
                 <svg
