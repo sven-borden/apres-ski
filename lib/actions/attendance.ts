@@ -1,5 +1,6 @@
 import { doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
+import { trackAttendanceToggled } from "@/lib/analytics";
 
 export async function toggleAttendance(
   participant: { id: string; name: string; color: string },
@@ -26,6 +27,7 @@ export async function toggleAttendance(
         updatedBy,
       });
     }
+    trackAttendanceToggled(!currentlyPresent);
   } catch (err) {
     console.error("Failed to toggle attendance:", err);
     throw err;

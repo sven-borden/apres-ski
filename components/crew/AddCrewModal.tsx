@@ -9,6 +9,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { PARTICIPANT_COLORS, getInitials } from "@/lib/utils/colors";
 import { inputClass } from "@/lib/utils/styles";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { trackCrewMemberAdded } from "@/lib/analytics";
 
 export function AddCrewModal({
   isOpen,
@@ -45,6 +46,7 @@ export function AddCrewModal({
         joinedAt: serverTimestamp(),
         tripId: "current",
       });
+      trackCrewMemberAdded();
       setName("");
       setSelectedColor(PARTICIPANT_COLORS[0].hex);
       onClose();

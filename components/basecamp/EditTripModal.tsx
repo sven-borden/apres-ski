@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { updateTrip } from "@/lib/actions/trip";
 import { seedMeals } from "@/lib/actions/meals";
 import { useUser } from "@/components/providers/UserProvider";
+import { trackTripSaved } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { inputClass, inputErrorClass } from "@/lib/utils/styles";
 import type { Trip } from "@/lib/types";
@@ -92,6 +93,7 @@ export function EditTripModal({
     try {
       await updateTrip({ name: name.trim(), startDate, endDate }, user?.id ?? "anonymous");
       await seedMeals(startDate, endDate);
+      trackTripSaved(!trip);
       onClose();
     } catch {
       setError(t.errors.save_failed);

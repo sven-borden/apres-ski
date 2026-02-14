@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { ParticipantPicker } from "@/components/feasts/ParticipantPicker";
 import { updateDinner } from "@/lib/actions/meals";
 import { useUser } from "@/components/providers/UserProvider";
+import { trackDinnerSaved } from "@/lib/analytics";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { inputClass } from "@/lib/utils/styles";
 import type { Meal, Participant } from "@/lib/types";
@@ -73,6 +74,7 @@ export function EditDinnerModal({
         { responsibleIds, description: description.trim() },
         user?.id ?? "anonymous",
       );
+      trackDinnerSaved(responsibleIds.length);
       onClose();
     } catch {
       setError(t.errors.save_failed);

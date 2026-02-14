@@ -3,11 +3,13 @@
 import { DesktopHeader } from "@/components/layout/DesktopHeader";
 import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
+import { PageViewTracker } from "@/components/layout/PageViewTracker";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-sky-300/40 via-sky-200/20 to-transparent" />
+      <PageViewTracker />
       <DesktopHeader />
       <OfflineBanner />
       <main className="min-h-screen pb-20 md:pb-0">
