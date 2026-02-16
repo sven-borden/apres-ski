@@ -16,6 +16,7 @@ const cspDirectives: Record<string, string[]> = {
     "*.google.com",
     "*.googleapis.com",
     "*.gstatic.com",
+    "https://www.googletagmanager.com",
   ],
   "connect-src": [
     "'self'",
