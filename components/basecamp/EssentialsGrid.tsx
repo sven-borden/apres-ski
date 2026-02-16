@@ -11,7 +11,6 @@ export function EssentialsGrid({ basecamp }: { basecamp: Basecamp }) {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <WifiCard wifi={basecamp.wifi} />
       <ScheduleCard checkIn={basecamp.checkIn} checkOut={basecamp.checkOut} capacity={basecamp.capacity} />
-      <AccessCodesCard codes={basecamp.accessCodes} />
       <TricountCard tricountUrl={basecamp.tricountUrl} />
       <EmergencyCard contacts={basecamp.emergencyContacts} />
     </div>
@@ -74,30 +73,6 @@ function ScheduleCard({
         </div>
       ) : (
         <p className="text-sm text-mist">{t.basecamp.not_configured}</p>
-      )}
-    </Card>
-  );
-}
-
-function AccessCodesCard({
-  codes,
-}: {
-  codes?: Basecamp["accessCodes"];
-}) {
-  const { t } = useLocale();
-  return (
-    <Card>
-      <h3 className="text-sm font-semibold text-midnight mb-2">
-        {t.basecamp.access_codes}
-      </h3>
-      {codes && codes.length > 0 ? (
-        <div className="space-y-2">
-          {codes.map((c, i) => (
-            <RevealField key={i} label={c.label} value={c.code} copyable />
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-mist">{t.basecamp.no_access_codes}</p>
       )}
     </Card>
   );
