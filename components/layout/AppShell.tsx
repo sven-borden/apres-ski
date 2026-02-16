@@ -4,6 +4,7 @@ import { DesktopHeader } from "@/components/layout/DesktopHeader";
 import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { PageViewTracker } from "@/components/layout/PageViewTracker";
+import { SnowOverlay } from "@/components/layout/SnowOverlay";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <PageViewTracker />
       <DesktopHeader />
       <OfflineBanner />
+      <SnowOverlay />
       <main className="min-h-screen pb-20 md:pb-0">
         <div className="max-w-5xl mx-auto px-4 md:px-6 py-6">
           {children}
