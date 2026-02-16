@@ -6,7 +6,7 @@ const cspDirectives: Record<string, string[]> = {
   "default-src": ["'self'"],
   "script-src": isDev
     ? ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
-    : ["'self'", "'unsafe-inline'"],
+    : ["'self'", "'unsafe-inline'", "https://www.clarity.ms", "https://www.googletagmanager.com"],
   "style-src": ["'self'", "'unsafe-inline'"],
   "font-src": ["'self'"],
   "img-src": [
@@ -23,8 +23,11 @@ const cspDirectives: Record<string, string[]> = {
     "*.firebaseio.com",
     "firestore.googleapis.com",
     "api.open-meteo.com",
+    "https://www.clarity.ms",
+    "https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
   ],
-  "frame-src": ["maps.google.com"],
+  "frame-src": ["maps.google.com", "www.google.com"],
   "object-src": ["'none'"],
   "base-uri": ["'self'"],
   "form-action": ["'self'"],
