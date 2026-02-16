@@ -24,6 +24,7 @@ const cspDirectives: Record<string, string[]> = {
     "firestore.googleapis.com",
     "api.open-meteo.com",
     "https://www.clarity.ms",
+    "https://f.clarity.ms",
     "https://www.google-analytics.com",
     "https://region1.google-analytics.com",
     "https://www.googletagmanager.com",
