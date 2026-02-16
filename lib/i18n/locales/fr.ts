@@ -150,10 +150,6 @@ export interface Translations {
     capacity: string;
     capacity_hint: string;
     capacity_beds: (n: number) => string;
-    access_codes: string;
-    placeholder_label: string;
-    placeholder_code: string;
-    add_code: string;
     emergency_contacts: string;
     placeholder_contact_name: string;
     placeholder_phone: string;
@@ -164,7 +160,6 @@ export interface Translations {
     placeholder_notes: string;
     not_configured: string;
     no_chalet: string;
-    no_access_codes: string;
     no_emergency_contacts: string;
     wifi: string;
     schedule: string;
@@ -228,8 +223,6 @@ export interface Translations {
     at_least_one_chef: string;
   };
   confirm: {
-    remove_access_code_title: string;
-    remove_access_code_message: string;
     remove_contact_title: string;
     remove_contact_message: string;
     mark_absent_title: string;
@@ -395,10 +388,6 @@ const fr: Translations = {
     capacity: "Capacité",
     capacity_hint: "nombre de lits",
     capacity_beds: (n: number) => (n === 1 ? "1 lit" : `${n} lits`),
-    access_codes: "Codes d'accès",
-    placeholder_label: "Libellé",
-    placeholder_code: "Code",
-    add_code: "+ Ajouter un code",
     emergency_contacts: "Contacts d'urgence",
     placeholder_contact_name: "Nom",
     placeholder_phone: "Téléphone",
@@ -409,7 +398,6 @@ const fr: Translations = {
     placeholder_notes: "Infos parking, règles de la maison, etc.",
     not_configured: "Non configuré",
     no_chalet: "Aucune info chalet",
-    no_access_codes: "Aucun code d'accès",
     no_emergency_contacts: "Aucun contact d'urgence",
     wifi: "WiFi",
     schedule: "Horaires",
@@ -474,8 +462,6 @@ const fr: Translations = {
     at_least_one_chef: "Au moins un chef doit être sélectionné",
   },
   confirm: {
-    remove_access_code_title: "Retirer le code d\u2019acc\u00e8s",
-    remove_access_code_message: "\u00cates-vous s\u00fbr de vouloir retirer ce code d\u2019acc\u00e8s ?",
     remove_contact_title: "Retirer le contact",
     remove_contact_message: "\u00cates-vous s\u00fbr de vouloir retirer ce contact d\u2019urgence ?",
     mark_absent_title: "Marquer comme absent",

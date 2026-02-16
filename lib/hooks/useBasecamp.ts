@@ -23,7 +23,6 @@ function normalizeBasecamp(raw: Record<string, unknown>): Basecamp {
     checkIn: (raw.checkIn as string) ?? "",
     checkOut: (raw.checkOut as string) ?? "",
     capacity: typeof raw.capacity === "number" ? raw.capacity : 0,
-    accessCodes: Array.isArray(raw.accessCodes) ? raw.accessCodes : [],
     emergencyContacts: Array.isArray(raw.emergencyContacts) ? raw.emergencyContacts : [],
     notes: (raw.notes as string) ?? "",
     tricountUrl: (raw.tricountUrl as string) ?? "",

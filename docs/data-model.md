@@ -90,7 +90,6 @@ All data lives in Firestore with open read/write rules (no authentication). The 
 | `wifi` | `{ network: string, password: string }` | WiFi credentials |
 | `checkIn` | `string` | Check-in time |
 | `checkOut` | `string` | Check-out time |
-| `accessCodes` | `{ label: string, code: string }[]` | Door codes, lockbox codes, etc. |
 | `emergencyContacts` | `{ name: string, phone: string, role: string }[]` | Emergency contact list |
 | `notes` | `string` | Free-text notes |
 | `updatedAt` | `Timestamp` | Server timestamp on last update |

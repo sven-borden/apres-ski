@@ -54,7 +54,6 @@ export interface Basecamp {
   checkIn: string;
   checkOut: string;
   capacity: number;
-  accessCodes: { label: string; code: string }[];
   emergencyContacts: { name: string; phone: string; role: string }[];
   notes: string;
   tricountUrl: string;

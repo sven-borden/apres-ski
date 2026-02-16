@@ -22,7 +22,6 @@ interface FormState {
   checkIn: string;
   checkOut: string;
   capacity: string;
-  accessCodes: { label: string; code: string }[];
   emergencyContacts: { name: string; phone: string; role: string }[];
   notes: string;
   tricountUrl: string;
@@ -40,7 +39,6 @@ function basecampToForm(b: Basecamp | null): FormState {
       checkIn: "",
       checkOut: "",
       capacity: "",
-      accessCodes: [],
       emergencyContacts: [],
       notes: "",
       tricountUrl: "",
@@ -59,7 +57,6 @@ function basecampToForm(b: Basecamp | null): FormState {
     checkIn: b.checkIn || "",
     checkOut: b.checkOut || "",
     capacity: b.capacity ? String(b.capacity) : "",
-    accessCodes: b.accessCodes?.length ? [...b.accessCodes] : [],
     emergencyContacts: b.emergencyContacts?.length
       ? [...b.emergencyContacts]
       : [],
@@ -104,7 +101,6 @@ export function EditBasecampModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [pendingRemoveCodeIndex, setPendingRemoveCodeIndex] = useState<number | null>(null);
   const [pendingRemoveContactIndex, setPendingRemoveContactIndex] = useState<number | null>(null);
   const { user } = useUser();
   const { t } = useLocale();
@@ -149,33 +145,6 @@ export function EditBasecampModal({
     }
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
-  }
-
-  function addAccessCode() {
-    setForm((prev) => ({
-      ...prev,
-      accessCodes: [...prev.accessCodes, { label: "", code: "" }],
-    }));
-  }
-
-  function removeAccessCode(index: number) {
-    setForm((prev) => ({
-      ...prev,
-      accessCodes: prev.accessCodes.filter((_, i) => i !== index),
-    }));
-  }
-
-  function updateAccessCode(
-    index: number,
-    field: "label" | "code",
-    value: string,
-  ) {
-    setForm((prev) => ({
-      ...prev,
-      accessCodes: prev.accessCodes.map((c, i) =>
-        i === index ? { ...c, [field]: value } : c,
-      ),
-    }));
   }
 
   function addContact() {
@@ -228,7 +197,6 @@ export function EditBasecampModal({
           checkIn: form.checkIn,
           checkOut: form.checkOut,
           capacity: form.capacity ? parseInt(form.capacity, 10) : 0,
-          accessCodes: form.accessCodes.filter((c) => c.label || c.code),
           emergencyContacts: form.emergencyContacts.filter(
             (c) => c.name || c.phone,
           ),
@@ -366,51 +334,6 @@ export function EditBasecampModal({
           />
         </Field>
 
-        {/* Access Codes */}
-        <fieldset>
-          <legend className="block text-sm font-medium text-midnight mb-1.5">
-            {t.basecamp.access_codes}
-          </legend>
-          <div className="space-y-2">
-            {form.accessCodes.map((code, i) => (
-              <div key={i} className="flex gap-2">
-                <input
-                  type="text"
-                  value={code.label}
-                  onChange={(e) => updateAccessCode(i, "label", e.target.value)}
-                  placeholder={t.basecamp.placeholder_label}
-                  aria-label={`${t.basecamp.placeholder_label} ${i + 1}`}
-                  maxLength={200}
-                  className={inputClass}
-                />
-                <input
-                  type="text"
-                  value={code.code}
-                  onChange={(e) => updateAccessCode(i, "code", e.target.value)}
-                  placeholder={t.basecamp.placeholder_code}
-                  aria-label={`${t.basecamp.placeholder_code} ${i + 1}`}
-                  maxLength={200}
-                  className={inputClass}
-                />
-                <button
-                  type="button"
-                  onClick={() => setPendingRemoveCodeIndex(i)}
-                  className="shrink-0 text-sm text-spritz hover:text-spritz/80 font-medium"
-                >
-                  {t.common.remove}
-                </button>
-              </div>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={addAccessCode}
-            className="mt-2 text-sm text-alpine hover:text-alpine/80 font-medium"
-          >
-            {t.basecamp.add_code}
-          </button>
-        </fieldset>
-
         {/* Emergency Contacts */}
         <fieldset>
           <legend className="block text-sm font-medium text-midnight mb-1.5">
@@ -515,17 +438,6 @@ export function EditBasecampModal({
           </Button>
         </div>
       </form>
-
-      <ConfirmDialog
-        isOpen={pendingRemoveCodeIndex !== null}
-        onClose={() => setPendingRemoveCodeIndex(null)}
-        onConfirm={() => {
-          if (pendingRemoveCodeIndex !== null) removeAccessCode(pendingRemoveCodeIndex);
-        }}
-        title={t.confirm.remove_access_code_title}
-        message={t.confirm.remove_access_code_message}
-        confirmLabel={t.confirm.confirm_remove}
-      />
 
       <ConfirmDialog
         isOpen={pendingRemoveContactIndex !== null}
