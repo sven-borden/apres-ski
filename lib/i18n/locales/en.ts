@@ -177,6 +177,9 @@ const en: Translations = {
     placeholder_coordinates_example: "46.096, 7.228",
     placeholder_check_in_time: "16:00",
     placeholder_check_out_time: "10:00",
+    tricount_url: "Tricount Link",
+    placeholder_tricount_url: "https://tricount.com/...",
+    open_tricount: "Open Tricount",
   },
   crew: {
     title: "Crew",

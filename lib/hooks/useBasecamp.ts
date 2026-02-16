@@ -26,6 +26,7 @@ function normalizeBasecamp(raw: Record<string, unknown>): Basecamp {
     accessCodes: Array.isArray(raw.accessCodes) ? raw.accessCodes : [],
     emergencyContacts: Array.isArray(raw.emergencyContacts) ? raw.emergencyContacts : [],
     notes: (raw.notes as string) ?? "",
+    tricountUrl: (raw.tricountUrl as string) ?? "",
     updatedAt: raw.updatedAt as Basecamp["updatedAt"],
     updatedBy: (raw.updatedBy as string) ?? "",
   };
