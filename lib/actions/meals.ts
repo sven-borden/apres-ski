@@ -1,7 +1,7 @@
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
 import { getDateRange } from "@/lib/utils/dates";
-import type { ShoppingItem } from "@/lib/types";
+import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
 
 export async function seedMeals(startDate: string, endDate: string) {
   try {
@@ -109,6 +109,41 @@ export async function toggleShoppingItem(
     );
   } catch (err) {
     console.error("Failed to toggle shopping item:", err);
+    throw err;
+  }
+}
+
+export async function updateShoppingQuantities(
+  date: string,
+  estimates: { id: string; quantity: number | null; unit: ShoppingUnit | null }[],
+  updatedBy: string,
+) {
+  try {
+    const db = getDb();
+    const ref = doc(db, "meals", date);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+
+    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
+    const estimateMap = new Map(estimates.map((e) => [e.id, e]));
+
+    const updated = list.map((item) => {
+      const est = estimateMap.get(item.id);
+      if (!est || est.quantity == null) return item;
+      return { ...item, quantity: est.quantity, unit: est.unit ?? undefined };
+    });
+
+    await setDoc(
+      ref,
+      {
+        shoppingList: updated,
+        updatedAt: serverTimestamp(),
+        updatedBy,
+      },
+      { merge: true },
+    );
+  } catch (err) {
+    console.error("Failed to update shopping quantities:", err);
     throw err;
   }
 }

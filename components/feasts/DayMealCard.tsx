@@ -7,21 +7,25 @@ import { ShoppingList } from "@/components/feasts/ShoppingList";
 import { EditDinnerModal } from "@/components/feasts/EditDinnerModal";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { formatDateLong } from "@/lib/utils/dates";
-import type { Meal, Participant } from "@/lib/types";
+import type { Attendance, Meal, Participant } from "@/lib/types";
 
 export function DayMealCard({
   date,
   meal,
   participants,
+  attendance,
 }: {
   date: string;
   meal: Meal | undefined;
   participants: Participant[];
+  attendance: Attendance[];
 }) {
   const [editOpen, setEditOpen] = useState(false);
   const { locale } = useLocale();
 
   const longDate = formatDateLong(date, locale);
+  const presentCount = attendance.filter((a) => a.date === date && a.present).length;
+  const headcount = presentCount > 0 ? presentCount : participants.length;
 
   return (
     <>
@@ -42,6 +46,8 @@ export function DayMealCard({
           <ShoppingList
             date={date}
             items={meal?.shoppingList ?? []}
+            mealDescription={meal?.description ?? ""}
+            headcount={headcount}
           />
         </div>
       </Card>

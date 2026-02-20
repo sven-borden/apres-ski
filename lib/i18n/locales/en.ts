@@ -212,6 +212,10 @@ const en: Translations = {
     unit_packs: "packs",
     mark_purchased: (item: string) => `Mark ${item} as purchased`,
     mark_unpurchased: (item: string) => `Unmark ${item}`,
+    estimate_quantities: "Estimate quantities",
+    estimating: "Estimating\u2026",
+    estimate_error: "Failed to estimate \u2014 please try again",
+    estimate_rate_limited: "Too many requests \u2014 please wait before trying again",
   },
   lineup: {
     present: "Present",

@@ -210,6 +210,10 @@ export interface Translations {
     unit_packs: string;
     mark_purchased: (item: string) => string;
     mark_unpurchased: (item: string) => string;
+    estimate_quantities: string;
+    estimating: string;
+    estimate_error: string;
+    estimate_rate_limited: string;
   };
   lineup: {
     present: string;
@@ -457,6 +461,10 @@ const fr: Translations = {
     unit_packs: "paquets",
     mark_purchased: (item: string) => `Marquer ${item} comme acheté`,
     mark_unpurchased: (item: string) => `Démarquer ${item}`,
+    estimate_quantities: "Estimer les quantités",
+    estimating: "Estimation\u2026",
+    estimate_error: "Échec de l\u2019estimation — veuillez réessayer",
+    estimate_rate_limited: "Trop de requêtes — veuillez patienter avant de réessayer",
   },
   lineup: {
     present: "Présent",
