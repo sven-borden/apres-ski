@@ -28,10 +28,14 @@ export interface Attendance {
   tripId: string;
 }
 
+export type ShoppingUnit = "kg" | "g" | "L" | "dL" | "cl" | "pcs" | "bottles" | "packs";
+
 export interface ShoppingItem {
   id: string;
   text: string;
   checked: boolean;
+  quantity?: number;
+  unit?: ShoppingUnit;
 }
 
 export interface Meal {
