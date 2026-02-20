@@ -199,6 +199,15 @@ export interface Translations {
     no_one_assigned: string;
     shopping_list: string;
     placeholder_item: string;
+    quantity_placeholder: string;
+    unit_kg: string;
+    unit_g: string;
+    unit_l: string;
+    unit_dl: string;
+    unit_cl: string;
+    unit_pcs: string;
+    unit_bottles: string;
+    unit_packs: string;
     mark_purchased: (item: string) => string;
     mark_unpurchased: (item: string) => string;
   };
@@ -437,6 +446,15 @@ const fr: Translations = {
     no_one_assigned: "Personne n'est encore assigné",
     shopping_list: "Liste de courses",
     placeholder_item: "Ajouter un article\u2026",
+    quantity_placeholder: "Qté",
+    unit_kg: "kg",
+    unit_g: "g",
+    unit_l: "L",
+    unit_dl: "dL",
+    unit_cl: "cl",
+    unit_pcs: "pcs",
+    unit_bottles: "bouteilles",
+    unit_packs: "paquets",
     mark_purchased: (item: string) => `Marquer ${item} comme acheté`,
     mark_unpurchased: (item: string) => `Démarquer ${item}`,
   },

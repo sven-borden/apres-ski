@@ -11,7 +11,7 @@ import {
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { trackShoppingItemAdded, trackShoppingItemToggled, trackShoppingItemRemoved } from "@/lib/analytics";
-import type { ShoppingItem } from "@/lib/types";
+import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
 
 export function ShoppingList({
   date,
@@ -21,6 +21,8 @@ export function ShoppingList({
   items: ShoppingItem[];
 }) {
   const [newItem, setNewItem] = useState("");
+  const [newQuantity, setNewQuantity] = useState("");
+  const [newUnit, setNewUnit] = useState<ShoppingUnit | "">("");
   const [error, setError] = useState<string | null>(null);
   const [pendingRemoveItem, setPendingRemoveItem] = useState<{ id: string; text: string } | null>(null);
   const { user } = useUser();
@@ -45,9 +47,13 @@ export function ShoppingList({
       id: crypto.randomUUID(),
       text,
       checked: false,
+      ...(newQuantity && { quantity: parseFloat(newQuantity) }),
+      ...(newUnit && { unit: newUnit }),
     };
 
     setNewItem("");
+    setNewQuantity("");
+    setNewUnit("");
     try {
       await addShoppingItem(date, item, userId);
       trackShoppingItemAdded();
@@ -125,6 +131,11 @@ export function ShoppingList({
                 )}
               >
                 {item.text}
+                {item.quantity != null && (
+                  <span className={cn("ml-1.5 text-xs font-medium", item.checked ? "text-mist" : "text-alpine")}>
+                    {item.quantity}{item.unit ? `\u00a0${item.unit}` : ""}
+                  </span>
+                )}
               </span>
               <button
                 type="button"
@@ -149,22 +160,50 @@ export function ShoppingList({
         </ul>
       )}
 
-      <form onSubmit={handleAdd} className="flex gap-2">
-        <input
-          type="text"
-          value={newItem}
-          onChange={(e) => setNewItem(e.target.value)}
-          placeholder={t.feasts.placeholder_item}
-          maxLength={100}
-          className="flex-1 rounded-lg border border-mist/30 bg-white/50 px-3 py-2 text-sm text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50"
-        />
-        <button
-          type="submit"
-          disabled={!newItem.trim()}
-          className="rounded-lg bg-alpine px-3 py-2 text-sm font-medium text-white hover:bg-alpine/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {t.common.add}
-        </button>
+      <form onSubmit={handleAdd} className="space-y-2">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newItem}
+            onChange={(e) => setNewItem(e.target.value)}
+            placeholder={t.feasts.placeholder_item}
+            maxLength={100}
+            className="flex-1 rounded-lg border border-mist/30 bg-white/50 px-3 py-2 text-sm text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50"
+          />
+          <button
+            type="submit"
+            disabled={!newItem.trim()}
+            className="rounded-lg bg-alpine px-3 py-2 text-sm font-medium text-white hover:bg-alpine/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {t.common.add}
+          </button>
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="number"
+            value={newQuantity}
+            onChange={(e) => setNewQuantity(e.target.value)}
+            placeholder={t.feasts.quantity_placeholder}
+            min="0"
+            step="any"
+            className="w-20 rounded-lg border border-mist/30 bg-white/50 px-3 py-2 text-sm text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50"
+          />
+          <select
+            value={newUnit}
+            onChange={(e) => setNewUnit(e.target.value as ShoppingUnit | "")}
+            className="rounded-lg border border-mist/30 bg-white/50 px-3 py-2 text-sm text-midnight focus:outline-none focus:ring-2 focus:ring-alpine/50"
+          >
+            <option value="">—</option>
+            <option value="kg">{t.feasts.unit_kg}</option>
+            <option value="g">{t.feasts.unit_g}</option>
+            <option value="L">{t.feasts.unit_l}</option>
+            <option value="dL">{t.feasts.unit_dl}</option>
+            <option value="cl">{t.feasts.unit_cl}</option>
+            <option value="pcs">{t.feasts.unit_pcs}</option>
+            <option value="bottles">{t.feasts.unit_bottles}</option>
+            <option value="packs">{t.feasts.unit_packs}</option>
+          </select>
+        </div>
       </form>
 
       <ConfirmDialog
