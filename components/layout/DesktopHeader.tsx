@@ -13,6 +13,7 @@ const navKeys: { key: keyof Translations["nav"]; href: string }[] = [
   { key: "feasts", href: "/feasts" },
   { key: "crew", href: "/crew" },
   { key: "basecamp", href: "/basecamp" },
+  { key: "shopping", href: "/shopping" },
 ];
 
 export function DesktopHeader() {

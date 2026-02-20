@@ -7,6 +7,7 @@ const en: Translations = {
     feasts: "Feasts",
     crew: "Crew",
     basecamp: "Basecamp",
+    shopping: "Shopping",
     main_navigation: "Main navigation",
   },
   common: {
@@ -241,6 +242,14 @@ const en: Translations = {
     longitude_range: "Longitude must be between -180 and 180",
     invalid_date_range: "End date must be after start date",
     at_least_one_chef: "At least one chef must be selected",
+  },
+  shopping: {
+    title: "Shopping List",
+    no_trip: "No trip set up yet \u2014 head to Basecamp to create one",
+    no_items: "No shopping items yet \u2014 add some in Feasts",
+    items_remaining: (n: number) => n === 1 ? "1 item remaining" : `${n} items remaining`,
+    all_done: "All items purchased!",
+    purchased: "Purchased",
   },
   confirm: {
     remove_contact_title: "Remove contact",

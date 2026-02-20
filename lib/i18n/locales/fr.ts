@@ -5,6 +5,7 @@ export interface Translations {
     feasts: string;
     crew: string;
     basecamp: string;
+    shopping: string;
     main_navigation: string;
   };
   common: {
@@ -254,6 +255,14 @@ export interface Translations {
     reset_quantities_message: string;
     confirm_reset: string;
   };
+  shopping: {
+    title: string;
+    no_trip: string;
+    no_items: string;
+    items_remaining: (n: number) => string;
+    all_done: string;
+    purchased: string;
+  };
 }
 
 const fr: Translations = {
@@ -263,6 +272,7 @@ const fr: Translations = {
     feasts: "Repas",
     crew: "Crew",
     basecamp: "Chalet",
+    shopping: "Courses",
     main_navigation: "Navigation principale",
   },
   common: {
@@ -497,6 +507,14 @@ const fr: Translations = {
     longitude_range: "La longitude doit être entre -180 et 180",
     invalid_date_range: "La date de fin doit être après la date de début",
     at_least_one_chef: "Au moins un chef doit être sélectionné",
+  },
+  shopping: {
+    title: "Liste de courses",
+    no_trip: "Aucun séjour configuré — allez dans Chalet pour en créer un",
+    no_items: "Aucun article — ajoutez-en dans Repas",
+    items_remaining: (n: number) => n === 1 ? "1 article restant" : `${n} articles restants`,
+    all_done: "Tout est acheté !",
+    purchased: "Achetés",
   },
   confirm: {
     remove_contact_title: "Retirer le contact",
