@@ -216,6 +216,9 @@ const en: Translations = {
     estimating: "Estimating\u2026",
     estimate_error: "Failed to estimate \u2014 please try again",
     estimate_rate_limited: "Too many requests \u2014 please wait before trying again",
+    reset_quantities: "Reset quantities",
+    resetting: "Resetting\u2026",
+    reset_error: "Failed to reset \u2014 please try again",
   },
   lineup: {
     present: "Present",
@@ -252,6 +255,9 @@ const en: Translations = {
     remove_shopping_item_message: (item: string) => `Are you sure you want to remove "${item}" from the list?`,
     confirm_remove: "Remove",
     confirm_save: "Save anyway",
+    reset_quantities_title: "Reset quantities",
+    reset_quantities_message: "This will remove all estimated quantities from the shopping list. Are you sure?",
+    confirm_reset: "Reset",
   },
 };
 

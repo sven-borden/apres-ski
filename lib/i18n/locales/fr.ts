@@ -214,6 +214,9 @@ export interface Translations {
     estimating: string;
     estimate_error: string;
     estimate_rate_limited: string;
+    reset_quantities: string;
+    resetting: string;
+    reset_error: string;
   };
   lineup: {
     present: string;
@@ -246,6 +249,9 @@ export interface Translations {
     remove_shopping_item_message: (item: string) => string;
     confirm_remove: string;
     confirm_save: string;
+    reset_quantities_title: string;
+    reset_quantities_message: string;
+    confirm_reset: string;
   };
 }
 
@@ -465,6 +471,9 @@ const fr: Translations = {
     estimating: "Estimation\u2026",
     estimate_error: "Échec de l\u2019estimation — veuillez réessayer",
     estimate_rate_limited: "Trop de requêtes — veuillez patienter avant de réessayer",
+    reset_quantities: "Réinitialiser",
+    resetting: "Réinitialisation\u2026",
+    reset_error: "Échec de la réinitialisation — veuillez réessayer",
   },
   lineup: {
     present: "Présent",
@@ -501,6 +510,9 @@ const fr: Translations = {
     remove_shopping_item_message: (item: string) => `\u00cates-vous s\u00fbr de vouloir retirer \u00ab\u202f${item}\u202f\u00bb de la liste ?`,
     confirm_remove: "Retirer",
     confirm_save: "Enregistrer quand m\u00eame",
+    reset_quantities_title: "Réinitialiser les quantités",
+    reset_quantities_message: "Cela supprimera toutes les quantités estimées de la liste de courses. Êtes-vous sûr ?",
+    confirm_reset: "Réinitialiser",
   },
 };
 
