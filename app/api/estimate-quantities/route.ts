@@ -116,6 +116,7 @@ ${itemsList}
 
 For each item, estimate the quantity and unit needed. Rules:
 - Use ONLY these units: kg, g, L, dL, cl, pcs, bottles, packs
+- Prefer specific units (kg, g, L, bottles, packs) over "pcs" — only use "pcs" as a last resort when no other unit makes sense (e.g. individual eggs, lemons)
 - Round to practical shopping amounts (e.g. 1.5 kg, not 1.37 kg)
 - Items that are clearly apero/drinks/snacks NOT part of the dinner recipe should get null for both quantity and unit
 - If unsure whether an item belongs to the recipe, estimate it anyway
