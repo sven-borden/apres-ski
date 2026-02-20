@@ -126,7 +126,7 @@ Return ONLY a JSON array, no other text. Each element must have exactly these fi
   try {
     const client = new Anthropic({ apiKey });
     const message = await client.messages.create({
-      model: "claude-sonnet-4-6-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 1024,
       messages: [{ role: "user", content: prompt }],
     });
