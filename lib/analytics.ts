@@ -59,6 +59,10 @@ export function trackShoppingItemRemoved() {
   log("shopping_item_removed");
 }
 
+export function trackQuantitiesEstimated(itemCount: number) {
+  log("quantities_estimated", { item_count: itemCount });
+}
+
 // ── Weather ─────────────────────────────────────────────────────────────
 export function trackWeatherRefreshed() {
   log("weather_refreshed");

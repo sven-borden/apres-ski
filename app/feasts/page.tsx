@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useMeals } from "@/lib/hooks/useMeals";
 import { useParticipants } from "@/lib/hooks/useParticipants";
+import { useAttendance } from "@/lib/hooks/useAttendance";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { getDateRange, isToday } from "@/lib/utils/dates";
 import { DateScroller } from "@/components/feasts/DateScroller";
@@ -20,6 +21,7 @@ function FeastsContent() {
   const { trip, loading: tripLoading } = useTrip();
   const { meals, loading: mealsLoading } = useMeals();
   const { participants, loading: participantsLoading } = useParticipants();
+  const { attendance, loading: attendanceLoading } = useAttendance();
   const { t } = useLocale();
   const dates = useMemo(
     () => (trip ? getDateRange(trip.startDate, trip.endDate) : []),
@@ -33,7 +35,7 @@ function FeastsContent() {
 
   const resolvedDate = selectedDate || (dateParam && dates.includes(dateParam) ? dateParam : getInitialDate(dates));
 
-  const loading = tripLoading || mealsLoading || participantsLoading;
+  const loading = tripLoading || mealsLoading || participantsLoading || attendanceLoading;
 
   if (loading) {
     return (
@@ -74,6 +76,7 @@ function FeastsContent() {
           date={resolvedDate}
           meal={currentMeal}
           participants={participants}
+          attendance={attendance}
         />
       )}
     </div>

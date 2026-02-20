@@ -7,22 +7,28 @@ import {
   addShoppingItem,
   toggleShoppingItem,
   removeShoppingItem,
+  updateShoppingQuantities,
 } from "@/lib/actions/meals";
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
-import { trackShoppingItemAdded, trackShoppingItemToggled, trackShoppingItemRemoved } from "@/lib/analytics";
+import { trackShoppingItemAdded, trackShoppingItemToggled, trackShoppingItemRemoved, trackQuantitiesEstimated } from "@/lib/analytics";
 import type { ShoppingItem } from "@/lib/types";
 
 export function ShoppingList({
   date,
   items,
+  mealDescription,
+  headcount,
 }: {
   date: string;
   items: ShoppingItem[];
+  mealDescription: string;
+  headcount: number;
 }) {
   const [newItem, setNewItem] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pendingRemoveItem, setPendingRemoveItem] = useState<{ id: string; text: string } | null>(null);
+  const [estimating, setEstimating] = useState(false);
   const { user } = useUser();
   const { t } = useLocale();
 
@@ -75,9 +81,72 @@ export function ShoppingList({
     }
   }
 
+  async function handleEstimate() {
+    const uncheckedItems = items.filter((i) => !i.checked);
+    if (uncheckedItems.length === 0 || !mealDescription) return;
+
+    setEstimating(true);
+    try {
+      const res = await fetch("/api/estimate-quantities", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(process.env.NEXT_PUBLIC_ESTIMATE_API_TOKEN
+            ? { Authorization: `Bearer ${process.env.NEXT_PUBLIC_ESTIMATE_API_TOKEN}` }
+            : {}),
+        },
+        body: JSON.stringify({
+          mealDescription,
+          headcount,
+          items: uncheckedItems.map((i) => ({ id: i.id, text: i.text })),
+        }),
+      });
+
+      if (!res.ok) {
+        if (res.status === 429) {
+          showError(t.feasts.estimate_rate_limited);
+          return;
+        }
+        throw new Error("API error");
+      }
+
+      const data = await res.json();
+      await updateShoppingQuantities(date, data.items, userId);
+      trackQuantitiesEstimated(data.items.length);
+    } catch {
+      showError(t.feasts.estimate_error);
+    } finally {
+      setEstimating(false);
+    }
+  }
+
+  const canEstimate = items.some((i) => !i.checked) && !!mealDescription;
+
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-midnight">{t.feasts.shopping_list}</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-midnight">{t.feasts.shopping_list}</h3>
+        {canEstimate && (
+          <button
+            type="button"
+            onClick={handleEstimate}
+            disabled={estimating}
+            className="text-xs font-medium text-alpine hover:text-alpine/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+          >
+            {estimating ? (
+              <>
+                <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                {t.feasts.estimating}
+              </>
+            ) : (
+              t.feasts.estimate_quantities
+            )}
+          </button>
+        )}
+      </div>
 
       {error && (
         <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1">{error}</p>
