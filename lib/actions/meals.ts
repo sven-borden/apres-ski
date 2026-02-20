@@ -148,6 +148,35 @@ export async function updateShoppingQuantities(
   }
 }
 
+export async function resetShoppingQuantities(
+  date: string,
+  updatedBy: string,
+) {
+  try {
+    const db = getDb();
+    const ref = doc(db, "meals", date);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+
+    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const updated = list.map(({ quantity, unit, ...rest }) => rest);
+
+    await setDoc(
+      ref,
+      {
+        shoppingList: updated,
+        updatedAt: serverTimestamp(),
+        updatedBy,
+      },
+      { merge: true },
+    );
+  } catch (err) {
+    console.error("Failed to reset shopping quantities:", err);
+    throw err;
+  }
+}
+
 export async function removeShoppingItem(
   date: string,
   itemId: string,

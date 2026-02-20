@@ -63,6 +63,10 @@ export function trackQuantitiesEstimated(itemCount: number) {
   log("quantities_estimated", { item_count: itemCount });
 }
 
+export function trackQuantitiesReset() {
+  log("quantities_reset");
+}
+
 // ── Weather ─────────────────────────────────────────────────────────────
 export function trackWeatherRefreshed() {
   log("weather_refreshed");

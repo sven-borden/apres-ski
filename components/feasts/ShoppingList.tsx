@@ -8,10 +8,11 @@ import {
   toggleShoppingItem,
   removeShoppingItem,
   updateShoppingQuantities,
+  resetShoppingQuantities,
 } from "@/lib/actions/meals";
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
-import { trackShoppingItemAdded, trackShoppingItemToggled, trackShoppingItemRemoved, trackQuantitiesEstimated } from "@/lib/analytics";
+import { trackShoppingItemAdded, trackShoppingItemToggled, trackShoppingItemRemoved, trackQuantitiesEstimated, trackQuantitiesReset } from "@/lib/analytics";
 import type { ShoppingItem } from "@/lib/types";
 
 export function ShoppingList({
@@ -29,6 +30,8 @@ export function ShoppingList({
   const [error, setError] = useState<string | null>(null);
   const [pendingRemoveItem, setPendingRemoveItem] = useState<{ id: string; text: string } | null>(null);
   const [estimating, setEstimating] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [pendingReset, setPendingReset] = useState(false);
   const { user } = useUser();
   const { t } = useLocale();
 
@@ -120,32 +123,57 @@ export function ShoppingList({
     }
   }
 
+  async function handleReset() {
+    setResetting(true);
+    try {
+      await resetShoppingQuantities(date, userId);
+      trackQuantitiesReset();
+    } catch {
+      showError(t.feasts.reset_error);
+    } finally {
+      setResetting(false);
+    }
+  }
+
   const canEstimate = items.some((i) => !i.checked) && !!mealDescription;
+  const hasQuantities = items.some((i) => i.quantity != null);
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-midnight">{t.feasts.shopping_list}</h3>
-        {canEstimate && (
-          <button
-            type="button"
-            onClick={handleEstimate}
-            disabled={estimating}
-            className="text-xs font-medium text-alpine hover:text-alpine/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
-          >
-            {estimating ? (
-              <>
-                <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                {t.feasts.estimating}
-              </>
-            ) : (
-              t.feasts.estimate_quantities
-            )}
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {hasQuantities && (
+            <button
+              type="button"
+              onClick={() => setPendingReset(true)}
+              disabled={resetting}
+              className="text-xs font-medium text-mist hover:text-spritz disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {resetting ? t.feasts.resetting : t.feasts.reset_quantities}
+            </button>
+          )}
+          {canEstimate && (
+            <button
+              type="button"
+              onClick={handleEstimate}
+              disabled={estimating}
+              className="text-xs font-medium text-alpine hover:text-alpine/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+            >
+              {estimating ? (
+                <>
+                  <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  {t.feasts.estimating}
+                </>
+              ) : (
+                t.feasts.estimate_quantities
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -250,6 +278,16 @@ export function ShoppingList({
         title={t.confirm.remove_shopping_item_title}
         message={pendingRemoveItem ? t.confirm.remove_shopping_item_message(pendingRemoveItem.text) : ""}
         confirmLabel={t.confirm.confirm_remove}
+      />
+
+      <ConfirmDialog
+        isOpen={pendingReset}
+        onClose={() => setPendingReset(false)}
+        onConfirm={handleReset}
+        title={t.confirm.reset_quantities_title}
+        message={t.confirm.reset_quantities_message}
+        confirmLabel={t.confirm.confirm_reset}
+        variant="warn"
       />
     </div>
   );
