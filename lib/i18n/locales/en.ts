@@ -219,6 +219,7 @@ const en: Translations = {
     reset_quantities: "Reset quantities",
     resetting: "Resetting\u2026",
     reset_error: "Failed to reset \u2014 please try again",
+    headcount: (count: number) => `${count} ${count === 1 ? "person" : "people"} in the chalet`,
   },
   lineup: {
     present: "Present",

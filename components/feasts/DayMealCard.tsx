@@ -21,7 +21,7 @@ export function DayMealCard({
   attendance: Attendance[];
 }) {
   const [editOpen, setEditOpen] = useState(false);
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
 
   const longDate = formatDateLong(date, locale);
   const presentCount = attendance.filter((a) => a.date === date && a.present).length;
@@ -30,9 +30,14 @@ export function DayMealCard({
   return (
     <>
       <Card>
-        <h2 className="text-lg font-semibold text-midnight mb-4">
-          {longDate}
-        </h2>
+        <div className="flex items-baseline justify-between mb-4">
+          <h2 className="text-lg font-semibold text-midnight">
+            {longDate}
+          </h2>
+          <span className="text-sm text-mist">
+            {t.feasts.headcount(headcount)}
+          </span>
+        </div>
 
         <div className="space-y-5">
           <DinnerSection
