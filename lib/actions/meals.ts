@@ -177,6 +177,45 @@ export async function resetShoppingQuantities(
   }
 }
 
+export async function updateSingleItemQuantity(
+  date: string,
+  itemId: string,
+  quantity: number | null,
+  unit: ShoppingUnit | null,
+  updatedBy: string,
+) {
+  try {
+    const db = getDb();
+    const ref = doc(db, "meals", date);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+
+    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
+    const updated = list.map((item) => {
+      if (item.id !== itemId) return item;
+      if (quantity == null) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { quantity: _q, unit: _u, ...rest } = item;
+        return rest;
+      }
+      return { ...item, quantity, unit: unit ?? undefined };
+    });
+
+    await setDoc(
+      ref,
+      {
+        shoppingList: updated,
+        updatedAt: serverTimestamp(),
+        updatedBy,
+      },
+      { merge: true },
+    );
+  } catch (err) {
+    console.error("Failed to update single item quantity:", err);
+    throw err;
+  }
+}
+
 export async function removeShoppingItem(
   date: string,
   itemId: string,
