@@ -11,6 +11,7 @@ import type { Translations } from "@/lib/i18n/locales";
 const navKeys: { key: keyof Translations["nav"]; href: string }[] = [
   { key: "hub", href: "/" },
   { key: "feasts", href: "/feasts" },
+  { key: "shopping", href: "/shopping" },
   { key: "crew", href: "/crew" },
   { key: "basecamp", href: "/basecamp" },
 ];

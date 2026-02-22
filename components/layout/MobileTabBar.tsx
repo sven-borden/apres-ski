@@ -33,6 +33,17 @@ const tabs: {
     ),
   },
   {
+    key: "shopping",
+    href: "/shopping",
+    icon: (
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="9" cy="21" r="1" />
+        <circle cx="20" cy="21" r="1" />
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+      </svg>
+    ),
+  },
+  {
     key: "crew",
     href: "/crew",
     icon: (
@@ -70,7 +81,7 @@ export function MobileTabBar() {
       aria-label={t.nav.main_navigation}
       className="fixed bottom-0 left-0 right-0 z-40 bg-glass backdrop-blur-md border-t border-glass-border md:hidden pb-[env(safe-area-inset-bottom)]"
     >
-      <div className="grid grid-cols-4 h-16">
+      <div className="grid grid-cols-5 h-16">
         {tabs.map((tab) => (
           <Link
             key={tab.href}

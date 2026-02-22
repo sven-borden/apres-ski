@@ -3,6 +3,7 @@ export interface Translations {
     hub: string;
     lineup: string;
     feasts: string;
+    shopping: string;
     crew: string;
     basecamp: string;
     main_navigation: string;
@@ -239,6 +240,20 @@ export interface Translations {
     invalid_date_range: string;
     at_least_one_chef: string;
   };
+  shopping: {
+    title: string;
+    no_trip: string;
+    no_items: string;
+    items_remaining: (n: number) => string;
+    all_done: string;
+    purchased: string;
+    smart_merge: string;
+    merging: string;
+    merge_error: string;
+    from_meal: (date: string) => string;
+    show_details: string;
+    hide_details: string;
+  };
   confirm: {
     remove_contact_title: string;
     remove_contact_message: string;
@@ -261,6 +276,7 @@ const fr: Translations = {
     hub: "Hub",
     lineup: "Planning",
     feasts: "Repas",
+    shopping: "Courses",
     crew: "Crew",
     basecamp: "Chalet",
     main_navigation: "Navigation principale",
@@ -497,6 +513,20 @@ const fr: Translations = {
     longitude_range: "La longitude doit être entre -180 et 180",
     invalid_date_range: "La date de fin doit être après la date de début",
     at_least_one_chef: "Au moins un chef doit être sélectionné",
+  },
+  shopping: {
+    title: "Courses",
+    no_trip: "Aucun séjour configuré — allez dans Chalet pour en créer un",
+    no_items: "Aucun article dans les listes de courses",
+    items_remaining: (n: number) => n === 1 ? "1 article restant" : `${n} articles restants`,
+    all_done: "Toutes les courses sont faites !",
+    purchased: "Achetés",
+    smart_merge: "Fusion intelligente",
+    merging: "Fusion en cours\u2026",
+    merge_error: "Échec de la fusion — veuillez réessayer",
+    from_meal: (date: string) => `Repas du ${date}`,
+    show_details: "Voir les détails",
+    hide_details: "Masquer les détails",
   },
   confirm: {
     remove_contact_title: "Retirer le contact",

@@ -67,6 +67,15 @@ export function trackQuantitiesReset() {
   log("quantities_reset");
 }
 
+// ── Consolidated shopping ───────────────────────────────────────────────
+export function trackSmartMerge(itemCount: number) {
+  log("smart_merge", { item_count: itemCount });
+}
+
+export function trackConsolidatedToggle(checked: boolean, sourceCount: number) {
+  log("consolidated_toggle", { checked, source_count: sourceCount });
+}
+
 // ── Weather ─────────────────────────────────────────────────────────────
 export function trackWeatherRefreshed() {
   log("weather_refreshed");
