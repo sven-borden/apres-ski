@@ -181,9 +181,9 @@ export function ShoppingList({
       )}
 
       {sorted.length > 0 && (
-        <ul className="space-y-1.5">
+        <ul className="grid gap-y-1.5 gap-x-2 items-center grid-cols-[auto_max-content_1fr_auto]">
           {sorted.map((item) => (
-            <li key={item.id} className="flex items-center gap-2 group">
+            <li key={item.id} className="contents">
               <button
                 type="button"
                 role="checkbox"
@@ -215,19 +215,21 @@ export function ShoppingList({
               </button>
               <span
                 className={cn(
-                  "text-sm flex-1",
+                  "text-sm whitespace-nowrap",
                   item.checked
                     ? "line-through text-mist"
                     : "text-midnight",
                 )}
               >
                 {item.text}
-                {item.quantity != null && (
-                  <span className={cn("ml-1.5 text-xs font-medium", item.checked ? "text-mist" : "text-alpine")}>
-                    {item.quantity}{item.unit ? `\u00a0${item.unit}` : ""}
-                  </span>
-                )}
               </span>
+              {item.quantity != null ? (
+                <span className={cn("text-xs font-medium", item.checked ? "text-mist" : "text-alpine")}>
+                  {item.quantity}{item.unit ? `\u00a0${item.unit}` : ""}
+                </span>
+              ) : (
+                <span />
+              )}
               <button
                 type="button"
                 onClick={() => setPendingRemoveItem({ id: item.id, text: item.text })}
