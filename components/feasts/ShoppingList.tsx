@@ -9,6 +9,7 @@ import {
   removeShoppingItem,
   updateShoppingQuantities,
   resetShoppingQuantities,
+  updateSingleItemQuantity,
 } from "@/lib/actions/meals";
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
@@ -32,6 +33,11 @@ export function ShoppingList({
   const [estimating, setEstimating] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [pendingReset, setPendingReset] = useState(false);
+  const [editingQuantity, setEditingQuantity] = useState<{
+    id: string;
+    quantity: string;
+    unit: string;
+  } | null>(null);
   const { user } = useUser();
   const { t } = useLocale();
 
@@ -135,6 +141,37 @@ export function ShoppingList({
     }
   }
 
+  function startEditQuantity(item: ShoppingItem) {
+    setEditingQuantity({
+      id: item.id,
+      quantity: item.quantity != null ? String(item.quantity) : "",
+      unit: item.unit ?? "",
+    });
+  }
+
+  async function saveQuantity() {
+    if (!editingQuantity) return;
+    const { id, quantity, unit } = editingQuantity;
+    setEditingQuantity(null);
+    const parsed = quantity.trim() === "" ? null : parseFloat(quantity);
+    const resolvedUnit = unit || null;
+    try {
+      await updateSingleItemQuantity(
+        date,
+        id,
+        parsed != null && !isNaN(parsed) ? parsed : null,
+        resolvedUnit as import("@/lib/types").ShoppingUnit | null,
+        userId,
+      );
+    } catch {
+      showError(t.errors.toggle_failed);
+    }
+  }
+
+  function cancelEditQuantity() {
+    setEditingQuantity(null);
+  }
+
   const canEstimate = items.some((i) => !i.checked) && !!mealDescription;
   const hasQuantities = items.some((i) => i.quantity != null);
 
@@ -223,12 +260,60 @@ export function ShoppingList({
               >
                 {item.text}
               </span>
-              {item.quantity != null ? (
-                <span className={cn("text-xs font-medium", item.checked ? "text-mist" : "text-alpine")}>
-                  {item.quantity}{item.unit ? `\u00a0${item.unit}` : ""}
+              {editingQuantity?.id === item.id ? (
+                <span
+                  className="flex items-center gap-1"
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) saveQuantity();
+                  }}
+                >
+                  <input
+                    type="number"
+                    value={editingQuantity.quantity}
+                    onChange={(e) => setEditingQuantity({ ...editingQuantity, quantity: e.target.value })}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveQuantity();
+                      if (e.key === "Escape") cancelEditQuantity();
+                    }}
+                    autoFocus
+                    className="w-14 text-xs text-right rounded border border-alpine/40 bg-white/60 px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-alpine/50"
+                    placeholder={t.feasts.quantity_placeholder}
+                    min={0}
+                    step="any"
+                  />
+                  <select
+                    value={editingQuantity.unit}
+                    onChange={(e) => setEditingQuantity({ ...editingQuantity, unit: e.target.value })}
+                    className="text-xs rounded border border-alpine/40 bg-white/60 px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-alpine/50"
+                  >
+                    <option value="">—</option>
+                    <option value="kg">{t.feasts.unit_kg}</option>
+                    <option value="g">{t.feasts.unit_g}</option>
+                    <option value="L">{t.feasts.unit_l}</option>
+                    <option value="dL">{t.feasts.unit_dl}</option>
+                    <option value="cl">{t.feasts.unit_cl}</option>
+                    <option value="pcs">{t.feasts.unit_pcs}</option>
+                    <option value="bottles">{t.feasts.unit_bottles}</option>
+                    <option value="packs">{t.feasts.unit_packs}</option>
+                  </select>
                 </span>
+              ) : item.quantity != null ? (
+                <button
+                  type="button"
+                  onClick={() => startEditQuantity(item)}
+                  className={cn("text-xs font-medium text-left hover:underline", item.checked ? "text-mist" : "text-alpine")}
+                >
+                  {item.quantity}{item.unit ? `\u00a0${item.unit}` : ""}
+                </button>
               ) : (
-                <span />
+                <button
+                  type="button"
+                  onClick={() => startEditQuantity(item)}
+                  className="text-xs text-mist/40 hover:text-alpine transition-colors"
+                  aria-label="Add quantity"
+                >
+                  +
+                </button>
               )}
               <button
                 type="button"
