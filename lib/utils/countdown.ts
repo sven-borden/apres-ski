@@ -8,9 +8,12 @@ export function getTodayString(): string {
   return `${y}-${m}-${d}`;
 }
 
+// Arrival time: 4pm Swiss time (CET = UTC+1 in winter)
+const ARRIVAL_TIME = "T16:00:00+01:00";
+
 export function getCountdownText(startDate: string, endDate: string, t: Translations): string {
   const today = new Date(`${getTodayString()}T00:00:00`);
-  const start = new Date(`${startDate}T00:00:00`);
+  const start = new Date(`${startDate}${ARRIVAL_TIME}`);
   const end = new Date(`${endDate}T00:00:00`);
 
   if (today < start) {
@@ -42,7 +45,7 @@ export type CountdownData =
 
 export function getCountdownData(startDate: string, endDate: string): CountdownData {
   const now = new Date();
-  const start = new Date(`${startDate}T00:00:00`);
+  const start = new Date(`${startDate}${ARRIVAL_TIME}`);
   const end = new Date(`${endDate}T23:59:59`);
 
   if (now < start) {
@@ -57,13 +60,14 @@ export function getCountdownData(startDate: string, endDate: string): CountdownD
   }
 
   const todayStart = new Date(`${getTodayString()}T00:00:00`);
+  const startMidnight = new Date(`${startDate}T00:00:00`);
   const dayNum =
     Math.floor(
-      (todayStart.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+      (todayStart.getTime() - startMidnight.getTime()) / (1000 * 60 * 60 * 24),
     ) + 1;
   const totalDays =
     Math.floor(
-      (new Date(`${endDate}T00:00:00`).getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+      (new Date(`${endDate}T00:00:00`).getTime() - startMidnight.getTime()) / (1000 * 60 * 60 * 24),
     ) + 1;
   return { state: "during", dayNum, totalDays };
 }
