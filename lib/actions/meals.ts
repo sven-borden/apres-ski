@@ -71,6 +71,28 @@ export async function seedMeals(startDate: string, endDate: string) {
   }
 }
 
+export async function toggleExcludeFromShopping(
+  date: string,
+  excludeFromShopping: boolean,
+  updatedBy: string,
+) {
+  try {
+    const db = getDb();
+    await setDoc(
+      doc(db, "meals", date),
+      {
+        excludeFromShopping,
+        updatedAt: serverTimestamp(),
+        updatedBy,
+      },
+      { merge: true },
+    );
+  } catch (err) {
+    console.error("Failed to toggle exclude from shopping:", err);
+    throw err;
+  }
+}
+
 export async function updateDinner(
   date: string,
   data: { responsibleIds: string[]; description: string },

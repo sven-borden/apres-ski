@@ -36,6 +36,7 @@ interface GroupingCache {
 function flattenMeals(meals: Meal[]): SourceItem[] {
   const items: SourceItem[] = [];
   for (const meal of meals) {
+    if (meal.excludeFromShopping) continue;
     for (const item of meal.shoppingList) {
       items.push({
         date: meal.date,

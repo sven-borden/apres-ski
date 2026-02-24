@@ -45,6 +45,7 @@ export interface Meal {
   responsibleIds: string[];
   description: string;
   shoppingList: ShoppingItem[];
+  excludeFromShopping: boolean;
   updatedAt: Timestamp;
   updatedBy: string;
 }

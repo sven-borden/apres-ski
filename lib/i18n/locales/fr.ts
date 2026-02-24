@@ -221,6 +221,7 @@ export interface Translations {
     headcount: (count: number) => string;
     general: string;
     general_subtitle: string;
+    exclude_from_shopping: string;
   };
   lineup: {
     present: string;
@@ -496,6 +497,7 @@ const fr: Translations = {
     headcount: (count: number) => `${count} ${count === 1 ? "personne" : "personnes"} au chalet`,
     general: "Général",
     general_subtitle: "Articles pour tout le séjour",
+    exclude_from_shopping: "Je fais mes courses moi-même",
   },
   lineup: {
     present: "Présent",

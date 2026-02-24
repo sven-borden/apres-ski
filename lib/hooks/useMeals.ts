@@ -13,6 +13,7 @@ function normalizeMeal(raw: Record<string, unknown>, id: string): Meal {
     responsibleIds: (raw.responsibleIds as string[]) ?? [],
     description: (raw.description as string) ?? "",
     shoppingList: Array.isArray(raw.shoppingList) ? raw.shoppingList : [],
+    excludeFromShopping: (raw.excludeFromShopping as boolean) ?? false,
     updatedAt: raw.updatedAt as Meal["updatedAt"],
     updatedBy: (raw.updatedBy as string) ?? "",
   };
