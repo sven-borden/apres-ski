@@ -11,6 +11,7 @@ import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { getDateRange, isToday } from "@/lib/utils/dates";
 import { DateScroller } from "@/components/feasts/DateScroller";
 import { DayMealCard } from "@/components/feasts/DayMealCard";
+import { GeneralCard } from "@/components/feasts/GeneralCard";
 
 function getInitialDate(dates: string[]): string {
   const today = dates.find((d) => isToday(d));
@@ -69,16 +70,19 @@ function FeastsContent() {
         dates={dates}
         selectedDate={resolvedDate}
         onSelectDate={setSelectedDate}
+        showGeneral
       />
 
-      {resolvedDate && (
+      {resolvedDate === "general" ? (
+        <GeneralCard meal={meals.find((m) => m.date === "general")} />
+      ) : resolvedDate ? (
         <DayMealCard
           date={resolvedDate}
           meal={currentMeal}
           participants={participants}
           attendance={attendance}
         />
-      )}
+      ) : null}
     </div>
   );
 }
