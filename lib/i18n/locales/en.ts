@@ -221,6 +221,8 @@ const en: Translations = {
     resetting: "Resetting\u2026",
     reset_error: "Failed to reset \u2014 please try again",
     headcount: (count: number) => `${count} ${count === 1 ? "person" : "people"} in the chalet`,
+    general: "General",
+    general_subtitle: "Items for the whole trip",
   },
   lineup: {
     present: "Present",

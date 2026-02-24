@@ -8,8 +8,8 @@ export async function seedMeals(startDate: string, endDate: string) {
     const db = getDb();
     const dates = getDateRange(startDate, endDate);
 
-    await Promise.all(
-      dates.map(async (date) => {
+    await Promise.all([
+      ...dates.map(async (date) => {
         const ref = doc(db, "meals", date);
         const snap = await getDoc(ref);
         if (snap.exists()) return;
@@ -24,7 +24,23 @@ export async function seedMeals(startDate: string, endDate: string) {
           updatedBy: "system",
         });
       }),
-    );
+      // Seed the general shopping list doc (trip-wide items)
+      (async () => {
+        const ref = doc(db, "meals", "general");
+        const snap = await getDoc(ref);
+        if (snap.exists()) return;
+
+        await setDoc(ref, {
+          date: "general",
+          tripId: "current",
+          responsibleIds: [],
+          description: "",
+          shoppingList: [],
+          updatedAt: serverTimestamp(),
+          updatedBy: "system",
+        });
+      })(),
+    ]);
   } catch (err) {
     console.error("Failed to seed meals:", err);
     throw err;

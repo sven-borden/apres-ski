@@ -219,6 +219,8 @@ export interface Translations {
     resetting: string;
     reset_error: string;
     headcount: (count: number) => string;
+    general: string;
+    general_subtitle: string;
   };
   lineup: {
     present: string;
@@ -492,6 +494,8 @@ const fr: Translations = {
     resetting: "Réinitialisation\u2026",
     reset_error: "Échec de la réinitialisation — veuillez réessayer",
     headcount: (count: number) => `${count} ${count === 1 ? "personne" : "personnes"} au chalet`,
+    general: "Général",
+    general_subtitle: "Articles pour tout le séjour",
   },
   lineup: {
     present: "Présent",
