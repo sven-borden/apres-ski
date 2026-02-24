@@ -223,6 +223,7 @@ const en: Translations = {
     headcount: (count: number) => `${count} ${count === 1 ? "person" : "people"} in the chalet`,
     general: "General",
     general_subtitle: "Items for the whole trip",
+    exclude_from_shopping: "I'll do my own shopping",
   },
   lineup: {
     present: "Present",
