@@ -218,7 +218,7 @@ export function ShoppingList({
       )}
 
       {sorted.length > 0 && (
-        <ul className="grid gap-y-1.5 gap-x-2 items-center grid-cols-[auto_max-content_1fr_auto]">
+        <ul className="grid gap-y-1.5 gap-x-2 items-center grid-cols-[auto_1fr_auto_auto]">
           {sorted.map((item) => (
             <li key={item.id} className="contents">
               <button
@@ -252,7 +252,7 @@ export function ShoppingList({
               </button>
               <span
                 className={cn(
-                  "text-sm whitespace-nowrap",
+                  "text-sm break-words",
                   item.checked
                     ? "line-through text-mist"
                     : "text-midnight",
