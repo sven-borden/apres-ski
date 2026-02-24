@@ -233,6 +233,38 @@ export async function updateSingleItemQuantity(
   }
 }
 
+export async function updateShoppingItemText(
+  date: string,
+  itemId: string,
+  text: string,
+  updatedBy: string,
+) {
+  try {
+    const db = getDb();
+    const ref = doc(db, "meals", date);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+
+    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
+    const updated = list.map((item) =>
+      item.id === itemId ? { ...item, text } : item,
+    );
+
+    await setDoc(
+      ref,
+      {
+        shoppingList: updated,
+        updatedAt: serverTimestamp(),
+        updatedBy,
+      },
+      { merge: true },
+    );
+  } catch (err) {
+    console.error("Failed to update shopping item text:", err);
+    throw err;
+  }
+}
+
 export async function removeShoppingItem(
   date: string,
   itemId: string,

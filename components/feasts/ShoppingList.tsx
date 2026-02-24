@@ -10,6 +10,7 @@ import {
   updateShoppingQuantities,
   resetShoppingQuantities,
   updateSingleItemQuantity,
+  updateShoppingItemText,
 } from "@/lib/actions/meals";
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
@@ -37,6 +38,10 @@ export function ShoppingList({
     id: string;
     quantity: string;
     unit: string;
+  } | null>(null);
+  const [editingText, setEditingText] = useState<{
+    id: string;
+    text: string;
   } | null>(null);
   const { user } = useUser();
   const { t } = useLocale();
@@ -172,6 +177,21 @@ export function ShoppingList({
     setEditingQuantity(null);
   }
 
+  async function saveText() {
+    if (!editingText) return;
+    const { id, text } = editingText;
+    const trimmed = text.trim();
+    setEditingText(null);
+    if (!trimmed) return;
+    const original = items.find((i) => i.id === id);
+    if (original && original.text === trimmed) return;
+    try {
+      await updateShoppingItemText(date, id, trimmed, userId);
+    } catch {
+      showError(t.errors.toggle_failed);
+    }
+  }
+
   const canEstimate = items.some((i) => !i.checked && i.quantity == null) && !!mealDescription;
   const hasQuantities = items.some((i) => i.quantity != null);
 
@@ -250,16 +270,34 @@ export function ShoppingList({
                   </svg>
                 )}
               </button>
-              <span
-                className={cn(
-                  "text-sm break-words",
-                  item.checked
-                    ? "line-through text-mist"
-                    : "text-midnight",
-                )}
-              >
-                {item.text}
-              </span>
+              {editingText?.id === item.id ? (
+                <input
+                  type="text"
+                  value={editingText.text}
+                  onChange={(e) => setEditingText({ ...editingText, text: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveText();
+                    if (e.key === "Escape") setEditingText(null);
+                  }}
+                  onBlur={saveText}
+                  autoFocus
+                  maxLength={100}
+                  className="text-sm rounded border border-alpine/40 bg-white/60 px-1 py-0.5 text-midnight focus:outline-none focus:ring-1 focus:ring-alpine/50 min-w-0"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setEditingText({ id: item.id, text: item.text })}
+                  className={cn(
+                    "text-sm whitespace-nowrap text-left hover:underline decoration-mist/30",
+                    item.checked
+                      ? "line-through text-mist"
+                      : "text-midnight",
+                  )}
+                >
+                  {item.text}
+                </button>
+              )}
               {editingQuantity?.id === item.id ? (
                 <span
                   className="flex items-center gap-1"
