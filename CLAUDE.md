@@ -93,7 +93,7 @@ Use GitHub (`gh` CLI) as much as possible for all Git operations:
 
 - **Branches**: Create feature branches (`feat/...`), fix branches (`fix/...`) for all changes — never commit directly to `master`.
 - **Pull Requests**: Always use `gh pr create` to open PRs against `master`. Include a summary and test plan.
-- **Merging**: Use `gh pr merge` to merge PRs — prefer squash merges to keep history clean.
+- **Merging**: Use `gh pr merge --squash --auto` to merge PRs — squash merge with auto-merge enabled by default.
 - **Issues**: Use `gh issue create` / `gh issue list` to track work.
 - **Reviews**: Use `gh pr view`, `gh pr checks` to verify CI status before merging.
 
