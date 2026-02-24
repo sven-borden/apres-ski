@@ -86,6 +86,8 @@ export async function addShoppingItem(
     await setDoc(
       ref,
       {
+        date,
+        tripId: "current",
         shoppingList: [...current, item],
         updatedAt: serverTimestamp(),
         updatedBy,
