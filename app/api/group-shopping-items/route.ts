@@ -106,8 +106,29 @@ For each group, pick the most descriptive name as the canonical name. Preserve t
 
 Items that don't match anything else should be in their own group (with just their own ID).
 
-Return ONLY a JSON array, no other text. Each element must have exactly these fields:
-{ "canonicalName": "<best name>", "itemIds": ["<id1>", "<id2>", ...] }`;
+Use the group_items tool to return the grouped results.`;
+
+  const groupItemsTool: Anthropic.Messages.Tool = {
+    name: "group_items",
+    description: "Group shopping items by ingredient",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        groups: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              canonicalName: { type: "string", description: "The best canonical name for this group of items" },
+              itemIds: { type: "array", items: { type: "string" }, description: "IDs of items in this group" },
+            },
+            required: ["canonicalName", "itemIds"],
+          },
+        },
+      },
+      required: ["groups"],
+    },
+  };
 
   try {
     const client = new Anthropic({ apiKey });
@@ -115,25 +136,19 @@ Return ONLY a JSON array, no other text. Each element must have exactly these fi
       model: "claude-haiku-4-5-20251001",
       max_tokens: 1024,
       messages: [{ role: "user", content: prompt }],
+      tools: [groupItemsTool],
+      tool_choice: { type: "tool", name: "group_items" },
     });
 
-    const textBlock = message.content.find((b) => b.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
-      return NextResponse.json({ error: "No text response from AI" }, { status: 500 });
+    const toolBlock = message.content.find((b) => b.type === "tool_use");
+    if (!toolBlock || toolBlock.type !== "tool_use") {
+      return NextResponse.json({ error: "No tool response from AI" }, { status: 500 });
     }
 
-    // Extract JSON array from response (handle markdown code blocks)
-    let jsonStr = textBlock.text.trim();
-    const jsonMatch = jsonStr.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
-      return NextResponse.json({ error: "Could not parse AI response" }, { status: 500 });
-    }
-    jsonStr = jsonMatch[0];
-
-    const parsed: unknown[] = JSON.parse(jsonStr);
+    const input = toolBlock.input as { groups: unknown[] };
 
     // Validate and sanitize
-    const groups: GroupResult[] = parsed
+    const groups: GroupResult[] = (input.groups ?? [])
       .filter((item): item is Record<string, unknown> =>
         typeof item === "object" && item !== null && "canonicalName" in item && "itemIds" in item,
       )
