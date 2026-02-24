@@ -91,7 +91,7 @@ export function ShoppingList({
   }
 
   async function handleEstimate() {
-    const uncheckedItems = items.filter((i) => !i.checked);
+    const uncheckedItems = items.filter((i) => !i.checked && i.quantity == null);
     if (uncheckedItems.length === 0 || !mealDescription) return;
 
     setEstimating(true);
@@ -172,7 +172,7 @@ export function ShoppingList({
     setEditingQuantity(null);
   }
 
-  const canEstimate = items.some((i) => !i.checked) && !!mealDescription;
+  const canEstimate = items.some((i) => !i.checked && i.quantity == null) && !!mealDescription;
   const hasQuantities = items.some((i) => i.quantity != null);
 
   return (
