@@ -128,6 +128,7 @@ export async function updateShoppingQuantities(
     const estimateMap = new Map(estimates.map((e) => [e.id, e]));
 
     const updated = list.map((item) => {
+      if (item.quantity != null) return item; // preserve existing quantities
       const est = estimateMap.get(item.id);
       if (!est || est.quantity == null) return item;
       return { ...item, quantity: est.quantity, unit: est.unit ?? undefined };
