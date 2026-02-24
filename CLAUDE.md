@@ -111,6 +111,7 @@ All interfaces defined in `lib/types.ts`. Uses Firestore `Timestamp` type.
 | `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` | Client | Firebase Analytics measurement ID |
 | `NEXT_PUBLIC_MS_CLARITY_PROJECT_ID` | Client | Microsoft Clarity project ID (optional) |
 | `NEXT_PUBLIC_ESTIMATE_API_TOKEN` | Client | Bearer token for AI estimate API routes |
+| `NEXT_PUBLIC_RECAPTCHA_V3_SITE_KEY` | Client | reCAPTCHA v3 site key for Firebase App Check |
 | `ANTHROPIC_API_KEY` | Server | Anthropic API key for AI features |
 
 ## Gotchas
