@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ShoppingUnit } from "@/lib/types";
 
-const VALID_UNITS: ShoppingUnit[] = ["kg", "g", "L", "dL", "cl", "bottles"];
+const VALID_UNITS: ShoppingUnit[] = ["kg", "g", "L", "dL", "cl", "bottles", "pcs", "packs"];
 
 // In-memory rate limiter (persists across requests in the same server process)
 const rateLimitMap = new Map<string, { lastRequest: number; dailyCount: number; day: string }>();
@@ -14,9 +14,10 @@ function getClientIp(request: Request): string {
 }
 
 interface RequestBody {
-  mealDescription: string;
+  mealDescription?: string;
   headcount: number;
   items: { id: string; text: string }[];
+  category?: "dinner" | "general";
 }
 
 interface EstimatedItem {
@@ -88,9 +89,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { mealDescription, headcount, items } = body;
+  const { mealDescription, headcount, items, category = "dinner" } = body;
 
-  if (!mealDescription || typeof mealDescription !== "string") {
+  if (category === "dinner" && (!mealDescription || typeof mealDescription !== "string")) {
     return NextResponse.json({ error: "mealDescription is required" }, { status: 400 });
   }
   if (!headcount || typeof headcount !== "number" || headcount < 1) {
@@ -104,7 +105,26 @@ export async function POST(request: Request) {
     .map((item) => `- id: "${item.id}", item: "${item.text}"`)
     .join("\n");
 
-  const prompt = `You are estimating grocery shopping quantities for a ski chalet dinner.
+  const prompt = category === "general"
+    ? `You are estimating grocery shopping quantities for a shared ski chalet's general supplies.
+
+These items cover apero (aperitif snacks & drinks), sandwiches for ski lunch breaks, and breakfast items.
+The headcount is ${headcount} person-days (total people across all trip days combined).
+
+IMPORTANT: Pancakes, crepe batter, and other hot breakfast items should be estimated VERY generously — these are hearty pre-ski fuel and skiers eat a LOT for breakfast.
+
+Shopping items:
+${itemsList}
+
+For each item, estimate the quantity and unit needed. Rules:
+- Use ONLY these units: kg, g, L, dL, cl, bottles, pcs, packs
+- Round to practical shopping amounts (e.g. 2 packs, not 1.7 packs)
+- Estimate ALL items — everything on this list is relevant
+- Think about the full trip duration implied by the person-days count
+
+Return ONLY a JSON array, no other text. Each element must have exactly these fields:
+{ "id": "<item id>", "quantity": <number or null>, "unit": "<unit or null>" }`
+    : `You are estimating grocery shopping quantities for a ski chalet dinner.
 
 Meal: ${mealDescription}
 Number of people: ${headcount}
@@ -115,7 +135,7 @@ Shopping items:
 ${itemsList}
 
 For each item, estimate the quantity and unit needed. Rules:
-- Use ONLY these units: kg, g, L, dL, cl, bottles
+- Use ONLY these units: kg, g, L, dL, cl, bottles, pcs, packs
 - Round to practical shopping amounts (e.g. 1.5 kg, not 1.37 kg)
 - Items that are clearly apero/drinks/snacks NOT part of the dinner recipe should get null for both quantity and unit
 - If unsure whether an item belongs to the recipe, estimate it anyway

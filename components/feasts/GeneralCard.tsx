@@ -5,7 +5,7 @@ import { ShoppingList } from "@/components/feasts/ShoppingList";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Meal } from "@/lib/types";
 
-export function GeneralCard({ meal }: { meal: Meal | undefined }) {
+export function GeneralCard({ meal, headcount }: { meal: Meal | undefined; headcount: number }) {
   const { t } = useLocale();
 
   return (
@@ -21,7 +21,8 @@ export function GeneralCard({ meal }: { meal: Meal | undefined }) {
         date="general"
         items={meal?.shoppingList ?? []}
         mealDescription=""
-        headcount={0}
+        headcount={headcount}
+        category="general"
       />
     </Card>
   );

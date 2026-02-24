@@ -45,6 +45,13 @@ function FeastsContent() {
     router.replace(`/feasts?date=${date}`);
   }, [router]);
 
+  const totalPersonDays = useMemo(() => {
+    return dates.reduce((sum, date) => {
+      const presentCount = attendance.filter((a) => a.date === date && a.present).length;
+      return sum + (presentCount > 0 ? presentCount : participants.length);
+    }, 0);
+  }, [dates, attendance, participants]);
+
   const loading = tripLoading || mealsLoading || participantsLoading || attendanceLoading;
 
   if (loading) {
@@ -83,7 +90,7 @@ function FeastsContent() {
       />
 
       {resolvedDate === "general" ? (
-        <GeneralCard meal={meals.find((m) => m.date === "general")} />
+        <GeneralCard meal={meals.find((m) => m.date === "general")} headcount={totalPersonDays} />
       ) : resolvedDate ? (
         <DayMealCard
           date={resolvedDate}

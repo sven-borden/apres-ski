@@ -22,11 +22,13 @@ export function ShoppingList({
   items,
   mealDescription,
   headcount,
+  category = "dinner",
 }: {
   date: string;
   items: ShoppingItem[];
   mealDescription: string;
   headcount: number;
+  category?: "dinner" | "general";
 }) {
   const [newItem, setNewItem] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +99,9 @@ export function ShoppingList({
 
   async function handleEstimate() {
     const uncheckedItems = items.filter((i) => !i.checked && i.quantity == null);
-    if (uncheckedItems.length === 0 || !mealDescription) return;
+    if (uncheckedItems.length === 0) return;
+    if (category === "dinner" && !mealDescription) return;
+    if (category === "general" && headcount < 1) return;
 
     setEstimating(true);
     try {
@@ -110,8 +114,9 @@ export function ShoppingList({
             : {}),
         },
         body: JSON.stringify({
-          mealDescription,
+          ...(category === "dinner" ? { mealDescription } : {}),
           headcount,
+          category,
           items: uncheckedItems.map((i) => ({ id: i.id, text: i.text })),
         }),
       });
@@ -192,7 +197,10 @@ export function ShoppingList({
     }
   }
 
-  const canEstimate = items.some((i) => !i.checked && i.quantity == null) && !!mealDescription;
+  const hasUnestimatedItems = items.some((i) => !i.checked && i.quantity == null);
+  const canEstimate = category === "general"
+    ? hasUnestimatedItems && headcount > 0
+    : hasUnestimatedItems && !!mealDescription;
   const hasQuantities = items.some((i) => i.quantity != null);
 
   return (
