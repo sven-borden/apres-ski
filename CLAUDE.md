@@ -87,6 +87,16 @@ All interfaces defined in `lib/types.ts`. Uses Firestore `Timestamp` type.
 
 `seedMeals(startDate, endDate)` in `lib/actions/meals.ts` auto-creates unassigned meal docs for each trip date (skips existing). Called from `EditTripModal` after saving a trip.
 
+## Git Workflow
+
+Use GitHub (`gh` CLI) as much as possible for all Git operations:
+
+- **Branches**: Create feature branches (`feat/...`), fix branches (`fix/...`) for all changes — never commit directly to `master`.
+- **Pull Requests**: Always use `gh pr create` to open PRs against `master`. Include a summary and test plan.
+- **Merging**: Use `gh pr merge` to merge PRs — prefer squash merges to keep history clean.
+- **Issues**: Use `gh issue create` / `gh issue list` to track work.
+- **Reviews**: Use `gh pr view`, `gh pr checks` to verify CI status before merging.
+
 ## Project Status
 
 All phases complete (1-7).
