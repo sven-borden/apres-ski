@@ -12,6 +12,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  console.log(`Blocked request from ${country} to ${request.nextUrl.pathname}`);
   return new NextResponse("Not available in your region", { status: 403 });
 }
 
