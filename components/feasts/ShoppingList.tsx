@@ -245,37 +245,28 @@ export function ShoppingList({
       </div>
 
       {excludeFromShopping !== undefined && (
-        <div className="flex items-center gap-2 cursor-pointer select-none"
-          onClick={async () => {
-            if (!user) return;
-            await toggleExcludeFromShopping(date, !excludeFromShopping, user.name);
-          }}
-          role="switch"
-          aria-checked={excludeFromShopping}
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              if (!user) return;
-              toggleExcludeFromShopping(date, !excludeFromShopping, user.name);
-            }
+        <button
+          type="button"
+          className="flex items-center gap-2 select-none"
+          onClick={() => {
+            toggleExcludeFromShopping(date, !excludeFromShopping, userId);
           }}
         >
-          <div
-            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${
+          <span
+            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors ${
               excludeFromShopping ? "bg-alpine" : "bg-mist/30"
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+              className={`inline-block h-4 w-4 mt-0.5 ml-0.5 rounded-full bg-white shadow-sm transition-transform ${
                 excludeFromShopping ? "translate-x-4" : "translate-x-0"
               }`}
             />
-          </div>
+          </span>
           <span className="text-xs text-mist">
             {t.feasts.exclude_from_shopping}
           </span>
-        </div>
+        </button>
       )}
 
       {error && (
