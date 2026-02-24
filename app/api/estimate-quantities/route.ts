@@ -51,16 +51,16 @@ export async function POST(request: Request) {
       entry.day = todayUTC;
     }
 
-    // 1 request per 60 seconds
-    if (now - entry.lastRequest < 60_000) {
+    // 5 requests per 60 seconds
+    if (now - entry.lastRequest < 12_000) {
       return NextResponse.json(
         { error: "Rate limited — please wait a minute before trying again" },
         { status: 429 },
       );
     }
 
-    // 10 requests per day
-    if (entry.dailyCount >= 10) {
+    // 50 requests per day
+    if (entry.dailyCount >= 50) {
       return NextResponse.json(
         { error: "Daily limit reached — try again tomorrow" },
         { status: 429 },
