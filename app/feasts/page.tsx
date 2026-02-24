@@ -39,7 +39,7 @@ function FeastsContent() {
 
   const resolvedDate = dateParam === "general" || (dateParam && dates.includes(dateParam))
     ? dateParam
-    : getInitialDate(dates);
+    : "general";
 
   const setSelectedDate = useCallback((date: string) => {
     router.replace(`/feasts?date=${date}`);
