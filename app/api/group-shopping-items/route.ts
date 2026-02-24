@@ -119,10 +119,10 @@ Use the group_items tool to return the grouped results.`;
           items: {
             type: "object",
             properties: {
-              canonicalName: { type: "string", description: "The best canonical name for this group of items" },
-              itemIds: { type: "array", items: { type: "string" }, description: "IDs of items in this group" },
+              canonical_name: { type: "string", description: "The best canonical name for this group of items" },
+              item_ids: { type: "array", items: { type: "string" }, description: "IDs of items in this group" },
             },
-            required: ["canonicalName", "itemIds"],
+            required: ["canonical_name", "item_ids"],
           },
         },
       },
@@ -145,17 +145,24 @@ Use the group_items tool to return the grouped results.`;
       return NextResponse.json({ error: "No tool response from AI" }, { status: 500 });
     }
 
-    const input = toolBlock.input as { groups: unknown[] };
+    const input = toolBlock.input as Record<string, unknown>;
 
-    // Validate and sanitize
-    const groups: GroupResult[] = (input.groups ?? [])
+    // Validate and sanitize — handle both camelCase and snake_case from the model
+    const rawGroups = Array.isArray(input.groups) ? input.groups : [];
+    const groups: GroupResult[] = rawGroups
       .filter((item): item is Record<string, unknown> =>
-        typeof item === "object" && item !== null && "canonicalName" in item && "itemIds" in item,
+        typeof item === "object" && item !== null &&
+        ("canonicalName" in item || "canonical_name" in item) &&
+        ("itemIds" in item || "item_ids" in item),
       )
-      .map((item) => ({
-        canonicalName: String(item.canonicalName),
-        itemIds: Array.isArray(item.itemIds) ? item.itemIds.map(String) : [],
-      }))
+      .map((item) => {
+        const name = item.canonicalName ?? item.canonical_name;
+        const ids = item.itemIds ?? item.item_ids;
+        return {
+          canonicalName: String(name),
+          itemIds: Array.isArray(ids) ? ids.map(String) : [],
+        };
+      })
       .filter((g) => g.itemIds.length > 0);
 
     return NextResponse.json({ groups });
