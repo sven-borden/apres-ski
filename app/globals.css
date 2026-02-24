@@ -8,8 +8,9 @@
   --spritz-orange: #F97316;
   --pine-green: #10B981;
   --mist-grey: #94A3B8;
-  --glass-bg: rgba(255, 255, 255, 0.70);
-  --glass-border: rgba(255, 255, 255, 0.20);
+  --glass-bg: rgba(255, 255, 255, 0.50);
+  --glass-border: rgba(255, 255, 255, 0.30);
+  --glass-bg-solid: rgba(255, 255, 255, 0.65);
   --danger-red: #EF4444;
   --caution-amber: #F59E0B;
 }
@@ -23,6 +24,7 @@
   --color-pine: var(--pine-green);
   --color-mist: var(--mist-grey);
   --color-glass: var(--glass-bg);
+  --color-glass-solid: var(--glass-bg-solid);
   --color-glass-border: var(--glass-border);
   --color-danger: var(--danger-red);
   --color-caution: var(--caution-amber);

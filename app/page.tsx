@@ -94,7 +94,7 @@ export default function HubPage() {
         {/* Chalet skeleton */}
         <div>
           <SectionHeader title={t.hub.chalet} href="/basecamp" linkLabel={t.hub.more_info} />
-          <div className="bg-glass backdrop-blur-md rounded-2xl shadow-lg overflow-hidden flex animate-pulse">
+          <div className="bg-glass backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden flex animate-pulse">
             <div className="flex-1 p-5 space-y-2">
               <div className="h-4 w-24 rounded bg-mist/20" />
               <div className="h-3 w-36 rounded bg-mist/20" />
