@@ -92,21 +92,10 @@ export async function POST(request: Request) {
     .map((item) => `- id: "${item.id}", text: "${item.text}"`)
     .join("\n");
 
-  const prompt = `You are grouping grocery shopping items for a ski chalet trip. Items may be in French or English.
+  const prompt = `Group these grocery shopping items. Only return groups where 2+ items refer to the same product (slight spelling variations, different languages, or different specificity all count as the same product). Skip items that have no match.
 
 Items:
-${itemsList}
-
-Group items that refer to the same ingredient or product, even if:
-- They use different languages (e.g. "beurre" and "butter")
-- They have slight spelling variations (e.g. "tomates" and "tomate")
-- They have different specificity (e.g. "cream" and "heavy cream" should be grouped)
-
-For each group, pick the most descriptive name as the canonical name. Preserve the original language if all items in a group use the same language.
-
-Items that don't match anything else should be in their own group (with just their own ID).
-
-Use the group_items tool to return the grouped results.`;
+${itemsList}`;
 
   const groupItemsTool: Anthropic.Messages.Tool = {
     name: "group_items",
@@ -134,11 +123,16 @@ Use the group_items tool to return the grouped results.`;
     const client = new Anthropic({ apiKey });
     const message = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
+      max_tokens: 4096,
       messages: [{ role: "user", content: prompt }],
       tools: [groupItemsTool],
       tool_choice: { type: "tool", name: "group_items" },
     });
+
+    if (message.stop_reason === "max_tokens") {
+      console.error("[group-shopping-items] response truncated (max_tokens)");
+      return NextResponse.json({ error: "AI response truncated" }, { status: 500 });
+    }
 
     const toolBlock = message.content.find((b) => b.type === "tool_use");
     if (!toolBlock || toolBlock.type !== "tool_use") {
