@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useMemo } from "react";
+import { Suspense, useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { useTrip } from "@/lib/hooks/useTrip";
@@ -12,6 +12,7 @@ import { getDateRange, isToday } from "@/lib/utils/dates";
 import { DateScroller } from "@/components/feasts/DateScroller";
 import { DayMealCard } from "@/components/feasts/DayMealCard";
 import { GeneralCard } from "@/components/feasts/GeneralCard";
+import { ensureGeneralMeal } from "@/lib/actions/meals";
 
 function getInitialDate(dates: string[]): string {
   const today = dates.find((d) => isToday(d));
@@ -24,6 +25,9 @@ function FeastsContent() {
   const { participants, loading: participantsLoading } = useParticipants();
   const { attendance, loading: attendanceLoading } = useAttendance();
   const { t } = useLocale();
+
+  useEffect(() => { ensureGeneralMeal(); }, []);
+
   const dates = useMemo(
     () => (trip ? getDateRange(trip.startDate, trip.endDate) : []),
     [trip],

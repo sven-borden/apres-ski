@@ -3,6 +3,30 @@ import { getDb } from "@/lib/firebase";
 import { getDateRange } from "@/lib/utils/dates";
 import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
 
+export async function ensureGeneralMeal() {
+  try {
+    const db = getDb();
+    const ref = doc(db, "meals", "general");
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+      await setDoc(ref, {
+        date: "general",
+        tripId: "current",
+        responsibleIds: [],
+        description: "",
+        shoppingList: [],
+        updatedAt: serverTimestamp(),
+        updatedBy: "system",
+      });
+    } else if (!snap.data().tripId) {
+      await setDoc(ref, { date: "general", tripId: "current" }, { merge: true });
+    }
+  } catch (err) {
+    console.error("Failed to ensure general meal:", err);
+  }
+}
+
 export async function seedMeals(startDate: string, endDate: string) {
   try {
     const db = getDb();
