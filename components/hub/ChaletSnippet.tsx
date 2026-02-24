@@ -17,7 +17,7 @@ export function ChaletSnippet({ basecamp }: { basecamp: Basecamp }) {
   const mapsUrl = buildGoogleMapsUrl(basecamp);
 
   return (
-    <div className="bg-glass backdrop-blur-md rounded-2xl shadow-lg overflow-hidden flex">
+    <div className="bg-glass backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden flex">
       {/* Left side — info */}
       <div className="flex-1 min-w-0 p-5 space-y-1.5">
         <h3 className="text-sm font-bold text-midnight truncate">

@@ -10,7 +10,7 @@ import { SnowOverlay } from "@/components/layout/SnowOverlay";
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-sky-300/40 via-sky-200/20 to-transparent" />
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-sky-300/25 via-sky-200/10 to-transparent" />
       <MountainBackdrop />
       <PageViewTracker />
       <DesktopHeader />
