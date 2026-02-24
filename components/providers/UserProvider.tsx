@@ -9,7 +9,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { getDb, initAnalytics } from "@/lib/firebase";
+import { getDb, initAnalytics, initAppCheck } from "@/lib/firebase";
 import { trackUserSetup } from "@/lib/analytics";
 
 import type { LocalUser } from "@/lib/types";
@@ -82,6 +82,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [savedThisSession, setSavedThisSession] = useState(false);
 
   useEffect(() => {
+    initAppCheck();
     initAnalytics();
   }, []);
 
