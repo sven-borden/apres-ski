@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState, useMemo, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useMemo, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useMeals } from "@/lib/hooks/useMeals";
@@ -34,11 +34,16 @@ function FeastsContent() {
   );
 
   const searchParams = useSearchParams();
+  const router = useRouter();
   const dateParam = searchParams.get("date");
 
-  const [selectedDate, setSelectedDate] = useState<string>("");
+  const resolvedDate = dateParam === "general" || (dateParam && dates.includes(dateParam))
+    ? dateParam
+    : getInitialDate(dates);
 
-  const resolvedDate = selectedDate || (dateParam && dates.includes(dateParam) ? dateParam : getInitialDate(dates));
+  const setSelectedDate = useCallback((date: string) => {
+    router.replace(`/feasts?date=${date}`);
+  }, [router]);
 
   const loading = tripLoading || mealsLoading || participantsLoading || attendanceLoading;
 
