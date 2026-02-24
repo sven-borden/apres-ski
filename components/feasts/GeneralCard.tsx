@@ -10,11 +10,16 @@ export function GeneralCard({ meal, headcount }: { meal: Meal | undefined; headc
 
   return (
     <Card>
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-midnight">
-          {t.feasts.general}
-        </h2>
-        <p className="text-sm text-mist">{t.feasts.general_subtitle}</p>
+      <div className="flex items-baseline justify-between mb-4">
+        <div>
+          <h2 className="text-lg font-semibold text-midnight">
+            {t.feasts.general}
+          </h2>
+          <p className="text-sm text-mist">{t.feasts.general_subtitle}</p>
+        </div>
+        <span className="text-sm text-mist">
+          {t.feasts.headcount(headcount)}
+        </span>
       </div>
 
       <ShoppingList

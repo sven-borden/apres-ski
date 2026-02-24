@@ -494,10 +494,10 @@ const fr: Translations = {
     reset_quantities: "Réinitialiser",
     resetting: "Réinitialisation\u2026",
     reset_error: "Échec de la réinitialisation — veuillez réessayer",
-    headcount: (count: number) => `${count} ${count === 1 ? "personne" : "personnes"} au chalet`,
+    headcount: (count: number) => `${count} ${count === 1 ? "mangeur" : "mangeurs"} au chalet`,
     general: "Général",
     general_subtitle: "Articles pour tout le séjour",
-    exclude_from_shopping: "Je fais mes courses moi-même",
+    exclude_from_shopping: "J'achète moi",
   },
   lineup: {
     present: "Présent",
