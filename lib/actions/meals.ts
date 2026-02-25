@@ -147,17 +147,15 @@ export async function addShoppingItem(
 export async function toggleShoppingItem(
   date: string,
   itemId: string,
+  checked: boolean,
+  items: ShoppingItem[],
   updatedBy: string,
 ) {
   try {
     const db = getDb();
     const ref = doc(db, "meals", date);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return;
-
-    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
-    const updated = list.map((item) =>
-      item.id === itemId ? { ...item, checked: !item.checked } : item,
+    const updated = items.map((item) =>
+      item.id === itemId ? { ...item, checked } : item,
     );
 
     await setDoc(
@@ -171,6 +169,35 @@ export async function toggleShoppingItem(
     );
   } catch (err) {
     console.error("Failed to toggle shopping item:", err);
+    throw err;
+  }
+}
+
+export async function setShoppingItemsChecked(
+  date: string,
+  itemIds: Set<string>,
+  checked: boolean,
+  items: ShoppingItem[],
+  updatedBy: string,
+) {
+  try {
+    const db = getDb();
+    const ref = doc(db, "meals", date);
+    const updated = items.map((item) =>
+      itemIds.has(item.id) ? { ...item, checked } : item,
+    );
+
+    await setDoc(
+      ref,
+      {
+        shoppingList: updated,
+        updatedAt: serverTimestamp(),
+        updatedBy,
+      },
+      { merge: true },
+    );
+  } catch (err) {
+    console.error("Failed to set shopping items checked:", err);
     throw err;
   }
 }

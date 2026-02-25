@@ -83,9 +83,10 @@ export function ShoppingList({
 
   async function handleToggle(itemId: string) {
     const item = items.find((i) => i.id === itemId);
+    if (!item) return;
     try {
-      await toggleShoppingItem(date, itemId, userId);
-      trackShoppingItemToggled(!item?.checked);
+      await toggleShoppingItem(date, itemId, !item.checked, items, userId);
+      trackShoppingItemToggled(!item.checked);
     } catch {
       showError(t.errors.toggle_failed);
     }
