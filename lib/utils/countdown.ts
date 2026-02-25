@@ -1,5 +1,27 @@
 import type { Translations } from "@/lib/i18n/locales";
 
+const SKI_QUOTES: string[] = [
+  "La raclette, c'est pas un repas, c'est un mode de vie",
+  "Aujourd'hui : ski, bière, dodo. Dans cet ordre.",
+  "Le seul cardio acceptable, c'est monter les pistes... en télésiège",
+  "Si tu tombes, fais semblant que c'est voulu",
+  "L'après-ski commence dès le matin si t'es courageux",
+  "Pas besoin de wifi, on a de la neige",
+  "Le fromage fondu guérit tout",
+  "Jour de repos = jour de raclette supplémentaire",
+  "Les courbatures, c'est juste le ski qui dit merci",
+  "La montagne, c'est 20% de ski et 80% de fondue",
+  "Qui dit chalet dit pas de règles",
+  "On skie pour mériter la tartiflette",
+  "Le générateur de bonne humeur : altitude + fromage",
+  "Sourire obligatoire après la première descente",
+  "Ici, l'heure de l'apéro c'est tout le temps",
+];
+
+export function getDailyQuote(dayNum: number): string {
+  return SKI_QUOTES[(dayNum - 1) % SKI_QUOTES.length];
+}
+
 export function getTodayString(): string {
   const now = new Date();
   const y = now.getFullYear();
