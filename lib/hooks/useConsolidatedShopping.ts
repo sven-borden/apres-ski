@@ -3,7 +3,7 @@
 import { useMemo, useState, useRef, useCallback } from "react";
 import type { Meal, ShoppingUnit } from "@/lib/types";
 import { sumQuantities, type SumOutput } from "@/lib/utils/units";
-import { toggleShoppingItem } from "@/lib/actions/meals";
+import { setShoppingItemsChecked } from "@/lib/actions/meals";
 
 // ── Types ───────────────────────────────────────────────────────────────
 
@@ -281,29 +281,35 @@ export function useConsolidatedShopping(meals: Meal[]) {
 
   const toggleConsolidatedItem = useCallback(
     async (item: ConsolidatedItem, updatedBy: string) => {
-      // Group sources by date to avoid Firestore race conditions
-      const byDate = new Map<string, SourceItem[]>();
+      const newChecked = !item.checked;
+
+      // Group source item IDs by date
+      const idsByDate = new Map<string, Set<string>>();
       for (const source of item.sources) {
-        const list = byDate.get(source.date);
-        if (list) {
-          list.push(source);
+        const ids = idsByDate.get(source.date);
+        if (ids) {
+          ids.add(source.itemId);
         } else {
-          byDate.set(source.date, [source]);
+          idsByDate.set(source.date, new Set([source.itemId]));
         }
       }
 
-      // Toggle all: if any unchecked, check all; if all checked, uncheck all
-      // We toggle each individual item in Firestore
-      // Parallel across dates, sequential within each date
+      // Build a map of date → full shopping list from meals
+      const mealsByDate = new Map<string, Meal>();
+      for (const meal of meals) {
+        mealsByDate.set(meal.date, meal);
+      }
+
+      // Single write per date (parallel across dates)
       await Promise.all(
-        Array.from(byDate.entries()).map(async ([date, sources]) => {
-          for (const source of sources) {
-            await toggleShoppingItem(date, source.itemId, updatedBy);
-          }
+        Array.from(idsByDate.entries()).map(([date, itemIds]) => {
+          const meal = mealsByDate.get(date);
+          if (!meal) return Promise.resolve();
+          return setShoppingItemsChecked(date, itemIds, newChecked, meal.shoppingList, updatedBy);
         }),
       );
     },
-    [],
+    [meals],
   );
 
   return {

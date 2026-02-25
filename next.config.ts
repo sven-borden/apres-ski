@@ -6,7 +6,7 @@ const cspDirectives: Record<string, string[]> = {
   "default-src": ["'self'"],
   "script-src": isDev
     ? ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
-    : ["'self'", "'unsafe-inline'", "https://www.clarity.ms", "https://scripts.clarity.ms", "https://www.googletagmanager.com"],
+    : ["'self'", "'unsafe-inline'", "https://www.clarity.ms", "https://scripts.clarity.ms", "https://www.googletagmanager.com", "https://www.google.com/recaptcha/", "https://www.gstatic.com/recaptcha/"],
   "style-src": ["'self'", "'unsafe-inline'"],
   "font-src": ["'self'"],
   "img-src": [
@@ -29,6 +29,8 @@ const cspDirectives: Record<string, string[]> = {
     "https://www.google-analytics.com",
     "https://region1.google-analytics.com",
     "https://www.googletagmanager.com",
+    "https://www.google.com",
+    "https://firebaseappcheck.googleapis.com",
   ],
   "frame-src": ["maps.google.com", "www.google.com"],
   "object-src": ["'none'"],
