@@ -101,7 +101,7 @@ service cloud.firestore {
       allow create, update: if
         (isDateString(mealId) || mealId == "general")
         && request.resource.data.keys().hasOnly(
-          ['date', 'tripId', 'responsibleIds', 'description', 'shoppingList', 'excludeFromShopping', 'updatedAt', 'updatedBy']
+          ['date', 'tripId', 'responsibleIds', 'description', 'shoppingList', 'excludeFromShopping', 'updatedAt', 'updatedBy', 'apero', 'dinner']
         )
         && request.resource.data.updatedAt is timestamp
         && bounded(request.resource.data.updatedBy, 100)
