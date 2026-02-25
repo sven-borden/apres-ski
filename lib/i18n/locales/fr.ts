@@ -256,6 +256,7 @@ export interface Translations {
     from_meal: (date: string) => string;
     show_details: string;
     hide_details: string;
+    category_other: string;
   };
   confirm: {
     remove_contact_title: string;
@@ -533,6 +534,7 @@ const fr: Translations = {
     from_meal: (date: string) => `Repas du ${date}`,
     show_details: "Voir les détails",
     hide_details: "Masquer les détails",
+    category_other: "Autre",
   },
   confirm: {
     remove_contact_title: "Retirer le contact",

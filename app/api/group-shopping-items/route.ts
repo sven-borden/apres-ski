@@ -12,11 +12,12 @@ function getClientIp(request: Request): string {
 
 interface RequestBody {
   items: { id: string; text: string }[];
+  locale?: string;
 }
 
-interface GroupResult {
-  canonicalName: string;
-  itemIds: string[];
+interface CategoryResult {
+  categoryName: string;
+  items: { canonicalName: string; itemIds: string[] }[];
 }
 
 export async function POST(request: Request) {
@@ -82,40 +83,62 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { items } = body;
+  const { items, locale } = body;
 
   if (!Array.isArray(items) || items.length === 0) {
     return NextResponse.json({ error: "items must be a non-empty array" }, { status: 400 });
   }
 
+  const isFrench = locale !== "en";
   const itemsList = items
     .map((item) => `- id: "${item.id}", text: "${item.text}"`)
     .join("\n");
 
-  const prompt = `Group these grocery shopping items. Only return groups where 2+ items refer to the same product (slight spelling variations, different languages, or different specificity all count as the same product). Skip items that have no match.
+  const suggestedCategories = isFrench
+    ? "Fruits & Légumes, Produits laitiers, Viande & Poisson, Boulangerie, Épicerie, Boissons, Surgelés, Snacks & Apéro, Condiments & Sauces, Autre"
+    : "Produce, Dairy, Meat & Fish, Bakery, Pantry, Beverages, Frozen, Snacks & Appetizers, Condiments & Sauces, Other";
+
+  const prompt = `Categorize and group these grocery shopping items. Every item must appear exactly once.
+
+Rules:
+1. Group duplicate/similar items (spelling variations, different languages, different specificity) under one canonical name.
+2. Assign EVERY item (including singletons) to a grocery store category.
+3. Return categories in grocery-aisle order.
+4. Use ${isFrench ? "French" : "English"} for all category names and canonical names.
+5. Suggested categories: ${suggestedCategories}. You may create additional categories if needed.
 
 Items:
 ${itemsList}`;
 
-  const groupItemsTool: Anthropic.Messages.Tool = {
-    name: "group_items",
-    description: "Group shopping items by ingredient",
+  const categorizeAndGroupTool: Anthropic.Messages.Tool = {
+    name: "categorize_and_group_items",
+    description: "Categorize and group shopping items by grocery aisle",
     input_schema: {
       type: "object" as const,
       properties: {
-        groups: {
+        categories: {
           type: "array",
           items: {
             type: "object",
             properties: {
-              canonical_name: { type: "string", description: "The best canonical name for this group of items" },
-              item_ids: { type: "array", items: { type: "string" }, description: "IDs of items in this group" },
+              category_name: { type: "string", description: "Grocery store category name" },
+              items: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    canonical_name: { type: "string", description: "The best canonical name for this item or group" },
+                    item_ids: { type: "array", items: { type: "string" }, description: "IDs of items in this group (1 for singletons, 2+ for merged)" },
+                  },
+                  required: ["canonical_name", "item_ids"],
+                },
+              },
             },
-            required: ["canonical_name", "item_ids"],
+            required: ["category_name", "items"],
           },
         },
       },
-      required: ["groups"],
+      required: ["categories"],
     },
   };
 
@@ -123,10 +146,10 @@ ${itemsList}`;
     const client = new Anthropic({ apiKey });
     const message = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 4096,
+      max_tokens: 8192,
       messages: [{ role: "user", content: prompt }],
-      tools: [groupItemsTool],
-      tool_choice: { type: "tool", name: "group_items" },
+      tools: [categorizeAndGroupTool],
+      tool_choice: { type: "tool", name: "categorize_and_group_items" },
     });
 
     if (message.stop_reason === "max_tokens") {
@@ -142,24 +165,36 @@ ${itemsList}`;
     const input = toolBlock.input as Record<string, unknown>;
 
     // Validate and sanitize — handle both camelCase and snake_case from the model
-    const rawGroups = Array.isArray(input.groups) ? input.groups : [];
-    const groups: GroupResult[] = rawGroups
-      .filter((item): item is Record<string, unknown> =>
-        typeof item === "object" && item !== null &&
-        ("canonicalName" in item || "canonical_name" in item) &&
-        ("itemIds" in item || "item_ids" in item),
+    const rawCategories = Array.isArray(input.categories) ? input.categories : [];
+    const categories: CategoryResult[] = rawCategories
+      .filter((cat): cat is Record<string, unknown> =>
+        typeof cat === "object" && cat !== null &&
+        ("categoryName" in cat || "category_name" in cat) &&
+        ("items" in cat && Array.isArray(cat.items)),
       )
-      .map((item) => {
-        const name = item.canonicalName ?? item.canonical_name;
-        const ids = item.itemIds ?? item.item_ids;
-        return {
-          canonicalName: String(name),
-          itemIds: Array.isArray(ids) ? ids.map(String) : [],
-        };
+      .map((cat) => {
+        const categoryName = String(cat.categoryName ?? cat.category_name);
+        const rawItems = Array.isArray(cat.items) ? cat.items : [];
+        const parsedItems = rawItems
+          .filter((item): item is Record<string, unknown> =>
+            typeof item === "object" && item !== null &&
+            ("canonicalName" in item || "canonical_name" in item) &&
+            ("itemIds" in item || "item_ids" in item),
+          )
+          .map((item) => {
+            const name = item.canonicalName ?? item.canonical_name;
+            const ids = item.itemIds ?? item.item_ids;
+            return {
+              canonicalName: String(name),
+              itemIds: Array.isArray(ids) ? ids.map(String) : [],
+            };
+          })
+          .filter((g) => g.itemIds.length > 0);
+        return { categoryName, items: parsedItems };
       })
-      .filter((g) => g.itemIds.length > 0);
+      .filter((cat) => cat.items.length > 0);
 
-    return NextResponse.json({ groups });
+    return NextResponse.json({ categories });
   } catch (err) {
     console.error("Group shopping items error:", err);
     return NextResponse.json(

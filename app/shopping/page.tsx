@@ -6,7 +6,7 @@ import { useTrip } from "@/lib/hooks/useTrip";
 import { useMeals } from "@/lib/hooks/useMeals";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { useUser } from "@/components/providers/UserProvider";
-import { useConsolidatedShopping, type ConsolidatedItem } from "@/lib/hooks/useConsolidatedShopping";
+import { useConsolidatedShopping, groupByCategory, type ConsolidatedItem } from "@/lib/hooks/useConsolidatedShopping";
 import { trackSmartMerge, trackConsolidatedToggle } from "@/lib/analytics";
 import { cn } from "@/lib/utils/cn";
 
@@ -140,11 +140,34 @@ function ConsolidatedItemRow({
   );
 }
 
+function CategorySection({
+  name,
+  items,
+  onToggle,
+}: {
+  name: string;
+  items: ConsolidatedItem[];
+  onToggle: (item: ConsolidatedItem) => void;
+}) {
+  return (
+    <div>
+      <h3 className="text-xs font-bold text-mist uppercase tracking-wider pt-4 pb-1 first:pt-0">
+        {name}
+      </h3>
+      <ul className="divide-y divide-glass-border">
+        {items.map((item) => (
+          <ConsolidatedItemRow key={item.key} item={item} onToggle={onToggle} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function ShoppingContent() {
   const { trip, loading: tripLoading } = useTrip();
   const { meals, loading: mealsLoading } = useMeals();
   const { user } = useUser();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   const {
     items,
@@ -153,7 +176,8 @@ function ShoppingContent() {
     groupingError,
     refreshGrouping,
     toggleConsolidatedItem,
-  } = useConsolidatedShopping(meals);
+    categoryOrder,
+  } = useConsolidatedShopping(meals, locale);
 
   const [showPurchased, setShowPurchased] = useState(false);
 
@@ -277,15 +301,23 @@ function ShoppingContent() {
       {/* Unchecked items */}
       {uncheckedItems.length > 0 && (
         <Card>
-          <ul className="divide-y divide-glass-border">
-            {uncheckedItems.map((item) => (
-              <ConsolidatedItemRow
-                key={item.key}
-                item={item}
-                onToggle={handleToggle}
-              />
-            ))}
-          </ul>
+          {categoryOrder ? (
+            <div className="space-y-2">
+              {groupByCategory(uncheckedItems, categoryOrder, t.shopping.category_other).map(([cat, catItems]) => (
+                <CategorySection key={cat} name={cat} items={catItems} onToggle={handleToggle} />
+              ))}
+            </div>
+          ) : (
+            <ul className="divide-y divide-glass-border">
+              {uncheckedItems.map((item) => (
+                <ConsolidatedItemRow
+                  key={item.key}
+                  item={item}
+                  onToggle={handleToggle}
+                />
+              ))}
+            </ul>
+          )}
         </Card>
       )}
 
@@ -315,15 +347,23 @@ function ShoppingContent() {
 
           {showPurchased && (
             <Card>
-              <ul className="divide-y divide-glass-border">
-                {checkedItems.map((item) => (
-                  <ConsolidatedItemRow
-                    key={item.key}
-                    item={item}
-                    onToggle={handleToggle}
-                  />
-                ))}
-              </ul>
+              {categoryOrder ? (
+                <div className="space-y-2">
+                  {groupByCategory(checkedItems, categoryOrder, t.shopping.category_other).map(([cat, catItems]) => (
+                    <CategorySection key={cat} name={cat} items={catItems} onToggle={handleToggle} />
+                  ))}
+                </div>
+              ) : (
+                <ul className="divide-y divide-glass-border">
+                  {checkedItems.map((item) => (
+                    <ConsolidatedItemRow
+                      key={item.key}
+                      item={item}
+                      onToggle={handleToggle}
+                    />
+                  ))}
+                </ul>
+              )}
             </Card>
           )}
         </div>
