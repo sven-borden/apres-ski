@@ -9,9 +9,9 @@ npm run dev      # Start dev server (Next.js)
 npm run build    # Production build
 npm run start    # Start production server
 npm run lint     # ESLint (flat config, no args needed)
+npm run test     # Run unit tests (Vitest, single run)
+npm run test:watch # Run unit tests in watch mode
 ```
-
-No test runner is configured.
 
 ## Architecture
 
