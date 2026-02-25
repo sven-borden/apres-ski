@@ -259,6 +259,7 @@ const en: Translations = {
     from_meal: (date: string) => `Meal on ${date}`,
     show_details: "Show details",
     hide_details: "Hide details",
+    category_other: "Other",
   },
   confirm: {
     remove_contact_title: "Remove contact",
