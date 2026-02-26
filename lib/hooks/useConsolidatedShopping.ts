@@ -338,22 +338,14 @@ export function useConsolidatedShopping(meals: Meal[], locale: string = "fr") {
         }
       }
 
-      // Build a map of date → full shopping list from meals
-      const mealsByDate = new Map<string, Meal>();
-      for (const meal of meals) {
-        mealsByDate.set(meal.date, meal);
-      }
-
       // Single write per date (parallel across dates)
       await Promise.all(
-        Array.from(idsByDate.entries()).map(([date, itemIds]) => {
-          const meal = mealsByDate.get(date);
-          if (!meal) return Promise.resolve();
-          return setShoppingItemsChecked(date, itemIds, newChecked, meal.shoppingList, updatedBy);
-        }),
+        Array.from(idsByDate.entries()).map(([date, itemIds]) =>
+          setShoppingItemsChecked(date, itemIds, newChecked, updatedBy),
+        ),
       );
     },
-    [meals],
+    [],
   );
 
   return {
