@@ -113,14 +113,16 @@ function ConsolidatedItemRow({
           </div>
         </button>
 
-        <span
+        <button
+          type="button"
+          onClick={() => onToggle(item)}
           className={cn(
-            "flex-1 min-w-0 text-midnight",
+            "flex-1 min-w-0 text-midnight text-left cursor-pointer",
             item.checked && "line-through opacity-60",
           )}
         >
           {item.canonicalName}
-        </span>
+        </button>
 
         <QuantityDisplay item={item} />
 
