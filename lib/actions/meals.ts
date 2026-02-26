@@ -177,13 +177,16 @@ export async function setShoppingItemsChecked(
   date: string,
   itemIds: Set<string>,
   checked: boolean,
-  items: ShoppingItem[],
   updatedBy: string,
 ) {
   try {
     const db = getDb();
     const ref = doc(db, "meals", date);
-    const updated = items.map((item) =>
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+
+    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
+    const updated = list.map((item) =>
       itemIds.has(item.id) ? { ...item, checked } : item,
     );
 
