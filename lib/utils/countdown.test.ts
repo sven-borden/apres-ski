@@ -48,14 +48,33 @@ describe("getCountdownData", () => {
     vi.useRealTimers();
   });
 
-  it("returns 'before' state with days and hours", () => {
+  it("returns 'before' state with calendar days", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-03-01T10:00:00"));
     const data = getCountdownData("2026-03-07", "2026-03-14");
     expect(data.state).toBe("before");
     if (data.state === "before") {
-      expect(data.days).toBeGreaterThan(0);
-      expect(data.hours).toBeGreaterThanOrEqual(0);
+      expect(data.days).toBe(6);
+    }
+  });
+
+  it("counts calendar days regardless of time of day", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-06T23:59:00"));
+    const data = getCountdownData("2026-03-07", "2026-03-14");
+    expect(data.state).toBe("before");
+    if (data.state === "before") {
+      expect(data.days).toBe(1);
+    }
+  });
+
+  it("transitions to 'during' on start day regardless of time", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-07T08:00:00"));
+    const data = getCountdownData("2026-03-07", "2026-03-14");
+    expect(data.state).toBe("during");
+    if (data.state === "during") {
+      expect(data.dayNum).toBe(1);
     }
   });
 
