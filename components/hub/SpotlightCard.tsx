@@ -67,7 +67,7 @@ export function SpotlightCard({
     meal?.shoppingList?.filter((i) => i.checked).length ?? 0;
 
   return (
-    <Card className={cn("shrink-0 w-[38vw] min-w-[160px] md:w-72 h-full", highlighted && "border-2 border-alpine")}>
+    <Card className={cn("shrink-0 w-[38vw] min-w-[160px] md:w-72 h-full transition-shadow", highlighted && "border-2 border-spritz shadow-[0_0_24px_rgba(249,115,22,0.25)]")}>
       <div className="space-y-3">
         {/* Header: date + headcount */}
         <div className="flex items-center justify-between">
@@ -76,7 +76,8 @@ export function SpotlightCard({
               {formatDateShort(date, locale)}
             </h2>
             {badge && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-alpine text-white">
+              <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-spritz text-white shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-white/90 animate-pulse" />
                 {badge}
               </span>
             )}
