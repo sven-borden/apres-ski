@@ -63,19 +63,22 @@ export function ShoppingList({
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
-    const text = newItem.trim();
-    if (!text) return;
+    const lines = newItem
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (lines.length === 0) return;
 
-    const item: ShoppingItem = {
+    const items: ShoppingItem[] = lines.map((text) => ({
       id: crypto.randomUUID(),
       text,
       checked: false,
-    };
+    }));
 
     setNewItem("");
     try {
-      await addShoppingItem(date, item, userId);
-      trackShoppingItemAdded();
+      await addShoppingItem(date, items.length === 1 ? items[0] : items, userId);
+      items.forEach(() => trackShoppingItemAdded());
     } catch {
       showError(t.errors.add_failed);
     }
@@ -414,18 +417,24 @@ export function ShoppingList({
       )}
 
       <form onSubmit={handleAdd} className="flex gap-2">
-        <input
-          type="text"
+        <textarea
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleAdd(e);
+            }
+          }}
           placeholder={t.feasts.placeholder_item}
-          maxLength={100}
-          className="flex-1 rounded-lg border border-mist/30 bg-white/50 px-3 py-2 text-sm text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50"
+          maxLength={500}
+          rows={1}
+          className="flex-1 rounded-lg border border-mist/30 bg-white/50 px-3 py-2 text-sm text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50 resize-none [field-sizing:content]"
         />
         <button
           type="submit"
           disabled={!newItem.trim()}
-          className="rounded-lg bg-alpine px-3 py-2 text-sm font-medium text-white hover:bg-alpine/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded-lg bg-alpine px-3 py-2 text-sm font-medium text-white hover:bg-alpine/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end"
         >
           {t.common.add}
         </button>
