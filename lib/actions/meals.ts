@@ -120,7 +120,7 @@ export async function updateDinner(
 
 export async function addShoppingItem(
   date: string,
-  item: ShoppingItem,
+  item: ShoppingItem | ShoppingItem[],
   updatedBy: string,
 ) {
   try {
@@ -128,11 +128,12 @@ export async function addShoppingItem(
     const ref = doc(db, "meals", date);
     const snap = await getDoc(ref);
     const current = snap.exists() ? (snap.data().shoppingList ?? []) : [];
+    const newItems = Array.isArray(item) ? item : [item];
 
     await setDoc(
       ref,
       {
-        shoppingList: [...current, item],
+        shoppingList: [...current, ...newItems],
         updatedAt: serverTimestamp(),
         updatedBy,
       },
