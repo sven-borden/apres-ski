@@ -44,6 +44,7 @@ const csp = Object.entries(cspDirectives)
   .join("; ");
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   poweredByHeader: false,
   async headers() {
     return [
