@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { getDb } from "@/lib/firebase";
+import { createParticipant } from "@/lib/actions/participants";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
@@ -36,15 +35,10 @@ export function AddCrewModal({
     setSaving(true);
     setError(null);
     try {
-      const id = crypto.randomUUID();
-      const db = getDb();
-      await setDoc(doc(db, "participants", id), {
-        id,
+      await createParticipant({
         name: name.trim(),
         color: selectedColor,
         avatar: getInitials(name.trim()),
-        joinedAt: serverTimestamp(),
-        tripId: "current",
       });
       trackCrewMemberAdded();
       setName("");

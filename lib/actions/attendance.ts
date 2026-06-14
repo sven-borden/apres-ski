@@ -1,33 +1,38 @@
-import { doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
-import { getDb } from "@/lib/firebase";
-import { trackAttendanceToggled } from "@/lib/analytics";
+"use server";
 
+import { getPb, TRIP_ID } from "@/lib/pb/server";
+
+// Attendance has a unique index on (participantId, date). Presence is modeled
+// as the existence of a record: toggling on creates it, toggling off deletes it.
 export async function toggleAttendance(
   participant: { id: string; name: string; color: string },
   date: string,
   currentlyPresent: boolean,
-  updatedBy: string,
 ) {
   try {
-    const db = getDb();
-    const docId = `${participant.id}_${date}`;
-    const ref = doc(db, "attendance", docId);
+    const pb = getPb();
+    const filter = pb.filter("participantId = {:pid} && date = {:date}", {
+      pid: participant.id,
+      date,
+    });
 
     if (currentlyPresent) {
-      await deleteDoc(ref);
+      try {
+        const rec = await pb.collection("attendance").getFirstListItem(filter);
+        await pb.collection("attendance").delete(rec.id);
+      } catch (err) {
+        if ((err as { status?: number }).status !== 404) throw err;
+      }
     } else {
-      await setDoc(ref, {
+      await pb.collection("attendance").create({
         participantId: participant.id,
         participantName: participant.name,
         participantColor: participant.color,
         date,
         present: true,
-        tripId: "current",
-        updatedAt: serverTimestamp(),
-        updatedBy,
+        tripId: TRIP_ID,
       });
     }
-    trackAttendanceToggled(!currentlyPresent);
   } catch (err) {
     console.error("Failed to toggle attendance:", err);
     throw err;
