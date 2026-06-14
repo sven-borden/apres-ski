@@ -19,7 +19,8 @@ services:
         condition: service_healthy
 
   pocketbase:
-    image: ghcr.io/muchobien/pocketbase:0.39.4
+    build:
+      context: ./pocketbase
     restart: unless-stopped
     volumes:
       - pb-data:/pb_data
