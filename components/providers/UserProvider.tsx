@@ -8,7 +8,7 @@ import {
   useEffect,
   useSyncExternalStore,
 } from "react";
-import { initAnalytics, initAppCheck } from "@/lib/firebase";
+import { initAppCheck } from "@/lib/firebase";
 import { trackUserSetup } from "@/lib/analytics";
 import { createParticipant } from "@/lib/actions/participants";
 
@@ -87,7 +87,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     initAppCheck();
-    initAnalytics();
   }, []);
 
   const user = storedUser;
