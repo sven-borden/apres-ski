@@ -24,14 +24,15 @@ function escape(v: string) {
   return v.replace(/"/g, '\\"');
 }
 
-/** Inclusive list of YYYY-MM-DD between start and end. */
+/** Inclusive list of YYYY-MM-DD between start and end (timezone-safe). */
 function dateRange(startISO: string, endISO: string): string[] {
   const out: string[] = [];
-  const d = new Date(startISO + "T00:00:00");
-  const end = new Date(endISO + "T00:00:00");
-  while (d <= end) {
+  const d = new Date(startISO + "T12:00:00Z");
+  const end = new Date(endISO + "T12:00:00Z");
+  let guard = 0;
+  while (d <= end && guard++ < 400) {
     out.push(d.toISOString().slice(0, 10));
-    d.setDate(d.getDate() + 1);
+    d.setUTCDate(d.getUTCDate() + 1);
   }
   return out;
 }

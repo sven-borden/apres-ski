@@ -4,18 +4,19 @@ import { useId, useMemo, useState } from "react";
 import { Modal } from "@/components/modal";
 import { Button } from "@/components/button";
 import { Field, Input } from "@/components/form";
-import { assignedMealDates } from "@/lib/basecamp";
 
 export type TripDraft = { name: string; startISO: string; endISO: string };
 
 export function TripEditor({
   open,
   initial,
+  assignedMealDates = [],
   onClose,
   onSave,
 }: {
   open: boolean;
   initial: TripDraft;
+  assignedMealDates?: string[];
   onClose: () => void;
   onSave: (draft: TripDraft) => void;
 }) {
@@ -35,7 +36,7 @@ export function TripEditor({
   // Meals already assigned that would fall outside the new range.
   const orphaned = useMemo(
     () => assignedMealDates.filter((d) => d < start || d > end),
-    [start, end],
+    [start, end, assignedMealDates],
   );
 
   function changeDates(next: () => void) {

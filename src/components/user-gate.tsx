@@ -17,6 +17,8 @@ export function UserGate() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  // Client-only render gate (avoids SSR-ing the modal).
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   if (!mounted || user) return null;
