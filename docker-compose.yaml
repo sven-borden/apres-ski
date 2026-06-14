@@ -22,6 +22,10 @@ services:
     build:
       context: ./pocketbase
     restart: unless-stopped
+    environment:
+      # Admin dashboard account, upserted on boot by pb_hooks (no-op if unset).
+      - PB_SUPERUSER_EMAIL=${PB_SUPERUSER_EMAIL}
+      - PB_SUPERUSER_PASSWORD=${PB_SUPERUSER_PASSWORD}
     volumes:
       - pb-data:/pb_data
     healthcheck:

@@ -18,7 +18,7 @@ COPY --from=build /pb/pocketbase /pb/pocketbase
 # migrations) only initialises when a hooks dir is present, so we create one and
 # point --hooksDir at it even though it is empty.
 COPY pb_migrations /pb/pb_migrations
-RUN mkdir -p /pb/pb_hooks
+COPY pb_hooks /pb/pb_hooks
 
 EXPOSE 8090
 # /pb_data holds the SQLite db + uploads -> mount a persistent volume here.
