@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    return Response.json(await pbFirst<TripRecord>("trips", { sort: "-created" }));
+    return Response.json(await pbFirst<TripRecord>("trips"));
   } catch (err) {
     return Response.json({ error: String(err) }, { status: 502 });
   }
