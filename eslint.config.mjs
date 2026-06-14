@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Tooling/skill scripts bundled in the repo — not application source.
     ".claude/**",
+    // PocketBase JSVM migrations run inside PocketBase, not the Next app.
+    "pocketbase/**",
   ]),
 ]);
 
