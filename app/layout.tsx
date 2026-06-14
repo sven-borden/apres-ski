@@ -7,6 +7,8 @@ import { LocaleProvider } from "@/lib/i18n/LocaleProvider";
 import { AppShell } from "@/components/layout/AppShell";
 
 const msClarity = process.env.NEXT_PUBLIC_MS_CLARITY_PROJECT_ID;
+const umamiSrc = process.env.NEXT_PUBLIC_UMAMI_SRC;
+const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 
 const inter = Inter({
   subsets: ["latin"],
@@ -53,6 +55,14 @@ export default function RootLayout({
           <Script id="ms-clarity" strategy="afterInteractive">
             {`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","${msClarity}");`}
           </Script>
+        )}
+        {umamiSrc && umamiWebsiteId && (
+          <Script
+            id="umami"
+            src={umamiSrc}
+            data-website-id={umamiWebsiteId}
+            strategy="afterInteractive"
+          />
         )}
       </head>
       <body className={`${inter.className} antialiased`}>

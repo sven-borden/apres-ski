@@ -1,10 +1,23 @@
-import { logEvent } from "firebase/analytics";
-import { getAnalyticsInstance } from "@/lib/firebase";
+// Analytics via self-hosted Umami. The tracking script is injected in the root
+// layout (when NEXT_PUBLIC_UMAMI_SRC / _WEBSITE_ID are set) and exposes
+// window.umami. These typed helpers are no-ops until the script has loaded.
 
-function log(eventName: string, params?: Record<string, string | number | boolean>) {
-  const analytics = getAnalyticsInstance();
-  if (!analytics) return;
-  logEvent(analytics, eventName, params);
+type UmamiTracker = {
+  track: (eventName: string, eventData?: Record<string, unknown>) => void;
+};
+
+declare global {
+  interface Window {
+    umami?: UmamiTracker;
+  }
+}
+
+function log(
+  eventName: string,
+  params?: Record<string, string | number | boolean>,
+) {
+  if (typeof window === "undefined") return;
+  window.umami?.track(eventName, params);
 }
 
 // ── User setup ──────────────────────────────────────────────────────────
