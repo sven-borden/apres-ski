@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navItems } from "@/lib/nav";
+import { UserGate } from "@/components/user-gate";
 
 function isActive(href: string, pathname: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -14,6 +15,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-dvh flex-col">
+      <UserGate />
       {/* Desktop / tablet: top navigation */}
       <header className="sticky top-0 z-[var(--z-nav)] hidden border-b border-border/70 bg-bg/80 backdrop-blur-md md:block">
         <nav className="mx-auto flex h-16 w-full max-w-5xl items-center gap-2 px-6">
