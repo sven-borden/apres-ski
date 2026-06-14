@@ -1,0 +1,32 @@
+# Coolify single-stack deploy: Next.js app (public) + PocketBase (internal only).
+# The app reaches PocketBase over the compose network at http://pocketbase:8090.
+# PocketBase publishes no port and has no domain — never exposed to the browser
+# (PROJECT.md §10: the DB is reached only through server-side code).
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      # Coolify maps the resource FQDN to this service on port 3000.
+      - SERVICE_FQDN_APP_3000
+      - POCKETBASE_URL=http://pocketbase:8090
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:0.39.4
+    restart: unless-stopped
+    volumes:
+      - pb-data:/pb_data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8090/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+volumes:
+  pb-data:
