@@ -8,7 +8,7 @@ import {
   useEffect,
   useSyncExternalStore,
 } from "react";
-import { initAnalytics } from "@/lib/firebase";
+import { initAnalytics, initAppCheck } from "@/lib/firebase";
 import { trackUserSetup } from "@/lib/analytics";
 import { createParticipant } from "@/lib/actions/participants";
 
@@ -86,6 +86,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [savedThisSession, setSavedThisSession] = useState(false);
 
   useEffect(() => {
+    initAppCheck();
     initAnalytics();
   }, []);
 

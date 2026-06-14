@@ -12,11 +12,12 @@ function getClientIp(request: Request): string {
 
 interface RequestBody {
   items: { id: string; text: string }[];
+  locale?: string;
 }
 
-interface GroupResult {
-  canonicalName: string;
-  itemIds: string[];
+interface CategoryResult {
+  categoryName: string;
+  items: { canonicalName: string; itemIds: string[] }[];
 }
 
 export async function POST(request: Request) {
@@ -45,16 +46,16 @@ export async function POST(request: Request) {
       entry.day = todayUTC;
     }
 
-    // 1 request per 60 seconds
-    if (now - entry.lastRequest < 60_000) {
+    // 5 requests per 60 seconds
+    if (now - entry.lastRequest < 12_000) {
       return NextResponse.json(
         { error: "Rate limited — please wait a minute before trying again" },
         { status: 429 },
       );
     }
 
-    // 10 requests per day
-    if (entry.dailyCount >= 10) {
+    // 50 requests per day
+    if (entry.dailyCount >= 50) {
       return NextResponse.json(
         { error: "Daily limit reached — try again tomorrow" },
         { status: 429 },
@@ -82,68 +83,118 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { items } = body;
+  const { items, locale } = body;
 
   if (!Array.isArray(items) || items.length === 0) {
     return NextResponse.json({ error: "items must be a non-empty array" }, { status: 400 });
   }
 
+  const isFrench = locale !== "en";
   const itemsList = items
     .map((item) => `- id: "${item.id}", text: "${item.text}"`)
     .join("\n");
 
-  const prompt = `You are grouping grocery shopping items for a ski chalet trip. Items may be in French or English.
+  const suggestedCategories = isFrench
+    ? "Fruits & Légumes, Produits laitiers, Viande & Poisson, Boulangerie, Épicerie, Boissons, Surgelés, Snacks & Apéro, Condiments & Sauces, Autre"
+    : "Produce, Dairy, Meat & Fish, Bakery, Pantry, Beverages, Frozen, Snacks & Appetizers, Condiments & Sauces, Other";
+
+  const prompt = `Categorize and group these grocery shopping items. Every item must appear exactly once.
+
+Rules:
+1. Group duplicate/similar items (spelling variations, different languages, different specificity) under one canonical name.
+2. Assign EVERY item (including singletons) to a grocery store category.
+3. Return categories in grocery-aisle order.
+4. Use ${isFrench ? "French" : "English"} for all category names and canonical names.
+5. Suggested categories: ${suggestedCategories}. You may create additional categories if needed.
 
 Items:
-${itemsList}
+${itemsList}`;
 
-Group items that refer to the same ingredient or product, even if:
-- They use different languages (e.g. "beurre" and "butter")
-- They have slight spelling variations (e.g. "tomates" and "tomate")
-- They have different specificity (e.g. "cream" and "heavy cream" should be grouped)
-
-For each group, pick the most descriptive name as the canonical name. Preserve the original language if all items in a group use the same language.
-
-Items that don't match anything else should be in their own group (with just their own ID).
-
-Return ONLY a JSON array, no other text. Each element must have exactly these fields:
-{ "canonicalName": "<best name>", "itemIds": ["<id1>", "<id2>", ...] }`;
+  const categorizeAndGroupTool: Anthropic.Messages.Tool = {
+    name: "categorize_and_group_items",
+    description: "Categorize and group shopping items by grocery aisle",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        categories: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              category_name: { type: "string", description: "Grocery store category name" },
+              items: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    canonical_name: { type: "string", description: "The best canonical name for this item or group" },
+                    item_ids: { type: "array", items: { type: "string" }, description: "IDs of items in this group (1 for singletons, 2+ for merged)" },
+                  },
+                  required: ["canonical_name", "item_ids"],
+                },
+              },
+            },
+            required: ["category_name", "items"],
+          },
+        },
+      },
+      required: ["categories"],
+    },
+  };
 
   try {
     const client = new Anthropic({ apiKey });
     const message = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
+      max_tokens: 8192,
       messages: [{ role: "user", content: prompt }],
+      tools: [categorizeAndGroupTool],
+      tool_choice: { type: "tool", name: "categorize_and_group_items" },
     });
 
-    const textBlock = message.content.find((b) => b.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
-      return NextResponse.json({ error: "No text response from AI" }, { status: 500 });
+    if (message.stop_reason === "max_tokens") {
+      console.error("[group-shopping-items] response truncated (max_tokens)");
+      return NextResponse.json({ error: "AI response truncated" }, { status: 500 });
     }
 
-    // Extract JSON array from response (handle markdown code blocks)
-    let jsonStr = textBlock.text.trim();
-    const jsonMatch = jsonStr.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
-      return NextResponse.json({ error: "Could not parse AI response" }, { status: 500 });
+    const toolBlock = message.content.find((b) => b.type === "tool_use");
+    if (!toolBlock || toolBlock.type !== "tool_use") {
+      return NextResponse.json({ error: "No tool response from AI" }, { status: 500 });
     }
-    jsonStr = jsonMatch[0];
 
-    const parsed: unknown[] = JSON.parse(jsonStr);
+    const input = toolBlock.input as Record<string, unknown>;
 
-    // Validate and sanitize
-    const groups: GroupResult[] = parsed
-      .filter((item): item is Record<string, unknown> =>
-        typeof item === "object" && item !== null && "canonicalName" in item && "itemIds" in item,
+    // Validate and sanitize — handle both camelCase and snake_case from the model
+    const rawCategories = Array.isArray(input.categories) ? input.categories : [];
+    const categories: CategoryResult[] = rawCategories
+      .filter((cat): cat is Record<string, unknown> =>
+        typeof cat === "object" && cat !== null &&
+        ("categoryName" in cat || "category_name" in cat) &&
+        ("items" in cat && Array.isArray(cat.items)),
       )
-      .map((item) => ({
-        canonicalName: String(item.canonicalName),
-        itemIds: Array.isArray(item.itemIds) ? item.itemIds.map(String) : [],
-      }))
-      .filter((g) => g.itemIds.length > 0);
+      .map((cat) => {
+        const categoryName = String(cat.categoryName ?? cat.category_name);
+        const rawItems = Array.isArray(cat.items) ? cat.items : [];
+        const parsedItems = rawItems
+          .filter((item): item is Record<string, unknown> =>
+            typeof item === "object" && item !== null &&
+            ("canonicalName" in item || "canonical_name" in item) &&
+            ("itemIds" in item || "item_ids" in item),
+          )
+          .map((item) => {
+            const name = item.canonicalName ?? item.canonical_name;
+            const ids = item.itemIds ?? item.item_ids;
+            return {
+              canonicalName: String(name),
+              itemIds: Array.isArray(ids) ? ids.map(String) : [],
+            };
+          })
+          .filter((g) => g.itemIds.length > 0);
+        return { categoryName, items: parsedItems };
+      })
+      .filter((cat) => cat.items.length > 0);
 
-    return NextResponse.json({ groups });
+    return NextResponse.json({ categories });
   } catch (err) {
     console.error("Group shopping items error:", err);
     return NextResponse.json(

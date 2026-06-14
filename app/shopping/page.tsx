@@ -1,12 +1,12 @@
 "use client";
 
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useCallback, useRef } from "react";
 import { Card } from "@/components/ui/Card";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useMeals } from "@/lib/hooks/useMeals";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { useUser } from "@/components/providers/UserProvider";
-import { useConsolidatedShopping, type ConsolidatedItem } from "@/lib/hooks/useConsolidatedShopping";
+import { useConsolidatedShopping, groupByCategory, type ConsolidatedItem } from "@/lib/hooks/useConsolidatedShopping";
 import { trackSmartMerge, trackConsolidatedToggle } from "@/lib/analytics";
 import { cn } from "@/lib/utils/cn";
 
@@ -97,7 +97,7 @@ function ConsolidatedItemRow({
                 ? "bg-pine border-pine"
                 : item.partiallyChecked
                   ? "border-alpine bg-alpine/20"
-                  : "border-mist/40",
+                  : "border-mist/40 hover:border-alpine",
             )}
           >
             {item.checked && (
@@ -113,14 +113,16 @@ function ConsolidatedItemRow({
           </div>
         </button>
 
-        <span
+        <button
+          type="button"
+          onClick={() => onToggle(item)}
           className={cn(
-            "flex-1 min-w-0 text-midnight",
+            "flex-1 min-w-0 text-midnight text-left cursor-pointer hover:underline decoration-mist/30",
             item.checked && "line-through opacity-60",
           )}
         >
           {item.canonicalName}
-        </span>
+        </button>
 
         <QuantityDisplay item={item} />
 
@@ -140,11 +142,34 @@ function ConsolidatedItemRow({
   );
 }
 
+function CategorySection({
+  name,
+  items,
+  onToggle,
+}: {
+  name: string;
+  items: ConsolidatedItem[];
+  onToggle: (item: ConsolidatedItem) => void;
+}) {
+  return (
+    <div>
+      <h3 className="text-xs font-bold text-mist uppercase tracking-wider pt-4 pb-1 first:pt-0">
+        {name}
+      </h3>
+      <ul className="divide-y divide-glass-border">
+        {items.map((item) => (
+          <ConsolidatedItemRow key={item.key} item={item} onToggle={onToggle} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function ShoppingContent() {
   const { trip, loading: tripLoading } = useTrip();
   const { meals, loading: mealsLoading } = useMeals();
   const { user } = useUser();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   const {
     items,
@@ -153,19 +178,62 @@ function ShoppingContent() {
     groupingError,
     refreshGrouping,
     toggleConsolidatedItem,
-  } = useConsolidatedShopping(meals);
+    categoryOrder,
+  } = useConsolidatedShopping(meals, locale);
 
   const [showPurchased, setShowPurchased] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [recentlyChecked, setRecentlyChecked] = useState<Set<string>>(() => new Set());
+  const recentTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const loading = tripLoading || mealsLoading;
 
+  function showError(message: string) {
+    setError(message);
+    setTimeout(() => setError(null), 3000);
+  }
+
+  const userName = user?.name ?? "anonymous";
+
   const handleToggle = useCallback(
     async (item: ConsolidatedItem) => {
-      if (!user) return;
-      trackConsolidatedToggle(!item.checked, item.sources.length);
-      await toggleConsolidatedItem(item, user.name);
+      try {
+        const willCheck = !item.checked;
+        trackConsolidatedToggle(willCheck, item.sources.length);
+        await toggleConsolidatedItem(item, userName);
+
+        if (willCheck) {
+          // Keep item visible in unchecked list for 2s before it moves
+          setRecentlyChecked((prev) => new Set(prev).add(item.key));
+          const existing = recentTimers.current.get(item.key);
+          if (existing) clearTimeout(existing);
+          recentTimers.current.set(
+            item.key,
+            setTimeout(() => {
+              setRecentlyChecked((prev) => {
+                const next = new Set(prev);
+                next.delete(item.key);
+                return next;
+              });
+              recentTimers.current.delete(item.key);
+            }, 2000),
+          );
+        } else {
+          // Unchecking: remove from recently-checked immediately
+          const existing = recentTimers.current.get(item.key);
+          if (existing) clearTimeout(existing);
+          recentTimers.current.delete(item.key);
+          setRecentlyChecked((prev) => {
+            const next = new Set(prev);
+            next.delete(item.key);
+            return next;
+          });
+        }
+      } catch {
+        showError(t.errors.toggle_failed);
+      }
     },
-    [user, toggleConsolidatedItem],
+    [userName, toggleConsolidatedItem, t],
   );
 
   const handleSmartMerge = useCallback(async () => {
@@ -204,8 +272,8 @@ function ShoppingContent() {
     );
   }
 
-  const uncheckedItems = items.filter((i) => !i.checked);
-  const checkedItems = items.filter((i) => i.checked);
+  const uncheckedItems = items.filter((i) => !i.checked || recentlyChecked.has(i.key));
+  const checkedItems = items.filter((i) => i.checked && !recentlyChecked.has(i.key));
   const totalCount = items.length;
   const checkedCount = checkedItems.length;
   const progress = totalCount > 0 ? (checkedCount / totalCount) * 100 : 0;
@@ -235,6 +303,10 @@ function ShoppingContent() {
           </div>
         </div>
       </Card>
+
+      {error && (
+        <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1">{error}</p>
+      )}
 
       {/* Smart merge button */}
       <div className="flex justify-end">
@@ -277,15 +349,23 @@ function ShoppingContent() {
       {/* Unchecked items */}
       {uncheckedItems.length > 0 && (
         <Card>
-          <ul className="divide-y divide-glass-border">
-            {uncheckedItems.map((item) => (
-              <ConsolidatedItemRow
-                key={item.key}
-                item={item}
-                onToggle={handleToggle}
-              />
-            ))}
-          </ul>
+          {categoryOrder ? (
+            <div className="space-y-2">
+              {groupByCategory(uncheckedItems, categoryOrder, t.shopping.category_other).map(([cat, catItems]) => (
+                <CategorySection key={cat} name={cat} items={catItems} onToggle={handleToggle} />
+              ))}
+            </div>
+          ) : (
+            <ul className="divide-y divide-glass-border">
+              {uncheckedItems.map((item) => (
+                <ConsolidatedItemRow
+                  key={item.key}
+                  item={item}
+                  onToggle={handleToggle}
+                />
+              ))}
+            </ul>
+          )}
         </Card>
       )}
 
@@ -315,15 +395,23 @@ function ShoppingContent() {
 
           {showPurchased && (
             <Card>
-              <ul className="divide-y divide-glass-border">
-                {checkedItems.map((item) => (
-                  <ConsolidatedItemRow
-                    key={item.key}
-                    item={item}
-                    onToggle={handleToggle}
-                  />
-                ))}
-              </ul>
+              {categoryOrder ? (
+                <div className="space-y-2">
+                  {groupByCategory(checkedItems, categoryOrder, t.shopping.category_other).map(([cat, catItems]) => (
+                    <CategorySection key={cat} name={cat} items={catItems} onToggle={handleToggle} />
+                  ))}
+                </div>
+              ) : (
+                <ul className="divide-y divide-glass-border">
+                  {checkedItems.map((item) => (
+                    <ConsolidatedItemRow
+                      key={item.key}
+                      item={item}
+                      onToggle={handleToggle}
+                    />
+                  ))}
+                </ul>
+              )}
             </Card>
           )}
         </div>

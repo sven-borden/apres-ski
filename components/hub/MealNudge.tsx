@@ -16,7 +16,7 @@ export function MealNudge({ unclaimedCount }: { unclaimedCount: number }) {
   return (
     <Link
       href="/feasts"
-      className="flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-glass backdrop-blur-md border border-glass-border text-sm transition-colors hover:bg-white/80"
+      className="flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-glass backdrop-blur-sm border border-glass-border text-sm transition-colors hover:bg-white/80"
     >
       <span>
         <span className="mr-1.5">🍳</span>

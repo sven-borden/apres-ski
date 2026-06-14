@@ -62,6 +62,10 @@ export function normalizeMeal(raw: Raw): Meal {
       : [],
     description: str(raw.description),
     shoppingList: Array.isArray(raw.shoppingList) ? raw.shoppingList : [],
+    excludeFromShopping:
+      typeof raw.excludeFromShopping === "boolean"
+        ? raw.excludeFromShopping
+        : false,
     updatedAt: str(raw.updatedAt),
     updatedBy: str(raw.updatedBy),
   };

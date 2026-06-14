@@ -10,6 +10,8 @@ import {
   updateShoppingQuantities,
   resetShoppingQuantities,
   updateSingleItemQuantity,
+  updateShoppingItemText,
+  toggleExcludeFromShopping,
 } from "@/lib/actions/meals";
 import { useUser } from "@/components/providers/UserProvider";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
@@ -21,11 +23,15 @@ export function ShoppingList({
   items,
   mealDescription,
   headcount,
+  category = "dinner",
+  excludeFromShopping,
 }: {
   date: string;
   items: ShoppingItem[];
   mealDescription: string;
   headcount: number;
+  category?: "dinner" | "general";
+  excludeFromShopping?: boolean;
 }) {
   const [newItem, setNewItem] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +43,10 @@ export function ShoppingList({
     id: string;
     quantity: string;
     unit: string;
+  } | null>(null);
+  const [editingText, setEditingText] = useState<{
+    id: string;
+    text: string;
   } | null>(null);
   const { user } = useUser();
   const { t } = useLocale();
@@ -53,19 +63,22 @@ export function ShoppingList({
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
-    const text = newItem.trim();
-    if (!text) return;
+    const lines = newItem
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (lines.length === 0) return;
 
-    const item: ShoppingItem = {
+    const items: ShoppingItem[] = lines.map((text) => ({
       id: crypto.randomUUID(),
       text,
       checked: false,
-    };
+    }));
 
     setNewItem("");
     try {
-      await addShoppingItem(date, item, userId);
-      trackShoppingItemAdded();
+      await addShoppingItem(date, items.length === 1 ? items[0] : items, userId);
+      items.forEach(() => trackShoppingItemAdded());
     } catch {
       showError(t.errors.add_failed);
     }
@@ -73,9 +86,10 @@ export function ShoppingList({
 
   async function handleToggle(itemId: string) {
     const item = items.find((i) => i.id === itemId);
+    if (!item) return;
     try {
-      await toggleShoppingItem(date, itemId, userId);
-      trackShoppingItemToggled(!item?.checked);
+      await toggleShoppingItem(date, itemId, !item.checked, items, userId);
+      trackShoppingItemToggled(!item.checked);
     } catch {
       showError(t.errors.toggle_failed);
     }
@@ -91,8 +105,10 @@ export function ShoppingList({
   }
 
   async function handleEstimate() {
-    const uncheckedItems = items.filter((i) => !i.checked);
-    if (uncheckedItems.length === 0 || !mealDescription) return;
+    const uncheckedItems = items.filter((i) => !i.checked && i.quantity == null);
+    if (uncheckedItems.length === 0) return;
+    if (category === "dinner" && !mealDescription) return;
+    if (category === "general" && headcount < 1) return;
 
     setEstimating(true);
     try {
@@ -105,8 +121,9 @@ export function ShoppingList({
             : {}),
         },
         body: JSON.stringify({
-          mealDescription,
+          ...(category === "dinner" ? { mealDescription } : {}),
           headcount,
+          category,
           items: uncheckedItems.map((i) => ({ id: i.id, text: i.text })),
         }),
       });
@@ -172,7 +189,25 @@ export function ShoppingList({
     setEditingQuantity(null);
   }
 
-  const canEstimate = items.some((i) => !i.checked) && !!mealDescription;
+  async function saveText() {
+    if (!editingText) return;
+    const { id, text } = editingText;
+    const trimmed = text.trim();
+    setEditingText(null);
+    if (!trimmed) return;
+    const original = items.find((i) => i.id === id);
+    if (original && original.text === trimmed) return;
+    try {
+      await updateShoppingItemText(date, id, trimmed, userId);
+    } catch {
+      showError(t.errors.toggle_failed);
+    }
+  }
+
+  const hasUnestimatedItems = items.some((i) => !i.checked && i.quantity == null);
+  const canEstimate = category === "general"
+    ? hasUnestimatedItems && headcount > 0
+    : hasUnestimatedItems && !!mealDescription;
   const hasQuantities = items.some((i) => i.quantity != null);
 
   return (
@@ -213,12 +248,37 @@ export function ShoppingList({
         </div>
       </div>
 
+      {excludeFromShopping !== undefined && (
+        <button
+          type="button"
+          className="flex items-center gap-2 select-none"
+          onClick={() => {
+            toggleExcludeFromShopping(date, !excludeFromShopping, userId);
+          }}
+        >
+          <span
+            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors ${
+              excludeFromShopping ? "bg-alpine" : "bg-mist/30"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 mt-0.5 ml-0.5 rounded-full bg-white shadow-sm transition-transform ${
+                excludeFromShopping ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
+          </span>
+          <span className="text-xs text-mist">
+            {t.feasts.exclude_from_shopping}
+          </span>
+        </button>
+      )}
+
       {error && (
         <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2 py-1">{error}</p>
       )}
 
       {sorted.length > 0 && (
-        <ul className="grid gap-y-1.5 gap-x-2 items-center grid-cols-[auto_max-content_1fr_auto]">
+        <ul className="grid gap-y-1.5 gap-x-2 items-center grid-cols-[auto_1fr_auto_auto]">
           {sorted.map((item) => (
             <li key={item.id} className="contents">
               <button
@@ -250,16 +310,34 @@ export function ShoppingList({
                   </svg>
                 )}
               </button>
-              <span
-                className={cn(
-                  "text-sm whitespace-nowrap",
-                  item.checked
-                    ? "line-through text-mist"
-                    : "text-midnight",
-                )}
-              >
-                {item.text}
-              </span>
+              {editingText?.id === item.id ? (
+                <input
+                  type="text"
+                  value={editingText.text}
+                  onChange={(e) => setEditingText({ ...editingText, text: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveText();
+                    if (e.key === "Escape") setEditingText(null);
+                  }}
+                  onBlur={saveText}
+                  autoFocus
+                  maxLength={100}
+                  className="text-sm rounded border border-alpine/40 bg-white/60 px-1 py-0.5 text-midnight focus:outline-none focus:ring-1 focus:ring-alpine/50 min-w-0"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setEditingText({ id: item.id, text: item.text })}
+                  className={cn(
+                    "text-sm whitespace-nowrap text-left hover:underline decoration-mist/30",
+                    item.checked
+                      ? "line-through text-mist"
+                      : "text-midnight",
+                  )}
+                >
+                  {item.text}
+                </button>
+              )}
               {editingQuantity?.id === item.id ? (
                 <span
                   className="flex items-center gap-1"
@@ -339,18 +417,24 @@ export function ShoppingList({
       )}
 
       <form onSubmit={handleAdd} className="flex gap-2">
-        <input
-          type="text"
+        <textarea
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleAdd(e);
+            }
+          }}
           placeholder={t.feasts.placeholder_item}
-          maxLength={100}
-          className="flex-1 rounded-lg border border-mist/30 bg-white/50 px-3 py-2 text-sm text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50"
+          maxLength={500}
+          rows={1}
+          className="flex-1 rounded-lg border border-mist/30 bg-white/50 px-3 py-2 text-sm text-midnight placeholder:text-mist focus:outline-none focus:ring-2 focus:ring-alpine/50 resize-none [field-sizing:content]"
         />
         <button
           type="submit"
           disabled={!newItem.trim()}
-          className="rounded-lg bg-alpine px-3 py-2 text-sm font-medium text-white hover:bg-alpine/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded-lg bg-alpine px-3 py-2 text-sm font-medium text-white hover:bg-alpine/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors self-end"
         >
           {t.common.add}
         </button>

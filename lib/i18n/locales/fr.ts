@@ -219,6 +219,9 @@ export interface Translations {
     resetting: string;
     reset_error: string;
     headcount: (count: number) => string;
+    general: string;
+    general_subtitle: string;
+    exclude_from_shopping: string;
   };
   lineup: {
     present: string;
@@ -253,6 +256,7 @@ export interface Translations {
     from_meal: (date: string) => string;
     show_details: string;
     hide_details: string;
+    category_other: string;
   };
   confirm: {
     remove_contact_title: string;
@@ -491,7 +495,10 @@ const fr: Translations = {
     reset_quantities: "Réinitialiser",
     resetting: "Réinitialisation\u2026",
     reset_error: "Échec de la réinitialisation — veuillez réessayer",
-    headcount: (count: number) => `${count} ${count === 1 ? "personne" : "personnes"} au chalet`,
+    headcount: (count: number) => `${count} ${count === 1 ? "mangeur" : "mangeurs"} au chalet`,
+    general: "Général",
+    general_subtitle: "Articles pour tout le séjour",
+    exclude_from_shopping: "J'achète moi",
   },
   lineup: {
     present: "Présent",
@@ -527,6 +534,7 @@ const fr: Translations = {
     from_meal: (date: string) => `Repas du ${date}`,
     show_details: "Voir les détails",
     hide_details: "Masquer les détails",
+    category_other: "Autre",
   },
   confirm: {
     remove_contact_title: "Retirer le contact",

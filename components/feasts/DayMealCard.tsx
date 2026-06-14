@@ -53,6 +53,7 @@ export function DayMealCard({
             items={meal?.shoppingList ?? []}
             mealDescription={meal?.description ?? ""}
             headcount={headcount}
+            excludeFromShopping={meal?.excludeFromShopping ?? false}
           />
         </div>
       </Card>

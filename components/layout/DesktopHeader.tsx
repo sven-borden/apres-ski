@@ -26,7 +26,7 @@ export function DesktopHeader() {
   }
 
   return (
-    <header className="hidden md:block sticky top-0 z-40 bg-glass backdrop-blur-md border-b border-glass-border">
+    <header className="hidden md:block sticky top-0 z-40 bg-glass-solid backdrop-blur-md border-b border-glass-border">
       <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-lg font-bold text-midnight">
           <Image src="/logo.png" alt="" width={32} height={32} className="rounded-md" />

@@ -6,7 +6,8 @@ import { getDateRange } from "@/lib/utils/dates";
 import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
 
 // Meals previously used the date string as the doc id. PocketBase uses an auto
-// id with a unique index on `date`, so we look meals up by date.
+// id with a unique index on `date`, so we look meals up by date. The special
+// date "general" holds trip-wide shopping items not tied to a day.
 async function findMealByDate(
   pb: PocketBase,
   date: string,
@@ -21,7 +22,9 @@ async function findMealByDate(
   }
 }
 
-async function updateShoppingList(
+// Reads the meal's current shopping list, applies `transform`, and writes it
+// back. No-op if the meal doesn't exist.
+async function mutateShoppingList(
   date: string,
   updatedBy: string,
   transform: (list: ShoppingItem[]) => ShoppingItem[],
@@ -38,14 +41,55 @@ async function updateShoppingList(
   });
 }
 
+async function upsertMeal(
+  pb: PocketBase,
+  date: string,
+  data: Record<string, unknown>,
+) {
+  const meal = await findMealByDate(pb, date);
+  if (meal) {
+    await pb.collection("meals").update(meal.id, data);
+  } else {
+    await pb.collection("meals").create({
+      date,
+      tripId: TRIP_ID,
+      responsibleIds: [],
+      description: "",
+      shoppingList: [],
+      ...data,
+    });
+  }
+}
+
+export async function ensureGeneralMeal() {
+  try {
+    const pb = getPb();
+    const meal = await findMealByDate(pb, "general");
+    if (!meal) {
+      await pb.collection("meals").create({
+        date: "general",
+        tripId: TRIP_ID,
+        responsibleIds: [],
+        description: "",
+        shoppingList: [],
+        updatedBy: "system",
+      });
+    } else if (!meal.tripId) {
+      await pb.collection("meals").update(meal.id, { tripId: TRIP_ID });
+    }
+  } catch (err) {
+    console.error("Failed to ensure general meal:", err);
+  }
+}
+
 export async function seedMeals(startDate: string, endDate: string) {
   try {
     const pb = getPb();
     const dates = getDateRange(startDate, endDate);
-    await Promise.all(
-      dates.map(async (date) => {
-        const existing = await findMealByDate(pb, date);
-        if (existing) return;
+
+    await Promise.all([
+      ...dates.map(async (date) => {
+        if (await findMealByDate(pb, date)) return;
         await pb.collection("meals").create({
           date,
           tripId: TRIP_ID,
@@ -55,9 +99,35 @@ export async function seedMeals(startDate: string, endDate: string) {
           updatedBy: "system",
         });
       }),
-    );
+      // Seed the general shopping list doc (trip-wide items).
+      (async () => {
+        if (await findMealByDate(pb, "general")) return;
+        await pb.collection("meals").create({
+          date: "general",
+          tripId: TRIP_ID,
+          responsibleIds: [],
+          description: "",
+          shoppingList: [],
+          updatedBy: "system",
+        });
+      })(),
+    ]);
   } catch (err) {
     console.error("Failed to seed meals:", err);
+    throw err;
+  }
+}
+
+export async function toggleExcludeFromShopping(
+  date: string,
+  excludeFromShopping: boolean,
+  updatedBy: string,
+) {
+  try {
+    const pb = getPb();
+    await upsertMeal(pb, date, { excludeFromShopping, updatedBy });
+  } catch (err) {
+    console.error("Failed to toggle exclude from shopping:", err);
     throw err;
   }
 }
@@ -69,19 +139,11 @@ export async function updateDinner(
 ) {
   try {
     const pb = getPb();
-    const meal = await findMealByDate(pb, date);
-    const payload = {
-      date,
-      tripId: TRIP_ID,
+    await upsertMeal(pb, date, {
       responsibleIds: data.responsibleIds,
       description: data.description,
       updatedBy,
-    };
-    if (meal) {
-      await pb.collection("meals").update(meal.id, payload);
-    } else {
-      await pb.collection("meals").create({ ...payload, shoppingList: [] });
-    }
+    });
   } catch (err) {
     console.error("Failed to update dinner:", err);
     throw err;
@@ -90,11 +152,12 @@ export async function updateDinner(
 
 export async function addShoppingItem(
   date: string,
-  item: ShoppingItem,
+  item: ShoppingItem | ShoppingItem[],
   updatedBy: string,
 ) {
   try {
-    await updateShoppingList(date, updatedBy, (list) => [...list, item]);
+    const newItems = Array.isArray(item) ? item : [item];
+    await mutateShoppingList(date, updatedBy, (list) => [...list, ...newItems]);
   } catch (err) {
     console.error("Failed to add shopping item:", err);
     throw err;
@@ -104,16 +167,41 @@ export async function addShoppingItem(
 export async function toggleShoppingItem(
   date: string,
   itemId: string,
+  checked: boolean,
+  items: ShoppingItem[],
   updatedBy: string,
 ) {
   try {
-    await updateShoppingList(date, updatedBy, (list) =>
+    const pb = getPb();
+    const meal = await findMealByDate(pb, date);
+    if (!meal) return;
+    const updated = items.map((item) =>
+      item.id === itemId ? { ...item, checked } : item,
+    );
+    await pb.collection("meals").update(meal.id, {
+      shoppingList: updated,
+      updatedBy,
+    });
+  } catch (err) {
+    console.error("Failed to toggle shopping item:", err);
+    throw err;
+  }
+}
+
+export async function setShoppingItemsChecked(
+  date: string,
+  itemIds: Set<string>,
+  checked: boolean,
+  updatedBy: string,
+) {
+  try {
+    await mutateShoppingList(date, updatedBy, (list) =>
       list.map((item) =>
-        item.id === itemId ? { ...item, checked: !item.checked } : item,
+        itemIds.has(item.id) ? { ...item, checked } : item,
       ),
     );
   } catch (err) {
-    console.error("Failed to toggle shopping item:", err);
+    console.error("Failed to set shopping items checked:", err);
     throw err;
   }
 }
@@ -125,8 +213,9 @@ export async function updateShoppingQuantities(
 ) {
   try {
     const estimateMap = new Map(estimates.map((e) => [e.id, e]));
-    await updateShoppingList(date, updatedBy, (list) =>
+    await mutateShoppingList(date, updatedBy, (list) =>
       list.map((item) => {
+        if (item.quantity != null) return item; // preserve existing quantities
         const est = estimateMap.get(item.id);
         if (!est || est.quantity == null) return item;
         return { ...item, quantity: est.quantity, unit: est.unit ?? undefined };
@@ -140,7 +229,7 @@ export async function updateShoppingQuantities(
 
 export async function resetShoppingQuantities(date: string, updatedBy: string) {
   try {
-    await updateShoppingList(date, updatedBy, (list) =>
+    await mutateShoppingList(date, updatedBy, (list) =>
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       list.map(({ quantity, unit, ...rest }) => rest),
     );
@@ -158,7 +247,7 @@ export async function updateSingleItemQuantity(
   updatedBy: string,
 ) {
   try {
-    await updateShoppingList(date, updatedBy, (list) =>
+    await mutateShoppingList(date, updatedBy, (list) =>
       list.map((item) => {
         if (item.id !== itemId) return item;
         if (quantity == null) {
@@ -175,13 +264,29 @@ export async function updateSingleItemQuantity(
   }
 }
 
+export async function updateShoppingItemText(
+  date: string,
+  itemId: string,
+  text: string,
+  updatedBy: string,
+) {
+  try {
+    await mutateShoppingList(date, updatedBy, (list) =>
+      list.map((item) => (item.id === itemId ? { ...item, text } : item)),
+    );
+  } catch (err) {
+    console.error("Failed to update shopping item text:", err);
+    throw err;
+  }
+}
+
 export async function removeShoppingItem(
   date: string,
   itemId: string,
   updatedBy: string,
 ) {
   try {
-    await updateShoppingList(date, updatedBy, (list) =>
+    await mutateShoppingList(date, updatedBy, (list) =>
       list.filter((item) => item.id !== itemId),
     );
   } catch (err) {

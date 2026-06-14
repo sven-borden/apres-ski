@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useMemo, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { useTrip } from "@/lib/hooks/useTrip";
 import { useMeals } from "@/lib/hooks/useMeals";
@@ -11,6 +11,8 @@ import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { getDateRange, isToday } from "@/lib/utils/dates";
 import { DateScroller } from "@/components/feasts/DateScroller";
 import { DayMealCard } from "@/components/feasts/DayMealCard";
+import { GeneralCard } from "@/components/feasts/GeneralCard";
+import { ensureGeneralMeal } from "@/lib/actions/meals";
 
 function getInitialDate(dates: string[]): string {
   const today = dates.find((d) => isToday(d));
@@ -23,17 +25,32 @@ function FeastsContent() {
   const { participants, loading: participantsLoading } = useParticipants();
   const { attendance, loading: attendanceLoading } = useAttendance();
   const { t } = useLocale();
+
+  useEffect(() => { ensureGeneralMeal(); }, []);
+
   const dates = useMemo(
     () => (trip ? getDateRange(trip.startDate, trip.endDate) : []),
     [trip],
   );
 
   const searchParams = useSearchParams();
+  const router = useRouter();
   const dateParam = searchParams.get("date");
 
-  const [selectedDate, setSelectedDate] = useState<string>("");
+  const resolvedDate = dateParam === "general" || (dateParam && dates.includes(dateParam))
+    ? dateParam
+    : "general";
 
-  const resolvedDate = selectedDate || (dateParam && dates.includes(dateParam) ? dateParam : getInitialDate(dates));
+  const setSelectedDate = useCallback((date: string) => {
+    router.replace(`/feasts?date=${date}`);
+  }, [router]);
+
+  const totalPersonDays = useMemo(() => {
+    return dates.reduce((sum, date) => {
+      const presentCount = attendance.filter((a) => a.date === date && a.present).length;
+      return sum + (presentCount > 0 ? presentCount : participants.length);
+    }, 0);
+  }, [dates, attendance, participants]);
 
   const loading = tripLoading || mealsLoading || participantsLoading || attendanceLoading;
 
@@ -69,16 +86,19 @@ function FeastsContent() {
         dates={dates}
         selectedDate={resolvedDate}
         onSelectDate={setSelectedDate}
+        showGeneral
       />
 
-      {resolvedDate && (
+      {resolvedDate === "general" ? (
+        <GeneralCard meal={meals.find((m) => m.date === "general")} headcount={totalPersonDays} />
+      ) : resolvedDate ? (
         <DayMealCard
           date={resolvedDate}
           meal={currentMeal}
           participants={participants}
           attendance={attendance}
         />
-      )}
+      ) : null}
     </div>
   );
 }

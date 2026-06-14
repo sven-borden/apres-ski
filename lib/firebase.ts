@@ -5,6 +5,11 @@ import {
   type Firestore,
 } from "firebase/firestore";
 import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
+import {
+  initializeAppCheck,
+  ReCaptchaV3Provider,
+  type AppCheck,
+} from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -35,6 +40,7 @@ let _app: FirebaseApp | undefined;
 let _db: Firestore | undefined;
 let _analytics: Analytics | undefined;
 let _analyticsReady: Promise<Analytics | null> | undefined;
+let _appCheck: AppCheck | undefined;
 
 export function getFirebaseInstance() {
   if (!_app) {
@@ -55,6 +61,25 @@ export function getDb() {
 
 export function getAnalyticsInstance(): Analytics | undefined {
   return _analytics;
+}
+
+export function initAppCheck(): AppCheck | undefined {
+  if (_appCheck) return _appCheck;
+
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_V3_SITE_KEY;
+  if (!siteKey) return undefined;
+
+  if (process.env.NODE_ENV === "development") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  }
+
+  const app = getFirebaseInstance();
+  _appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(siteKey),
+    isTokenAutoRefreshEnabled: true,
+  });
+  return _appCheck;
 }
 
 export function initAnalytics(): Promise<Analytics | null> {

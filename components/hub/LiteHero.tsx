@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { getCountdownData } from "@/lib/utils/countdown";
+import { getCountdownData, getDailyQuote } from "@/lib/utils/countdown";
 import { useWeather } from "@/lib/hooks/useWeather";
 import { getWeatherCondition } from "@/lib/utils/weather";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
@@ -53,6 +53,12 @@ export function LiteHero({
           </span>
         )}
       </div>
+
+      {data?.state === "during" && (
+        <p className="text-white/70 text-sm italic">
+          {"\u00AB"} {getDailyQuote(data.dayNum)} {"\u00BB"}
+        </p>
+      )}
 
       {weather && weatherCondition && (
         <p className="text-white/80 text-sm font-medium">

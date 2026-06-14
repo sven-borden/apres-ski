@@ -3,7 +3,7 @@
 import { useMemo, useState, useRef, useCallback } from "react";
 import type { Meal, ShoppingUnit } from "@/lib/types";
 import { sumQuantities, type SumOutput } from "@/lib/utils/units";
-import { toggleShoppingItem } from "@/lib/actions/meals";
+import { setShoppingItemsChecked } from "@/lib/actions/meals";
 
 // ── Types ───────────────────────────────────────────────────────────────
 
@@ -24,11 +24,14 @@ export interface ConsolidatedItem {
   checked: boolean;
   partiallyChecked: boolean;
   sum: SumOutput;
+  category: string | null;
 }
 
 interface GroupingCache {
   fingerprint: string;
   groups: Map<string, string>; // itemId → canonicalName
+  categories: Map<string, string>; // itemId → categoryName
+  categoryOrder: string[]; // ordered category names from AI
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────
@@ -36,6 +39,7 @@ interface GroupingCache {
 function flattenMeals(meals: Meal[]): SourceItem[] {
   const items: SourceItem[] = [];
   for (const meal of meals) {
+    if (meal.excludeFromShopping) continue;
     for (const item of meal.shoppingList) {
       items.push({
         date: meal.date,
@@ -51,9 +55,9 @@ function flattenMeals(meals: Meal[]): SourceItem[] {
   return items;
 }
 
-function makeFingerprint(items: SourceItem[]): string {
+function makeFingerprint(items: SourceItem[], locale: string): string {
   const texts = items.map((i) => i.text.toLowerCase().trim()).sort();
-  return texts.join("|");
+  return `${locale}|${texts.join("|")}`;
 }
 
 function groupByExactMatch(items: SourceItem[]): Map<string, SourceItem[]> {
@@ -104,6 +108,7 @@ function pickCanonicalName(sources: SourceItem[], groupKey: string): string {
 function buildConsolidated(
   groups: Map<string, SourceItem[]>,
   aiCanonicalNames: Map<string, string> | null,
+  aiCategories: Map<string, string> | null,
 ): ConsolidatedItem[] {
   const result: ConsolidatedItem[] = [];
   for (const [key, sources] of groups) {
@@ -117,6 +122,15 @@ function buildConsolidated(
       sources.map((s) => ({ quantity: s.quantity, unit: s.unit })),
     );
 
+    // Resolve category from first source item that has one
+    let category: string | null = null;
+    if (aiCategories) {
+      for (const s of sources) {
+        const cat = aiCategories.get(s.itemId);
+        if (cat) { category = cat; break; }
+      }
+    }
+
     result.push({
       key,
       canonicalName,
@@ -124,6 +138,7 @@ function buildConsolidated(
       checked: allChecked,
       partiallyChecked: someChecked,
       sum,
+      category,
     });
   }
 
@@ -143,9 +158,13 @@ function loadCachedGrouping(): GroupingCache | null {
     const raw = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
+    // Backward compat: missing categories/categoryOrder = cache miss
+    if (!parsed.categories || !parsed.categoryOrder) return null;
     return {
       fingerprint: parsed.fingerprint,
       groups: new Map(Object.entries(parsed.groups)),
+      categories: new Map(Object.entries(parsed.categories)),
+      categoryOrder: parsed.categoryOrder,
     };
   } catch {
     return null;
@@ -159,6 +178,8 @@ function saveCachedGrouping(cache: GroupingCache) {
       JSON.stringify({
         fingerprint: cache.fingerprint,
         groups: Object.fromEntries(cache.groups),
+        categories: Object.fromEntries(cache.categories),
+        categoryOrder: cache.categoryOrder,
       }),
     );
   } catch {
@@ -168,7 +189,7 @@ function saveCachedGrouping(cache: GroupingCache) {
 
 // ── Hook ────────────────────────────────────────────────────────────────
 
-export function useConsolidatedShopping(meals: Meal[]) {
+export function useConsolidatedShopping(meals: Meal[], locale: string = "fr") {
   const [groupingLoading, setGroupingLoading] = useState(false);
   const [groupingError, setGroupingError] = useState<string | null>(null);
   const aiCacheRef = useRef<GroupingCache | null>(null);
@@ -182,7 +203,7 @@ export function useConsolidatedShopping(meals: Meal[]) {
   });
 
   const flatItems = useMemo(() => flattenMeals(meals), [meals]);
-  const fingerprint = useMemo(() => makeFingerprint(flatItems), [flatItems]);
+  const fingerprint = useMemo(() => makeFingerprint(flatItems, locale), [flatItems, locale]);
 
   // If fingerprint changed, invalidate AI cache
   const currentAiMapping = useMemo(() => {
@@ -195,13 +216,9 @@ export function useConsolidatedShopping(meals: Meal[]) {
   // AI canonical names for display (keyed by lowercase group key)
   const aiCanonicalNames = useMemo(() => {
     if (!currentAiMapping) return null;
-    // Build reverse: group key → canonical name from the API response
-    // We need to go through the AI groups to find canonical names
     const cached = aiCacheRef.current;
     if (!cached) return null;
 
-    // The cache stores itemId → canonicalName
-    // We need groupKey → canonicalName
     const nameMap = new Map<string, string>();
     for (const [, canonicalName] of cached.groups) {
       const key = canonicalName.toLowerCase().trim();
@@ -212,14 +229,30 @@ export function useConsolidatedShopping(meals: Meal[]) {
     return nameMap;
   }, [currentAiMapping]);
 
+  // AI categories mapping (itemId → categoryName)
+  const aiCategories = useMemo(() => {
+    if (!currentAiMapping) return null;
+    const cached = aiCacheRef.current;
+    if (!cached) return null;
+    return cached.categories;
+  }, [currentAiMapping]);
+
+  // Ordered category names from AI
+  const categoryOrder = useMemo(() => {
+    if (!currentAiMapping) return null;
+    const cached = aiCacheRef.current;
+    if (!cached) return null;
+    return cached.categoryOrder;
+  }, [currentAiMapping]);
+
   const items = useMemo(() => {
     if (currentAiMapping) {
       const groups = applyAIGroups(flatItems, currentAiMapping);
-      return buildConsolidated(groups, aiCanonicalNames);
+      return buildConsolidated(groups, aiCanonicalNames, aiCategories);
     }
     const groups = groupByExactMatch(flatItems);
-    return buildConsolidated(groups, null);
-  }, [flatItems, currentAiMapping, aiCanonicalNames]);
+    return buildConsolidated(groups, null, null);
+  }, [flatItems, currentAiMapping, aiCanonicalNames, aiCategories]);
 
   const refreshGrouping = useCallback(async () => {
     if (flatItems.length === 0) return;
@@ -248,7 +281,7 @@ export function useConsolidatedShopping(meals: Meal[]) {
       const res = await fetch("/api/group-shopping-items", {
         method: "POST",
         headers,
-        body: JSON.stringify({ items: uniqueItems }),
+        body: JSON.stringify({ items: uniqueItems, locale }),
       });
 
       if (!res.ok) {
@@ -257,49 +290,59 @@ export function useConsolidatedShopping(meals: Meal[]) {
       }
 
       const data = await res.json();
-      const groups: { canonicalName: string; itemIds: string[] }[] = data.groups;
+      const apiCategories: { categoryName: string; items: { canonicalName: string; itemIds: string[] }[] }[] = data.categories;
 
-      // Build mapping: itemId → canonicalName
-      const mapping = new Map<string, string>();
-      for (const group of groups) {
-        for (const id of group.itemIds) {
-          mapping.set(id, group.canonicalName);
+      // Build mappings: itemId → canonicalName and itemId → categoryName
+      const groupsMapping = new Map<string, string>();
+      const categoriesMapping = new Map<string, string>();
+      const orderedCategories: string[] = [];
+
+      for (const cat of apiCategories) {
+        orderedCategories.push(cat.categoryName);
+        for (const group of cat.items) {
+          for (const id of group.itemIds) {
+            groupsMapping.set(id, group.canonicalName);
+            categoriesMapping.set(id, cat.categoryName);
+          }
         }
       }
 
-      const cache: GroupingCache = { fingerprint, groups: mapping };
+      const cache: GroupingCache = {
+        fingerprint,
+        groups: groupsMapping,
+        categories: categoriesMapping,
+        categoryOrder: orderedCategories,
+      };
       aiCacheRef.current = cache;
       saveCachedGrouping(cache);
-      setAiMapping(mapping);
+      setAiMapping(groupsMapping);
     } catch (err) {
       setGroupingError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setGroupingLoading(false);
     }
-  }, [flatItems, fingerprint]);
+  }, [flatItems, fingerprint, locale]);
 
   const toggleConsolidatedItem = useCallback(
     async (item: ConsolidatedItem, updatedBy: string) => {
-      // Group sources by date to avoid Firestore race conditions
-      const byDate = new Map<string, SourceItem[]>();
+      const newChecked = !item.checked;
+
+      // Group source item IDs by date
+      const idsByDate = new Map<string, Set<string>>();
       for (const source of item.sources) {
-        const list = byDate.get(source.date);
-        if (list) {
-          list.push(source);
+        const ids = idsByDate.get(source.date);
+        if (ids) {
+          ids.add(source.itemId);
         } else {
-          byDate.set(source.date, [source]);
+          idsByDate.set(source.date, new Set([source.itemId]));
         }
       }
 
-      // Toggle all: if any unchecked, check all; if all checked, uncheck all
-      // We toggle each individual item in Firestore
-      // Parallel across dates, sequential within each date
+      // Single write per date (parallel across dates)
       await Promise.all(
-        Array.from(byDate.entries()).map(async ([date, sources]) => {
-          for (const source of sources) {
-            await toggleShoppingItem(date, source.itemId, updatedBy);
-          }
-        }),
+        Array.from(idsByDate.entries()).map(([date, itemIds]) =>
+          setShoppingItemsChecked(date, itemIds, newChecked, updatedBy),
+        ),
       );
     },
     [],
@@ -313,5 +356,34 @@ export function useConsolidatedShopping(meals: Meal[]) {
     groupingError,
     refreshGrouping,
     toggleConsolidatedItem,
+    categoryOrder,
   };
+}
+
+export function groupByCategory(
+  items: ConsolidatedItem[],
+  categoryOrder: string[],
+  fallbackCategory: string,
+): [string, ConsolidatedItem[]][] {
+  const buckets = new Map<string, ConsolidatedItem[]>();
+  // Initialize buckets in order
+  for (const cat of categoryOrder) {
+    buckets.set(cat, []);
+  }
+  // Assign items
+  for (const item of items) {
+    const cat = item.category ?? fallbackCategory;
+    const list = buckets.get(cat);
+    if (list) {
+      list.push(item);
+    } else {
+      buckets.set(cat, [item]);
+    }
+  }
+  // Filter out empty categories, preserve order (fallback last if not in order)
+  const result: [string, ConsolidatedItem[]][] = [];
+  for (const [cat, list] of buckets) {
+    if (list.length > 0) result.push([cat, list]);
+  }
+  return result;
 }

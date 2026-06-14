@@ -79,7 +79,7 @@ export function MobileTabBar() {
   return (
     <nav
       aria-label={t.nav.main_navigation}
-      className="fixed bottom-0 left-0 right-0 z-40 bg-glass backdrop-blur-md border-t border-glass-border md:hidden pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-glass-solid backdrop-blur-md border-t border-glass-border md:hidden pb-[env(safe-area-inset-bottom)]"
     >
       <div className="grid grid-cols-5 h-16">
         {tabs.map((tab) => (

@@ -53,7 +53,7 @@ export function EditDinnerModal({
 
   function validateAll(): boolean {
     const errors: Record<string, string> = {};
-    if (responsibleIds.length === 0) {
+    if (responsibleIds.length === 0 && !description.trim()) {
       errors.chefs = t.validation.at_least_one_chef;
     }
     setFieldErrors(errors);
@@ -109,7 +109,16 @@ export function EditDinnerModal({
           <textarea
             id="dinner-description"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              if (e.target.value.trim() && fieldErrors.chefs) {
+                setFieldErrors((fe) => {
+                  const updated = { ...fe };
+                  delete updated.chefs;
+                  return updated;
+                });
+              }
+            }}
             placeholder={t.feasts.placeholder_meal}
             rows={3}
             maxLength={500}

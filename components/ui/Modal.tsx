@@ -122,7 +122,7 @@ export function Modal({
         aria-label={title ? undefined : "Dialog"}
         tabIndex={-1}
         className={cn(
-          "relative z-10 w-full bg-glass backdrop-blur-md border border-glass-border shadow-xl",
+          "relative z-10 w-full bg-glass-solid backdrop-blur-md border border-glass-border shadow-xl",
           "rounded-t-2xl md:rounded-2xl",
           "max-h-[90vh] overflow-y-auto",
           "md:max-w-md md:mx-4",
