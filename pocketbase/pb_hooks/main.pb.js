@@ -13,14 +13,19 @@ onBootstrap((e) => {
     return;
   }
 
-  let record;
   try {
-    record = e.app.findAuthRecordByEmail("_superusers", email);
-  } catch {
-    record = new Record(e.app.findCollectionByNameOrId("_superusers"));
-    record.set("email", email);
+    let record;
+    try {
+      record = e.app.findAuthRecordByEmail("_superusers", email);
+    } catch {
+      record = new Record(e.app.findCollectionByNameOrId("_superusers"));
+      record.set("email", email);
+    }
+    record.setPassword(password);
+    e.app.save(record);
+    console.log("[superuser] upserted", email);
+  } catch (err) {
+    // Never let a bad PB_SUPERUSER_* value crash PocketBase boot.
+    console.log("[superuser] upsert failed:", String(err));
   }
-  record.setPassword(password);
-  e.app.save(record);
-  console.log("[superuser] upserted", email);
 });
