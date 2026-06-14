@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.claude
+npm-debug.log*
+Dockerfile
+.dockerignore
+.DS_Store
+*.md
