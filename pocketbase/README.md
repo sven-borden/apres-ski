@@ -38,30 +38,39 @@ Design notes:
 - **References** (`attendance.participantId`, `meals.responsibleIds`) stay
   denormalized text/json, not relations — same loose model as Firestore.
 
-## Deploy on Coolify
+## Deployment (live)
+
+Provisioned on Coolify (`https://coolify.borden.ch`) in project **Apres-ski**,
+server `localhost`, as a Dockerfile application built from this repo
+(`base directory /pocketbase`). Status: `running:healthy`.
+
+**Internal-only — no public domain.** PocketBase is *not* exposed to the
+internet. It listens on `:8090` on the shared `coolify` docker network and is
+reached only by the Next.js app (deployed at `apres-ski.borden.ch`), which
+proxies all reads/writes/realtime server-side. The browser never talks to
+PocketBase directly. Internal URL for the app: `http://<pb-container>:8090`
+(container name confirmed when wiring the app — issues #126/#127/#128).
 
 Provisioning needs `COOLIFY_ACCESS_TOKEN` set so the Coolify MCP / API can
-authenticate against `https://coolify.borden.ch`:
+authenticate:
 
 ```bash
 export COOLIFY_ACCESS_TOKEN=<token>   # or add to .env.local + restart Claude
 ```
 
-Then either:
-
-1. **Coolify UI** — New Resource → Docker Compose → point at this repo subdir
-   (`pocketbase/`). Coolify builds the Dockerfile, mounts the `pb_data` volume,
-   assigns a domain. Migrations apply on first boot.
-2. **MCP / API** — create a compose service with this `docker-compose.yml` and
-   `instant_deploy`.
+To re-create from scratch: Coolify UI → New Resource → from the
+`sven-borden/apres-ski` repo, build pack Dockerfile, base dir `/pocketbase`,
+add a persistent volume at `/pb_data`, and **leave the domain empty** so it
+stays internal. Migrations apply automatically on first boot.
 
 ### First boot
 
-PocketBase needs a superuser for the admin UI (`/_/`). Create one once the
-container is up:
+PocketBase needs a superuser for the admin UI (`/_/`). Since the service is
+internal-only, create it from the Coolify container terminal (the admin UI
+isn't publicly reachable):
 
 ```bash
-# inside the container / via Coolify terminal
+# Coolify → pocketbase app → Terminal
 /pb/pocketbase superuser upsert <email> <password> --dir=/pb_data
 ```
 
