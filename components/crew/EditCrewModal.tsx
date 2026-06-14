@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
-import { getDb } from "@/lib/firebase";
+import { updateParticipant } from "@/lib/actions/participants";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
@@ -46,13 +45,11 @@ export function EditCrewModal({
     setSaving(true);
     setError(null);
     try {
-      const db = getDb();
       const trimmed = name.trim();
-      await updateDoc(doc(db, "participants", participant.id), {
+      await updateParticipant(participant.id, {
         name: trimmed,
         avatar: getInitials(trimmed),
         color: selectedColor,
-        updatedAt: serverTimestamp(),
       });
       trackCrewMemberEdited();
       onClose();

@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // PocketBase migrations run in PB's JSVM, not the Next app — they follow
+    // PocketBase's own conventions (triple-slash type refs, etc.).
+    "pocketbase/**",
   ]),
 ]);
 

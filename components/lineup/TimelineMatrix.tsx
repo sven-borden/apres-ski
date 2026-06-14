@@ -74,7 +74,7 @@ export function TimelineMatrix({
 
   async function doToggle(id: string, name: string, color: string, date: string, currentlyPresent: boolean) {
     try {
-      await toggleAttendance({ id, name, color }, date, currentlyPresent, user?.id ?? "anonymous");
+      await toggleAttendance({ id, name, color }, date, currentlyPresent);
     } catch {
       setError(t.errors.toggle_failed);
       setTimeout(() => setError(null), 3000);

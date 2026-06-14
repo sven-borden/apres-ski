@@ -8,9 +8,9 @@ import {
   useEffect,
   useSyncExternalStore,
 } from "react";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { getDb, initAnalytics, initAppCheck } from "@/lib/firebase";
+import { initAnalytics, initAppCheck } from "@/lib/firebase";
 import { trackUserSetup } from "@/lib/analytics";
+import { createParticipant } from "@/lib/actions/participants";
 
 import type { LocalUser } from "@/lib/types";
 
@@ -20,14 +20,18 @@ interface UserContextValue {
   user: LocalUser | null;
   isReady: boolean;
   needsSetup: boolean;
-  saveUser: (data: { name: string; color: string; avatar: string }) => void;
+  saveUser: (data: {
+    name: string;
+    color: string;
+    avatar: string;
+  }) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextValue>({
   user: null,
   isReady: false,
   needsSetup: false,
-  saveUser: () => {},
+  saveUser: async () => {},
 });
 
 export function useUser() {
@@ -91,10 +95,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const needsSetup = !user && !savedThisSession;
 
   const saveUser = useCallback(
-    (data: { name: string; color: string; avatar: string }) => {
-      const id = crypto.randomUUID();
+    async (data: { name: string; color: string; avatar: string }) => {
+      // PocketBase assigns the id; store it so attendance/meal references match.
+      const participant = await createParticipant(data);
       const localUser: LocalUser = {
-        id,
+        id: participant.id,
         name: data.name,
         color: data.color,
         avatar: data.avatar,
@@ -104,16 +109,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(localUser));
       notifyListeners();
       setSavedThisSession(true);
-
-      const db = getDb();
-      setDoc(doc(db, "participants", id), {
-        id,
-        name: data.name,
-        color: data.color,
-        avatar: data.avatar,
-        joinedAt: serverTimestamp(),
-        tripId: "current",
-      });
       trackUserSetup();
     },
     [],

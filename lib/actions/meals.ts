@@ -1,26 +1,81 @@
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { getDb } from "@/lib/firebase";
+"use server";
+
+import PocketBase, { type RecordModel } from "pocketbase";
+import { getPb, TRIP_ID } from "@/lib/pb/server";
 import { getDateRange } from "@/lib/utils/dates";
 import type { ShoppingItem, ShoppingUnit } from "@/lib/types";
 
+// Meals previously used the date string as the doc id. PocketBase uses an auto
+// id with a unique index on `date`, so we look meals up by date. The special
+// date "general" holds trip-wide shopping items not tied to a day.
+async function findMealByDate(
+  pb: PocketBase,
+  date: string,
+): Promise<RecordModel | null> {
+  try {
+    return await pb
+      .collection("meals")
+      .getFirstListItem(pb.filter("date = {:date}", { date }));
+  } catch (err) {
+    if ((err as { status?: number }).status === 404) return null;
+    throw err;
+  }
+}
+
+// Reads the meal's current shopping list, applies `transform`, and writes it
+// back. No-op if the meal doesn't exist.
+async function mutateShoppingList(
+  date: string,
+  updatedBy: string,
+  transform: (list: ShoppingItem[]) => ShoppingItem[],
+) {
+  const pb = getPb();
+  const meal = await findMealByDate(pb, date);
+  if (!meal) return;
+  const list: ShoppingItem[] = Array.isArray(meal.shoppingList)
+    ? meal.shoppingList
+    : [];
+  await pb.collection("meals").update(meal.id, {
+    shoppingList: transform(list),
+    updatedBy,
+  });
+}
+
+async function upsertMeal(
+  pb: PocketBase,
+  date: string,
+  data: Record<string, unknown>,
+) {
+  const meal = await findMealByDate(pb, date);
+  if (meal) {
+    await pb.collection("meals").update(meal.id, data);
+  } else {
+    await pb.collection("meals").create({
+      date,
+      tripId: TRIP_ID,
+      responsibleIds: [],
+      description: "",
+      shoppingList: [],
+      ...data,
+    });
+  }
+}
+
 export async function ensureGeneralMeal() {
   try {
-    const db = getDb();
-    const ref = doc(db, "meals", "general");
-    const snap = await getDoc(ref);
-
-    if (!snap.exists()) {
-      await setDoc(ref, {
+    const pb = getPb();
+    const meal = await findMealByDate(pb, "general");
+    if (!meal) {
+      await pb.collection("meals").create({
         date: "general",
-        tripId: "current",
+        tripId: TRIP_ID,
         responsibleIds: [],
         description: "",
         shoppingList: [],
-        updatedAt: serverTimestamp(),
         updatedBy: "system",
       });
-    } else if (!snap.data().tripId) {
-      await setDoc(ref, { date: "general", tripId: "current" }, { merge: true });
+    } else if (!meal.tripId) {
+      await pb.collection("meals").update(meal.id, { tripId: TRIP_ID });
     }
   } catch (err) {
     console.error("Failed to ensure general meal:", err);
@@ -29,38 +84,30 @@ export async function ensureGeneralMeal() {
 
 export async function seedMeals(startDate: string, endDate: string) {
   try {
-    const db = getDb();
+    const pb = getPb();
     const dates = getDateRange(startDate, endDate);
 
     await Promise.all([
       ...dates.map(async (date) => {
-        const ref = doc(db, "meals", date);
-        const snap = await getDoc(ref);
-        if (snap.exists()) return;
-
-        await setDoc(ref, {
+        if (await findMealByDate(pb, date)) return;
+        await pb.collection("meals").create({
           date,
-          tripId: "current",
+          tripId: TRIP_ID,
           responsibleIds: [],
           description: "",
           shoppingList: [],
-          updatedAt: serverTimestamp(),
           updatedBy: "system",
         });
       }),
-      // Seed the general shopping list doc (trip-wide items)
+      // Seed the general shopping list doc (trip-wide items).
       (async () => {
-        const ref = doc(db, "meals", "general");
-        const snap = await getDoc(ref);
-        if (snap.exists()) return;
-
-        await setDoc(ref, {
+        if (await findMealByDate(pb, "general")) return;
+        await pb.collection("meals").create({
           date: "general",
-          tripId: "current",
+          tripId: TRIP_ID,
           responsibleIds: [],
           description: "",
           shoppingList: [],
-          updatedAt: serverTimestamp(),
           updatedBy: "system",
         });
       })(),
@@ -77,16 +124,8 @@ export async function toggleExcludeFromShopping(
   updatedBy: string,
 ) {
   try {
-    const db = getDb();
-    await setDoc(
-      doc(db, "meals", date),
-      {
-        excludeFromShopping,
-        updatedAt: serverTimestamp(),
-        updatedBy,
-      },
-      { merge: true },
-    );
+    const pb = getPb();
+    await upsertMeal(pb, date, { excludeFromShopping, updatedBy });
   } catch (err) {
     console.error("Failed to toggle exclude from shopping:", err);
     throw err;
@@ -99,19 +138,12 @@ export async function updateDinner(
   updatedBy: string,
 ) {
   try {
-    const db = getDb();
-    await setDoc(
-      doc(db, "meals", date),
-      {
-        date,
-        tripId: "current",
-        responsibleIds: data.responsibleIds,
-        description: data.description,
-        updatedAt: serverTimestamp(),
-        updatedBy,
-      },
-      { merge: true },
-    );
+    const pb = getPb();
+    await upsertMeal(pb, date, {
+      responsibleIds: data.responsibleIds,
+      description: data.description,
+      updatedBy,
+    });
   } catch (err) {
     console.error("Failed to update dinner:", err);
     throw err;
@@ -124,21 +156,8 @@ export async function addShoppingItem(
   updatedBy: string,
 ) {
   try {
-    const db = getDb();
-    const ref = doc(db, "meals", date);
-    const snap = await getDoc(ref);
-    const current = snap.exists() ? (snap.data().shoppingList ?? []) : [];
     const newItems = Array.isArray(item) ? item : [item];
-
-    await setDoc(
-      ref,
-      {
-        shoppingList: [...current, ...newItems],
-        updatedAt: serverTimestamp(),
-        updatedBy,
-      },
-      { merge: true },
-    );
+    await mutateShoppingList(date, updatedBy, (list) => [...list, ...newItems]);
   } catch (err) {
     console.error("Failed to add shopping item:", err);
     throw err;
@@ -153,21 +172,16 @@ export async function toggleShoppingItem(
   updatedBy: string,
 ) {
   try {
-    const db = getDb();
-    const ref = doc(db, "meals", date);
+    const pb = getPb();
+    const meal = await findMealByDate(pb, date);
+    if (!meal) return;
     const updated = items.map((item) =>
       item.id === itemId ? { ...item, checked } : item,
     );
-
-    await setDoc(
-      ref,
-      {
-        shoppingList: updated,
-        updatedAt: serverTimestamp(),
-        updatedBy,
-      },
-      { merge: true },
-    );
+    await pb.collection("meals").update(meal.id, {
+      shoppingList: updated,
+      updatedBy,
+    });
   } catch (err) {
     console.error("Failed to toggle shopping item:", err);
     throw err;
@@ -181,24 +195,10 @@ export async function setShoppingItemsChecked(
   updatedBy: string,
 ) {
   try {
-    const db = getDb();
-    const ref = doc(db, "meals", date);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return;
-
-    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
-    const updated = list.map((item) =>
-      itemIds.has(item.id) ? { ...item, checked } : item,
-    );
-
-    await setDoc(
-      ref,
-      {
-        shoppingList: updated,
-        updatedAt: serverTimestamp(),
-        updatedBy,
-      },
-      { merge: true },
+    await mutateShoppingList(date, updatedBy, (list) =>
+      list.map((item) =>
+        itemIds.has(item.id) ? { ...item, checked } : item,
+      ),
     );
   } catch (err) {
     console.error("Failed to set shopping items checked:", err);
@@ -212,29 +212,14 @@ export async function updateShoppingQuantities(
   updatedBy: string,
 ) {
   try {
-    const db = getDb();
-    const ref = doc(db, "meals", date);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return;
-
-    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
     const estimateMap = new Map(estimates.map((e) => [e.id, e]));
-
-    const updated = list.map((item) => {
-      if (item.quantity != null) return item; // preserve existing quantities
-      const est = estimateMap.get(item.id);
-      if (!est || est.quantity == null) return item;
-      return { ...item, quantity: est.quantity, unit: est.unit ?? undefined };
-    });
-
-    await setDoc(
-      ref,
-      {
-        shoppingList: updated,
-        updatedAt: serverTimestamp(),
-        updatedBy,
-      },
-      { merge: true },
+    await mutateShoppingList(date, updatedBy, (list) =>
+      list.map((item) => {
+        if (item.quantity != null) return item; // preserve existing quantities
+        const est = estimateMap.get(item.id);
+        if (!est || est.quantity == null) return item;
+        return { ...item, quantity: est.quantity, unit: est.unit ?? undefined };
+      }),
     );
   } catch (err) {
     console.error("Failed to update shopping quantities:", err);
@@ -242,28 +227,11 @@ export async function updateShoppingQuantities(
   }
 }
 
-export async function resetShoppingQuantities(
-  date: string,
-  updatedBy: string,
-) {
+export async function resetShoppingQuantities(date: string, updatedBy: string) {
   try {
-    const db = getDb();
-    const ref = doc(db, "meals", date);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return;
-
-    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const updated = list.map(({ quantity, unit, ...rest }) => rest);
-
-    await setDoc(
-      ref,
-      {
-        shoppingList: updated,
-        updatedAt: serverTimestamp(),
-        updatedBy,
-      },
-      { merge: true },
+    await mutateShoppingList(date, updatedBy, (list) =>
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      list.map(({ quantity, unit, ...rest }) => rest),
     );
   } catch (err) {
     console.error("Failed to reset shopping quantities:", err);
@@ -279,30 +247,16 @@ export async function updateSingleItemQuantity(
   updatedBy: string,
 ) {
   try {
-    const db = getDb();
-    const ref = doc(db, "meals", date);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return;
-
-    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
-    const updated = list.map((item) => {
-      if (item.id !== itemId) return item;
-      if (quantity == null) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { quantity: _q, unit: _u, ...rest } = item;
-        return rest;
-      }
-      return { ...item, quantity, unit: unit ?? undefined };
-    });
-
-    await setDoc(
-      ref,
-      {
-        shoppingList: updated,
-        updatedAt: serverTimestamp(),
-        updatedBy,
-      },
-      { merge: true },
+    await mutateShoppingList(date, updatedBy, (list) =>
+      list.map((item) => {
+        if (item.id !== itemId) return item;
+        if (quantity == null) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { quantity: _q, unit: _u, ...rest } = item;
+          return rest;
+        }
+        return { ...item, quantity, unit: unit ?? undefined };
+      }),
     );
   } catch (err) {
     console.error("Failed to update single item quantity:", err);
@@ -317,24 +271,8 @@ export async function updateShoppingItemText(
   updatedBy: string,
 ) {
   try {
-    const db = getDb();
-    const ref = doc(db, "meals", date);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return;
-
-    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
-    const updated = list.map((item) =>
-      item.id === itemId ? { ...item, text } : item,
-    );
-
-    await setDoc(
-      ref,
-      {
-        shoppingList: updated,
-        updatedAt: serverTimestamp(),
-        updatedBy,
-      },
-      { merge: true },
+    await mutateShoppingList(date, updatedBy, (list) =>
+      list.map((item) => (item.id === itemId ? { ...item, text } : item)),
     );
   } catch (err) {
     console.error("Failed to update shopping item text:", err);
@@ -348,22 +286,8 @@ export async function removeShoppingItem(
   updatedBy: string,
 ) {
   try {
-    const db = getDb();
-    const ref = doc(db, "meals", date);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return;
-
-    const list: ShoppingItem[] = snap.data().shoppingList ?? [];
-    const updated = list.filter((item) => item.id !== itemId);
-
-    await setDoc(
-      ref,
-      {
-        shoppingList: updated,
-        updatedAt: serverTimestamp(),
-        updatedBy,
-      },
-      { merge: true },
+    await mutateShoppingList(date, updatedBy, (list) =>
+      list.filter((item) => item.id !== itemId),
     );
   } catch (err) {
     console.error("Failed to remove shopping item:", err);

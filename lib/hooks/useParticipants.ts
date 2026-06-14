@@ -1,45 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { getDb } from "@/lib/firebase";
+import { usePolledResource } from "./usePolledResource";
 import type { Participant } from "@/lib/types";
 
-function normalizeParticipant(raw: Record<string, unknown>, id: string): Participant {
-  return {
-    id,
-    name: (raw.name as string) ?? "",
-    color: (raw.color as string) ?? "",
-    avatar: (raw.avatar as string) ?? "",
-    joinedAt: raw.joinedAt as Participant["joinedAt"],
-    tripId: (raw.tripId as string) ?? "",
-  };
-}
+const EMPTY: Participant[] = [];
 
 export function useParticipants() {
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    const db = getDb();
-    const q = query(collection(db, "participants"), where("tripId", "in", ["current", ""]));
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        setParticipants(
-          snap.docs.map((d) => normalizeParticipant(d.data(), d.id)),
-        );
-        setLoading(false);
-      },
-      (err) => {
-        setError(err);
-        setLoading(false);
-      },
-    );
-
-    return unsub;
-  }, []);
-
-  return { participants, loading, error };
+  const { data, loading, error } = usePolledResource<Participant[]>(
+    "/api/db/participants",
+    EMPTY,
+  );
+  return { participants: data, loading, error };
 }

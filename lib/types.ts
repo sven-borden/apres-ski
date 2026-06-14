@@ -1,11 +1,13 @@
-import type { Timestamp } from "firebase/firestore";
+// Timestamps are ISO 8601 strings (PocketBase autodate / datetime).
+// Previously Firestore `Timestamp`; the UI never reads sub-fields, it only
+// passes them through, so a plain string is sufficient.
 
 export interface Trip {
   name: string;
   startDate: string;
   endDate: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: string;
+  updatedAt: string;
   updatedBy: string;
 }
 
@@ -14,7 +16,7 @@ export interface Participant {
   name: string;
   color: string;
   avatar: string;
-  joinedAt: Timestamp;
+  joinedAt: string;
   tripId: string;
 }
 
@@ -46,7 +48,7 @@ export interface Meal {
   description: string;
   shoppingList: ShoppingItem[];
   excludeFromShopping: boolean;
-  updatedAt: Timestamp;
+  updatedAt: string;
   updatedBy: string;
 }
 
@@ -62,7 +64,7 @@ export interface Basecamp {
   emergencyContacts: { name: string; phone: string; role: string }[];
   notes: string;
   tricountUrl: string;
-  updatedAt: Timestamp;
+  updatedAt: string;
   updatedBy: string;
 }
 
@@ -73,7 +75,7 @@ export interface WeatherData {
   weatherCode: number;
   snowDepth: number;
   freezingLevel: number;
-  fetchedAt: Timestamp;
+  fetchedAt: string;
 }
 
 export interface LocalUser {
