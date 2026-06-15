@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/button";
-import { UNITS, seedMeals, type Meal, type Unit } from "@/lib/feasts";
+import { UNITS, type Meal, type Unit } from "@/lib/feasts";
+import { useTrip, useMeals } from "@/lib/hooks/data";
+import { setShoppingItemChecked } from "@/lib/actions";
 import {
   consolidate,
   fingerprint,
@@ -10,6 +13,8 @@ import {
   type Line,
   type MergedGroup,
 } from "@/lib/shopping";
+
+const arr = <T,>(v: T[] | "" | undefined | null): T[] => (Array.isArray(v) ? v : []);
 
 const SINGULAR: Partial<Record<Unit, string>> = { bottles: "bouteille", packs: "paquet", pcs: "pièce" };
 
@@ -20,8 +25,26 @@ function itemQty(quantity?: number, unit?: Unit) {
 }
 
 export function ShoppingScreen() {
-  const [meals, setMeals] = useState<Record<string, Meal>>(() => seedMeals());
+  const trip = useTrip();
+  const mealsQ = useMeals();
+  const [meals, setMeals] = useState<Record<string, Meal>>({});
   const [justChecked, setJustChecked] = useState<Set<string>>(new Set());
+
+  // Mirror live meals into the consolidation-friendly shape.
+  useEffect(() => {
+    const rec: Record<string, Meal> = {};
+    for (const m of arr(mealsQ.data)) {
+      rec[m.date] = {
+        date: m.date,
+        chefs: arr(m.responsibleIds),
+        description: m.description ?? "",
+        shoppingList: arr(m.shoppingList),
+        excludeFromShopping: !!m.excludeFromShopping,
+      };
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMeals(rec);
+  }, [mealsQ.data]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [showPurchased, setShowPurchased] = useState(false);
   const [merged, setMerged] = useState<MergedGroup[] | null>(null);
@@ -62,6 +85,11 @@ export function ShoppingScreen() {
       }
       return next;
     });
+
+    // Persist to every source date, then reconcile from the server.
+    void setShoppingItemChecked(
+      line.sources.map((s) => ({ date: s.date, itemId: s.item.id, checked })),
+    ).then(() => mealsQ.refresh());
 
     const t = timers.current.get(line.key);
     if (t) clearTimeout(t);
@@ -110,6 +138,20 @@ export function ShoppingScreen() {
 
   const active = lines.filter((l) => !l.done || justChecked.has(l.key));
   const purchased = lines.filter((l) => l.done && !justChecked.has(l.key));
+
+  if (!trip.data && !trip.loading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <h1 className="text-2xl font-extrabold tracking-tight">Courses</h1>
+        <div className="flex flex-col items-center gap-4 rounded-[var(--radius-lg)] border border-dashed border-border bg-surface px-6 py-14 text-center">
+          <p className="text-sm text-ink-muted">Crée d’abord le séjour et planifie des repas.</p>
+          <Link href="/" className="inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-5 text-sm font-semibold text-on-accent shadow-sm hover:brightness-105">
+            Configurer le séjour
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -225,10 +267,6 @@ export function ShoppingScreen() {
           )}
         </>
       )}
-
-      <p className="text-center text-xs text-ink-muted">
-        Aperçu de démonstration — données fictives en attendant la connexion au backend.
-      </p>
     </div>
   );
 }

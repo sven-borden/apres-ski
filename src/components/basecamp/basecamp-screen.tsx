@@ -5,9 +5,14 @@ import { Button } from "@/components/button";
 import { CopyButton } from "@/components/copy-button";
 import { TripEditor, type TripDraft } from "@/components/basecamp/trip-editor";
 import { BasecampEditor } from "@/components/basecamp/basecamp-editor";
-import { osmEmbedUrl, seedBasecamp, seedTrip, type Basecamp } from "@/lib/basecamp";
+import { osmEmbedUrl, type Basecamp } from "@/lib/basecamp";
+import { useTrip, useBasecamp, useMeals } from "@/lib/hooks/data";
+import { saveTrip, saveBasecamp } from "@/lib/actions";
+import { useLocalUser } from "@/lib/user";
+import type { BasecampRecord } from "@/lib/pb/types";
 
 const fmtDate = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
+const arr = <T,>(v: T[] | "" | undefined | null): T[] => (Array.isArray(v) ? v : []);
 
 function formatRange(startISO: string, endISO: string) {
   const start = new Date(startISO + "T00:00:00");
@@ -15,9 +20,43 @@ function formatRange(startISO: string, endISO: string) {
   return `${fmtDate.format(start)} – ${fmtDate.format(end)} ${end.getFullYear()}`;
 }
 
+function emptyBasecamp(): Basecamp {
+  return {
+    name: "",
+    address: "",
+    coordinates: { lat: 46.0817, lng: 7.2336 },
+    mapsUrl: "",
+    wifi: { network: "", password: "" },
+    checkIn: "",
+    checkOut: "",
+    capacity: 0,
+    emergencyContacts: [],
+    notes: "",
+    tricountUrl: "",
+  };
+}
+
+function toBasecamp(rec: BasecampRecord): Basecamp {
+  return {
+    name: rec.name ?? "",
+    address: rec.address ?? "",
+    coordinates: rec.coordinates || { lat: 46.0817, lng: 7.2336 },
+    mapsUrl: rec.mapsUrl ?? "",
+    wifi: rec.wifi || { network: "", password: "" },
+    checkIn: rec.checkIn ?? "",
+    checkOut: rec.checkOut ?? "",
+    capacity: rec.capacity ?? 0,
+    emergencyContacts: arr(rec.emergencyContacts),
+    notes: rec.notes ?? "",
+    tricountUrl: rec.tricountUrl ?? "",
+  };
+}
+
 export function BasecampScreen() {
-  const [trip, setTrip] = useState<TripDraft | null>(seedTrip);
-  const [basecamp, setBasecamp] = useState<Basecamp | null>(seedBasecamp);
+  const tripQ = useTrip();
+  const basecampQ = useBasecamp();
+  const mealsQ = useMeals();
+  const me = useLocalUser();
   const [tripOpen, setTripOpen] = useState(false);
   const [campOpen, setCampOpen] = useState(false);
   const [tripKey, setTripKey] = useState(0);
@@ -31,6 +70,14 @@ export function BasecampScreen() {
     setCampKey((k) => k + 1);
     setCampOpen(true);
   }
+
+  const trip: TripDraft | null = tripQ.data
+    ? { name: tripQ.data.name, startISO: tripQ.data.startDate, endISO: tripQ.data.endDate }
+    : null;
+  const basecamp: Basecamp | null = basecampQ.data ? toBasecamp(basecampQ.data) : null;
+  const assignedMealDates = arr(mealsQ.data)
+    .filter((m) => arr(m.responsibleIds).length > 0)
+    .map((m) => m.date);
 
   const blankTrip: TripDraft = trip ?? { name: "", startISO: "", endISO: "" };
 
@@ -169,28 +216,28 @@ export function BasecampScreen() {
         )}
       </section>
 
-      <p className="text-center text-xs text-ink-muted">
-        Aperçu de démonstration — données fictives en attendant la connexion au backend.
-      </p>
-
       <TripEditor
         key={`trip-${tripKey}`}
         open={tripOpen}
         initial={blankTrip}
+        assignedMealDates={assignedMealDates}
         onClose={() => setTripOpen(false)}
-        onSave={(d) => {
-          setTrip(d);
+        onSave={async (d) => {
+          await saveTrip({ name: d.name, startDate: d.startISO, endDate: d.endISO, updatedBy: me?.id });
           setTripOpen(false);
+          tripQ.refresh();
+          mealsQ.refresh();
         }}
       />
       <BasecampEditor
         key={`camp-${campKey}`}
         open={campOpen}
-        initial={basecamp ?? seedBasecamp}
+        initial={basecamp ?? emptyBasecamp()}
         onClose={() => setCampOpen(false)}
-        onSave={(b) => {
-          setBasecamp(b);
+        onSave={async (b) => {
+          await saveBasecamp({ ...b, updatedBy: me?.id });
           setCampOpen(false);
+          basecampQ.refresh();
         }}
       />
     </div>

@@ -1,7 +1,10 @@
 import {
+  cloneElement,
   forwardRef,
+  isValidElement,
   useId,
   type InputHTMLAttributes,
+  type ReactElement,
   type TextareaHTMLAttributes,
 } from "react";
 
@@ -37,13 +40,18 @@ export function Field({
   htmlFor?: string;
 }) {
   const auto = useId();
-  const id = htmlFor ?? auto;
+  // Associate the label with the control: reuse the child's id, else inject ours.
+  const child = isValidElement(children)
+    ? (children as ReactElement<{ id?: string }>)
+    : null;
+  const id = htmlFor ?? child?.props.id ?? auto;
+  const labelled = child ? cloneElement(child, { id }) : children;
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-sm font-medium text-ink-muted">
         {label}
       </label>
-      {children}
+      {labelled}
       {error ? (
         <p className="text-xs font-medium text-danger">{error}</p>
       ) : hint ? (
