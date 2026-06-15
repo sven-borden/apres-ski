@@ -56,7 +56,6 @@ export async function aiEstimate(
   const res = await anthropic().messages.create({
     model: MODEL,
     max_tokens: 4096,
-    output_config: { effort: "low" },
     system,
     messages: [{ role: "user", content: JSON.stringify({ items }) }],
   });
@@ -92,7 +91,6 @@ export async function aiMerge(
   const res = await anthropic().messages.create({
     model: MODEL,
     max_tokens: 8192,
-    output_config: { effort: "low" },
     system,
     messages: [{ role: "user", content: JSON.stringify({ items }) }],
   });
