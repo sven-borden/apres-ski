@@ -1,16 +1,4 @@
-import {
-  headcount as presentCount,
-  seedAttendance,
-  seedParticipants,
-  tripDays,
-  type Participant,
-} from "./crew";
-
-/**
- * Placeholder meals + shopping. Swap for live PocketBase data later — see
- * PROJECT.md §2.4 (Meal), §2.5 (Shopping item), §4.2 / §4.6 (Feasts), §5.1
- * (headcount), §6.1 (AI estimate). Shapes mirror the eventual records.
- */
+/** Meal + shopping types and the closed unit set (PROJECT.md §2.4–2.5). */
 
 export const GENERAL = "general" as const;
 
@@ -50,100 +38,10 @@ export function newItemId() {
   return `item-${Date.now().toString(36)}-${counter}`;
 }
 
-function item(text: string, extra: Partial<ShoppingItem> = {}): ShoppingItem {
-  return { id: newItemId(), text, checked: false, ...extra };
-}
-
-function emptyMeal(date: string): Meal {
-  return { date, chefs: [], description: "", shoppingList: [], excludeFromShopping: false };
-}
-
-/** Seed meals keyed by date, plus the special "general" meal. */
-export function seedMeals(): Record<string, Meal> {
-  const [d0, d1, d2, d3] = tripDays;
-  const meals: Record<string, Meal> = {
-    [d0]: {
-      date: d0,
-      chefs: ["p-lea"],
-      description: "Raclette + salade verte",
-      excludeFromShopping: false,
-      shoppingList: [
-        item("Fromage à raclette"),
-        item("Pommes de terre", { quantity: 2, unit: "kg" }),
-        item("Cornichons"),
-        item("Vin blanc", { quantity: 2, unit: "bottles" }),
-        item("Charcuterie"),
-      ],
-    },
-    [d1]: {
-      date: d1,
-      chefs: ["p-tom", "p-marc"],
-      description: "Fondue moitié-moitié",
-      excludeFromShopping: false,
-      shoppingList: [
-        item("Fromage à fondue"),
-        item("Pain", { quantity: 2, unit: "pcs" }),
-        item("Ail"),
-        item("Kirsch"),
-        item("Vin blanc", { quantity: 1, unit: "bottles", checked: true }),
-      ],
-    },
-    [d2]: emptyMeal(d2),
-    [d3]: {
-      date: d3,
-      chefs: ["p-sofia"],
-      description: "Curry de légumes + riz",
-      excludeFromShopping: false,
-      shoppingList: [
-        item("Riz"),
-        item("Lait de coco"),
-        item("Légumes de saison"),
-        item("Pâte de curry"),
-      ],
-    },
-    [GENERAL]: {
-      date: GENERAL,
-      chefs: [],
-      description: "",
-      excludeFromShopping: false,
-      shoppingList: [
-        item("Chips & crackers"),
-        item("Bière", { quantity: 24, unit: "bottles" }),
-        item("Pain de mie"),
-        item("Jambon"),
-        item("Café", { checked: true }),
-        item("Œufs"),
-        item("Lait", { checked: true }),
-        item("Beurre"),
-        item("Patates"),
-      ],
-    },
-  };
-  return meals;
-}
-
-/** Effective headcount for one day (PROJECT.md §5.1). */
-export function dayHeadcount(
-  date: string,
-  attendance: Set<string> = seedAttendance,
-  roster: Participant[] = seedParticipants,
-): number {
-  const present = presentCount(date, attendance, roster);
-  return present > 0 ? present : roster.length;
-}
-
-/** Total person-days across the trip (PROJECT.md §5.1, general list). */
-export function personDays(
-  attendance: Set<string> = seedAttendance,
-  roster: Participant[] = seedParticipants,
-): number {
-  return tripDays.reduce((sum, d) => sum + dayHeadcount(d, attendance, roster), 0);
-}
-
 /* ── Mock AI quantity estimator (PROJECT.md §6.1) ─────────────────────────
-   Placeholder for the server-side LLM call. Deterministic heuristic from
-   headcount + item keywords; fills only items that lack a quantity. Swap for
-   the real rate-limited /api endpoint later. */
+   Local fallback / placeholder for the server-side LLM call. Deterministic
+   heuristic from headcount + item keywords; fills only items lacking a
+   quantity. Replaced by the /api/ai/estimate endpoint. */
 
 type Bucket = { unit: Unit; perPerson: number; round: (n: number) => number };
 
