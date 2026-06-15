@@ -6,7 +6,9 @@ import { Button } from "@/components/button";
 import { UNITS, type Meal, type Unit } from "@/lib/feasts";
 import { useTrip, useMeals } from "@/lib/hooks/data";
 import { setShoppingItemChecked } from "@/lib/actions";
+import { useToast } from "@/components/toast";
 import {
+  applyAiMerge,
   consolidate,
   fingerprint,
   smartMerge,
@@ -28,6 +30,7 @@ export function ShoppingScreen() {
   const trip = useTrip();
   const mealsQ = useMeals();
   const [meals, setMeals] = useState<Record<string, Meal>>({});
+  const toast = useToast();
   const [justChecked, setJustChecked] = useState<Set<string>>(new Set());
 
   // Mirror live meals into the consolidation-friendly shape.
@@ -115,8 +118,21 @@ export function ShoppingScreen() {
 
   async function runMerge() {
     setMerging(true);
-    await new Promise((r) => setTimeout(r, 1000)); // simulate the server round-trip
-    const groups = smartMerge(lines);
+    let groups;
+    try {
+      const res = await fetch("/api/ai/merge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: lines.map((l) => ({ id: l.key, text: l.name })), locale: "fr" }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const data = (await res.json()) as { groups: { category: string; items: { canonicalName: string; itemIds: string[] }[] }[] };
+      groups = applyAiMerge(lines, data.groups);
+    } catch {
+      // Degrade gracefully: fall back to local exact-text grouping.
+      toast("Tri IA indisponible — regroupement simple.", "error");
+      groups = smartMerge(lines);
+    }
     setMerged(groups);
     setMergeFp(fp);
     try {

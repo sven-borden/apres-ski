@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { useToast } from "@/components/toast";
 import {
   UNITS,
   estimateQuantities,
   newItemId,
+  type Estimate,
   type ShoppingItem,
   type Unit,
 } from "@/lib/feasts";
@@ -45,6 +47,7 @@ export function ShoppingList({
   const [estimating, setEstimating] = useState(false);
   const [confirm, setConfirm] = useState<{ kind: "remove"; item: ShoppingItem } | { kind: "reset" } | null>(null);
   const timers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const toast = useToast();
 
   useEffect(() => {
     const map = timers.current;
@@ -116,12 +119,26 @@ export function ShoppingList({
 
   async function runEstimate() {
     setEstimating(true);
-    await new Promise((r) => setTimeout(r, 900)); // simulate the server round-trip
-    const estimates = estimateQuantities(
+    const payload = {
       category,
       headcount,
-      missingQty.map((i) => ({ id: i.id, text: i.text })),
-    );
+      description,
+      items: missingQty.map((i) => ({ id: i.id, text: i.text })),
+    };
+    let estimates: Estimate[];
+    try {
+      const res = await fetch("/api/ai/estimate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      estimates = (await res.json()).estimates as Estimate[];
+    } catch {
+      // Degrade gracefully: keep the feature working with the local heuristic.
+      toast("Estimation IA indisponible — quantités approximatives.", "error");
+      estimates = estimateQuantities(category, headcount, payload.items);
+    }
     const byId = new Map(estimates.map((e) => [e.id, e]));
     setItems(
       items.map((i) => {

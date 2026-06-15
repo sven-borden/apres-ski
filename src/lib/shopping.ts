@@ -190,6 +190,36 @@ export function smartMerge(lines: Line[]): MergedGroup[] {
   }));
 }
 
+/** Map the AI endpoint's grouping back onto our Line objects (§6.2). */
+export function applyAiMerge(
+  lines: Line[],
+  groups: { category: string; items: { canonicalName: string; itemIds: string[] }[] }[],
+): MergedGroup[] {
+  const byKey = new Map(lines.map((l) => [l.key, l]));
+  const used = new Set<string>();
+  const out: MergedGroup[] = [];
+
+  for (const g of groups) {
+    const groupLines: Line[] = [];
+    for (const item of g.items) {
+      const sources = item.itemIds.flatMap((id) => {
+        const l = byKey.get(id);
+        if (!l) return [];
+        used.add(id);
+        return l.sources;
+      });
+      if (sources.length) groupLines.push(buildLine(item.itemIds[0], item.canonicalName, sources));
+    }
+    if (groupLines.length) {
+      out.push({ category: { id: g.category.toLowerCase(), label: g.category }, lines: groupLines });
+    }
+  }
+
+  const leftover = lines.filter((l) => !used.has(l.key));
+  if (leftover.length) out.push({ category: { id: "other", label: "Autre" }, lines: leftover });
+  return out;
+}
+
 /** Fingerprint for caching the merge (§6.2): item set + locale. */
 export function fingerprint(lines: Line[], locale = "fr"): string {
   return locale + "|" + lines.map((l) => normalize(l.name)).sort().join(",");

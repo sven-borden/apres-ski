@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navItems } from "@/lib/nav";
 import { UserGate } from "@/components/user-gate";
+import { ToastProvider } from "@/components/toast";
 
 function isActive(href: string, pathname: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -14,6 +15,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
+    <ToastProvider>
     <div className="flex min-h-dvh flex-col">
       <UserGate />
       {/* Desktop / tablet: top navigation */}
@@ -86,5 +88,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </ul>
       </nav>
     </div>
+    </ToastProvider>
   );
 }
